@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repo": "tundra-paws/scenery",
-  "updated": "2026-11-23T19:24:34.387Z",
+  "updated": "2026-11-23T19:46:31.941Z",
   "iterations": [
     {
       "id": 1,
@@ -97,6 +97,54 @@
       },
       "three": "0.184.0",
       "distHash": "53a507880e6447544d780ee1af9b96cf3373acba0f089dda47c12c3ce103d0ed",
+      "withdrawn": false
+    },
+    {
+      "id": 3,
+      "dir": "i/0003/",
+      "date": "2026-11-23",
+      "sha": "d065e449bbee70f8bb71968377fbf497a9a393d3",
+      "title": "The sea meets the sand",
+      "summary": "The hard line where the water cut the beach is gone. The sea thins to clear over the last of the sand, and a pale line of foam laps along the waterline all the way round the island.",
+      "kind": "polish",
+      "model": "Claude",
+      "journal": "journal/2026-11-23-the-sea-meets-the-sand.md",
+      "shots": {
+        "hero": "shot.webp",
+        "thumb": "thumb.webp"
+      },
+      "stats": {
+        "desktop": {
+          "draws": 9,
+          "triangles": 151290,
+          "live": {
+            "buffers": 29,
+            "textures": 8,
+            "programs": 7,
+            "framebuffers": 4,
+            "renderbuffers": 0,
+            "vertexArrays": 9
+          }
+        },
+        "mobile": {
+          "draws": 9,
+          "triangles": 57654,
+          "live": {
+            "buffers": 29,
+            "textures": 8,
+            "programs": 7,
+            "framebuffers": 4,
+            "renderbuffers": 0,
+            "vertexArrays": 9
+          }
+        }
+      },
+      "bytes": {
+        "new": 88545,
+        "site": 1068474
+      },
+      "three": "0.184.0",
+      "distHash": "dcbf5eea77d6c1f5e37ede779f69c618b65741a59bfcc6cf61b72aca4ff06b0c",
       "withdrawn": false
     }
   ]
