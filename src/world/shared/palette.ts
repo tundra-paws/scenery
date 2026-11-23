@@ -18,9 +18,9 @@ export const PALETTE = {
   grassDry:     '#8f9a5a',
   rock:         '#7d7a74',
   cairn:        '#a8a193',
-  snow:         '#eef2f5',
   waterDeep:    '#1d4d68',
   waterShallow: '#8fc2cc',
+  foam:         '#eef2f5',
 } as const
 
 export type PaletteName = keyof typeof PALETTE

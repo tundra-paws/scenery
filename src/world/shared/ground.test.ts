@@ -1,10 +1,12 @@
 // src/world/shared/ground.test.ts
 import { describe, expect, test } from 'bun:test'
+import * as THREE from 'three'
 import { createSeededRng } from 'threejs-scenes/primitives'
 
 import { VIEWS, resolveView } from '../views.ts'
 import { WORLD_SEED } from '../world.ts'
 import { createGround } from './ground.ts'
+import { createHeightMap } from './height-map.ts'
 import { scatterOnGround } from './scatter.ts'
 
 
@@ -48,6 +50,27 @@ describe('ground', () => {
 
         expect(slope).toBeGreaterThanOrEqual(0)
         expect(slope).toBeLessThan(1)
+      }
+  })
+})
+
+describe('createHeightMap', () => {
+  test('a lookup at a grid corner lands on the texel that holds the height there', () => {
+    const ground             = createGround({ seed: WORLD_SEED })
+    const segments           = 16
+    const side               = segments + 1
+    const { texture, scale } = createHeightMap(ground, segments)
+    const { data }           = texture.image
+
+    for (let row = 0; row < side; row += 3)
+      for (let column = 0; column < side; column += 3) {
+        const x = (column / segments - 0.5) * ground.size
+        const z = (row / segments - 0.5) * ground.size
+
+        // A texel's centre is half a texel in from its edge.
+        expect((x * scale + 0.5) * side - 0.5).toBeCloseTo(column, 6)
+        expect((z * scale + 0.5) * side - 0.5).toBeCloseTo(row, 6)
+        expect(THREE.DataUtils.fromHalfFloat(data![row * side + column]!)).toBeCloseTo(ground.heightAt(x, z) - ground.waterLevel, 1)
       }
   })
 })

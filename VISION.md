@@ -31,8 +31,9 @@ thrashes. Calm, a little lonely, never bleak.
 
 **Palette.** A handful, all in `src/world/shared/palette.ts`. Cool sky blues and a pale horizon
 for distance. Moss and dry-straw greens for the living ground. Warm sand at the edge. Grey stone:
-darker for what lies where it fell (`rock`), paler for what a hand has placed (`cairn`). One warm
-note, the sun's cream, reserved for light itself. A new colour needs a job none of these does.
+darker for what lies where it fell (`rock`), paler for what a hand has placed (`cairn`). One cold
+white (`foam`), only where the sea runs out on the land. One warm note, the sun's cream, reserved
+for light itself. A new colour needs a job none of these does.
 
 **Motifs.**
 - *Placed stone.* Cairns, markers, low walls: the same boulder shape, stacked on purpose.
@@ -44,10 +45,10 @@ note, the sun's cream, reserved for light itself. A new colour needs a job none 
 ruins of anything grand, no magic glow. Not busy: every added thing must leave the picture as
 quiet as it found it. Not photoreal: no texture maps chasing realism.
 
-**The first month.** Week one: the summit cairn (done), a shoreline that reads as one, water
-with depth. Week two: wind in the grass and on the sea; clouds. Week three: a worn path from the
-landing to the cairn, with small waymarkers, and the tour following it. Week four: a second
-landmass on the horizon and a change of light over the tour, toward evening.
+**The first month.** Week one: the summit cairn and a shoreline that reads as one (both done),
+water with depth. Week two: wind in the grass and on the sea; clouds. Week three: a worn path
+from the landing to the cairn, with small waymarkers, and the tour following it. Week four: a
+second landmass on the horizon and a change of light over the tour, toward evening.
 
 ## Where it starts
 

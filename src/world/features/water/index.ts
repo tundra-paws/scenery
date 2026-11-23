@@ -1,10 +1,12 @@
 // src/world/features/water/index.ts
 import * as THREE from 'three'
 
+import { createHeightMap } from '../../shared/height-map.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { SUN } from '../environment/index.ts'
+import { TERRAIN_SEGMENTS } from '../terrain/index.ts'
 
 
 /** Edge length of the water plane. Far wider than the land, so the fog hides its edge. */
@@ -27,14 +29,30 @@ const VERTEX = /* glsl */ `
 `
 
 const FRAGMENT = /* glsl */ `
-  uniform float uTime;
-  uniform float uOpacity;
-  uniform vec3  uDeep;
-  uniform vec3  uShallow;
-  uniform vec3  uSun;
-  uniform vec3  uSunDirection;
+  uniform float     uTime;
+  uniform float     uOpacity;
+  uniform vec3      uDeep;
+  uniform vec3      uShallow;
+  uniform vec3      uFoam;
+  uniform vec3      uSun;
+  uniform vec3      uSunDirection;
+  uniform sampler2D uGround;
+  uniform float     uGroundScale;
 
   varying vec3 vWorld;
+
+  // Depth of water, in world units, at which the sea is fully itself.
+  const float SHALLOWS = 0.9;
+
+  // Depth the foam on the waterline reaches out to when the swell is level.
+  const float RIM = 0.18;
+
+  // The wavelet behind the rim: its lines per unit of depth, how fast they run
+  // in (one every five seconds or so, and one on its way at the tenth second,
+  // when the postcards are taken), and the depth they first show at.
+  const float WAVELET_DENSITY = 4.4;
+  const float WAVELET_SPEED   = 1.17;
+  const float WAVELET_START   = 1.3;
 
   #include <fog_pars_fragment>
 
@@ -60,7 +78,32 @@ const FRAGMENT = /* glsl */ `
 
     colour += uSun * pow(max(dot(normal, halfway), 0.0), 220.0) * 0.9;
 
-    gl_FragColor = vec4(colour, mix(uOpacity, 1.0, fresnel));
+    // How much water lies over the land here. The map is on the terrain's own
+    // grid, so zero is where the mesh breaks the surface.
+    float depth = -texture2D(uGround, at * uGroundScale + 0.5).r;
+    float pixel = fwidth(depth);
+
+    // The sea has no edge of its own: it thins over the last of the sand until
+    // the sand is all there is. Over a couple of pixels at least, so the edge
+    // stays soft from across the bay.
+    float alpha = mix(uOpacity, 1.0, fresnel) * smoothstep(0.0, SHALLOWS + pixel * 2.0, depth);
+
+    // Foam where it runs out, reaching further and whiter where the swell is
+    // up and all but gone where it is down. Never thinner than a pixel or so,
+    // so from a distance the island still has a drawn shoreline.
+    float swell = (across + along) * 0.25;
+    float reach = RIM * (1.0 + 0.6 * swell) + pixel * 1.5;
+    float foam  = (1.0 - smoothstep(reach * 0.5, reach, depth)) * clamp(0.65 + 0.5 * swell, 0.0, 1.0);
+
+    // One wavelet behind it: a fainter line that drifts in and dies on the rim.
+    // Where a pixel spans more than the gap between two lines there is nothing
+    // to draw but moire, so it fades out with distance.
+    float crest   = smoothstep(0.8, 1.0, sin(depth * WAVELET_DENSITY + uTime * WAVELET_SPEED + swell));
+    float wavelet = crest * (1.0 - smoothstep(RIM, WAVELET_START, depth)) * (1.0 - smoothstep(0.4, 1.6, pixel * WAVELET_DENSITY));
+
+    foam = max(foam, wavelet * 0.6);
+
+    gl_FragColor = vec4(mix(colour, uFoam, foam), mix(alpha, 1.0, foam));
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
@@ -68,15 +111,22 @@ const FRAGMENT = /* glsl */ `
   }
 `
 
-/** The sea: one plane at the water level, with moving glints and a fresnel fade. */
+/**
+ * The sea: one plane at the water level, with moving glints and a fresnel fade,
+ * thinning to foam where the land comes up through it.
+ */
 export function createWater (world: World): Feature {
   let mesh: THREE.Mesh | null               = null
   let material: THREE.ShaderMaterial | null = null
+  let ground: THREE.DataTexture | null      = null
 
   return {
     name: 'water',
 
     build ({ scene }) {
+      const heights = createHeightMap(world.ground, TERRAIN_SEGMENTS[world.quality.tier])
+
+      ground   = heights.texture
       material = new THREE.ShaderMaterial({
         name:           'water',
         vertexShader:   VERTEX,
@@ -91,11 +141,17 @@ export function createWater (world: World): Feature {
             uOpacity:      { value: 0.82 },
             uDeep:         { value: new THREE.Color(PALETTE.waterDeep) },
             uShallow:      { value: new THREE.Color(PALETTE.waterShallow) },
+            uFoam:         { value: new THREE.Color(PALETTE.foam) },
             uSun:          { value: new THREE.Color(PALETTE.sun) },
             uSunDirection: { value: SUN.clone() },
+            uGround:       { value: null },
+            uGroundScale:  { value: heights.scale },
           },
         ]),
       })
+
+      // Set after the merge, which would hand back a copy of the texture.
+      material.uniforms.uGround!.value = ground
 
       const geometry = new THREE.PlaneGeometry(EXTENT, EXTENT)
 
@@ -116,12 +172,15 @@ export function createWater (world: World): Feature {
     dispose () {
       mesh?.geometry.dispose()
       material?.dispose()
+      ground?.dispose()
       mesh?.removeFromParent()
       mesh     = null
       material = null
+      ground   = null
     },
   }
 }
 
-// perf: cheap — one draw call, two triangles, no textures. The fragment shader
-// is a dozen trig calls; it covers a lot of screen, so keep it that small.
+// perf: cheap — one draw call, two triangles, one small height texture. The
+// fragment shader is a dozen trig calls and one lookup; it covers a lot of
+// screen, so keep it that small.

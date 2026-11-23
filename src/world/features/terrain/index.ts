@@ -8,21 +8,20 @@ import type { Feature, World } from '../../world.ts'
 
 
 /** Grid cells per side. Triangles are twice the square of this. */
-const SEGMENTS: Record<QualityTier, number> = { mobile: 96, desktop: 160, highEnd: 224 }
+export const TERRAIN_SEGMENTS: Record<QualityTier, number> = { mobile: 96, desktop: 160, highEnd: 224 }
 
 const SAND  = new THREE.Color(PALETTE.sand)
 const GRASS = new THREE.Color(PALETTE.grass)
 const DRY   = new THREE.Color(PALETTE.grassDry)
 const ROCK  = new THREE.Color(PALETTE.rock)
-const SNOW  = new THREE.Color(PALETTE.snow)
 
 const scratch = new THREE.Color()
 
 /**
  * What the ground is made of at a point, as a colour.
  *
- * Height picks the band (sand at the water, grass above it, snow on the tops)
- * and steepness overrides it with rock, because nothing grows on a cliff.
+ * Height picks the band (sand at the water, grass above it, straw toward the
+ * tops) and steepness overrides it with rock, because nothing grows on a cliff.
  */
 function colourAt (world: World, x: number, z: number, height: number, out: THREE.Color): THREE.Color {
   const { ground } = world
@@ -32,7 +31,6 @@ function colourAt (world: World, x: number, z: number, height: number, out: THRE
   out.copy(SAND)
   out.lerp(GRASS, smoothstep(0.7, 2.4, above))
   out.lerp(DRY, smoothstep(0.35, 0.6, above / ground.relief))
-  out.lerp(SNOW, smoothstep(0.72, 0.86, above / ground.relief))
   out.lerp(ROCK, smoothstep(0.16, 0.34, slope))
 
   return out
@@ -47,7 +45,7 @@ export function createTerrain (world: World): Feature {
 
     build ({ scene }) {
       const { ground } = world
-      const segments   = SEGMENTS[world.quality.tier]
+      const segments   = TERRAIN_SEGMENTS[world.quality.tier]
       const geometry   = new THREE.PlaneGeometry(ground.size, ground.size, segments, segments)
 
       geometry.rotateX(-Math.PI / 2)
