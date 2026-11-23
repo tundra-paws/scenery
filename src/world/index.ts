@@ -1,5 +1,6 @@
 // src/world/index.ts
 import { createCairn } from './features/cairn/index.ts'
+import { createClouds } from './features/clouds/index.ts'
 import { createEnvironment } from './features/environment/index.ts'
 import { createRocks } from './features/rocks/index.ts'
 import { createTerrain } from './features/terrain/index.ts'
@@ -22,6 +23,7 @@ import type { Feature, World } from './world.ts'
 export function createFeatures (world: World): Feature[] {
   return [
     createEnvironment(world),
+    createClouds(world),
     createTerrain(world),
     createWater(world),
     createRocks(world),

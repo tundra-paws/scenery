@@ -1,12 +1,14 @@
 // src/world/features/water/index.ts
 import * as THREE from 'three'
 
+import { CLOUD_SHADOW_GLSL } from '../../shared/cloud-shadow.ts'
 import { DEEP_WATER } from '../../shared/ground.ts'
 import { createHeightMap } from '../../shared/height-map.ts'
 import { PALETTE } from '../../shared/palette.ts'
+import { SUN } from '../../shared/sun.ts'
+import { WIND_GLSL } from '../../shared/wind.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
-import { SUN } from '../environment/index.ts'
 import { TERRAIN_SEGMENTS } from '../terrain/index.ts'
 
 
@@ -14,7 +16,11 @@ import { TERRAIN_SEGMENTS } from '../terrain/index.ts'
 const EXTENT = 3200
 
 const VERTEX = /* glsl */ `
+  ${WIND_GLSL}
+  ${CLOUD_SHADOW_GLSL}
+
   varying vec3 vWorld;
+  varying vec2 vCloudUv;
 
   #include <fog_pars_vertex>
 
@@ -23,6 +29,7 @@ const VERTEX = /* glsl */ `
     vec4 mvPosition = viewMatrix * world;
 
     vWorld      = world.xyz;
+    vCloudUv    = cloudShadowUv(world.xyz);
     gl_Position = projectionMatrix * mvPosition;
 
     #include <fog_vertex>
@@ -30,6 +37,9 @@ const VERTEX = /* glsl */ `
 `
 
 const FRAGMENT = /* glsl */ `
+  ${WIND_GLSL}
+  ${CLOUD_SHADOW_GLSL}
+
   uniform float     uTime;
   uniform vec3      uDeep;
   uniform vec3      uShallow;
@@ -41,6 +51,7 @@ const FRAGMENT = /* glsl */ `
   uniform float     uGroundScale;
 
   varying vec3 vWorld;
+  varying vec2 vCloudUv;
 
   // Depth of water, in world units, over which the sea thins out to nothing
   // on the sand.
@@ -67,21 +78,42 @@ const FRAGMENT = /* glsl */ `
   const float WAVELET_SPEED   = 1.17;
   const float WAVELET_START   = 1.3;
 
+  // How far upwind to feel for the bottom, to tell a shore the wind blows onto
+  // from one it blows off, and the drop in depth over that reach that makes a
+  // shore fully one or the other.
+  const float FETCH  = 3.0;
+  const float SHELVE = 0.35;
+
+  // How much darker a gust ruffles the water, and how much of its light the
+  // sea loses under a cloud.
+  const float RUFFLE = 0.13;
+  const float GLOOM  = 0.5;
+
   #include <fog_pars_fragment>
 
   void main () {
     vec2 at = vWorld.xz;
 
-    // Two pairs of travelling sines stand in for a normal map: cheap, endless,
-    // and a pure function of position and time.
-    float across = sin(at.x * 0.35 + uTime * 0.9) + sin(at.y * 0.27 - uTime * 0.7);
-    float along  = sin((at.x + at.y) * 0.21 + uTime * 0.5) + sin((at.x - at.y) * 0.43 - uTime * 1.1);
+    // Four travelling sines stand in for a normal map: cheap, endless, and a
+    // pure function of position and time. All four run before the wind, two
+    // straight down it and two off to either side, so the sea has a grain and
+    // the grain has a direction.
+    vec2  run   = vec2(dot(at, WIND), dot(at, vec2(-WIND.y, WIND.x)));
+    float along = sin(run.x * 0.35 - uTime * 0.9) + sin((run.x * 0.98 + run.y * 0.21) * 0.43 - uTime * 1.1);
+    float aside = sin((run.x * 0.82 + run.y * 0.57) * 0.27 - uTime * 0.7) - sin((run.x * 0.87 - run.y * 0.5) * 0.21 - uTime * 0.5);
+
+    // The gusts the grass bends to cross the water too, as patches where it
+    // is ruffled. A patch narrower than a pixel is only shimmer, so far off
+    // they even out to the average.
+    float gust = windGust(at);
+
+    gust = mix(gust, 0.5, smoothstep(0.08, 0.4, fwidth(gust)));
 
     // Far away a ripple is smaller than a pixel and turns into a moire of the
     // sampling grid, so the waves flatten out with distance.
-    float calm = 0.05 / (1.0 + distance(cameraPosition, vWorld) * 0.012);
+    float calm = (0.03 + 0.04 * gust) / (1.0 + distance(cameraPosition, vWorld) * 0.012);
 
-    vec3 normal = normalize(vec3(across * calm, 1.0, along * calm));
+    vec3 normal = normalize(vec3((WIND.x * along - WIND.y * aside) * calm, 1.0, (WIND.y * along + WIND.x * aside) * calm));
     vec3 view   = normalize(cameraPosition - vWorld);
 
     // How much water lies over the land here. The map is on the terrain's own
@@ -94,11 +126,15 @@ const FRAGMENT = /* glsl */ `
     // drop. On top of that the surface gives back some sky, most at a glance.
     float murk    = smoothstep(PALE, DEEP, depth);
     float fresnel = pow(1.0 - max(dot(normal, view), 0.0), 3.0);
-    vec3  colour  = mix(mix(uShallow, uDeep, murk), uSky, fresnel * SHEEN);
+    vec3  body    = mix(uShallow, uDeep, murk);
+    vec3  colour  = mix(mix(body, uDeep, RUFFLE * gust), uSky, fresnel * SHEEN);
 
-    vec3 halfway = normalize(uSunDirection + view);
+    // Under a cloud the sea is duller and the sun has nothing to glint off.
+    float light   = cloudLight(vCloudUv);
+    vec3  halfway = normalize(uSunDirection + view);
 
-    colour += uSun * pow(max(dot(normal, halfway), 0.0), 220.0) * 0.9;
+    colour *= mix(1.0 - GLOOM, 1.0, light);
+    colour += uSun * pow(max(dot(normal, halfway), 0.0), 220.0) * 0.9 * light * light;
 
     // The sea has no edge of its own: it thins over the last of the sand until
     // the sand is all there is. Over a couple of pixels at least, so the edge
@@ -108,11 +144,18 @@ const FRAGMENT = /* glsl */ `
     float veil  = max(fresnel, min(murk * 2.0, 1.0));
     float alpha = mix(1.0 - CLEAR, 1.0, veil) * smoothstep(0.0, SHALLOWS + pixel * 2.0, depth);
 
+    // Which shore this is. Where the bottom is deeper upwind, the wind is
+    // bringing the sea in; where it is shallower, the land is in the way and
+    // the water lies in its lee. Looked up only near the land.
+    float upwind   = depth < WAVELET_START * 2.0 ? -textureLod(uGround, (at - WIND * FETCH) * uGroundScale + 0.5, 0.0).r : depth;
+    float windward = clamp(0.5 + (upwind - depth) / SHELVE * 0.5, 0.0, 1.0);
+
     // Foam where it runs out, reaching further and whiter where the swell is
-    // up and all but gone where it is down. Never thinner than a pixel or so,
-    // so from a distance the island still has a drawn shoreline.
-    float swell = (across + along) * 0.25;
-    float reach = RIM * (1.0 + 0.6 * swell) + pixel * 1.5;
+    // up or a gust is behind it, further still on the windward shore, and all
+    // but gone in the lee. Never thinner than a pixel or so, so from a distance
+    // the island still has a drawn shoreline all the way round.
+    float swell = (along + aside) * 0.25 + (gust - 0.5) * 0.5;
+    float reach = RIM * (1.0 + 0.6 * swell) * mix(0.6, 1.5, windward) + pixel * 1.5;
     float foam  = (1.0 - smoothstep(reach * 0.5, reach, depth)) * clamp(0.65 + 0.5 * swell, 0.0, 1.0);
 
     // One wavelet behind it: a fainter line that drifts in and dies on the rim.
@@ -121,7 +164,7 @@ const FRAGMENT = /* glsl */ `
     float crest   = smoothstep(0.8, 1.0, sin(depth * WAVELET_DENSITY + uTime * WAVELET_SPEED + swell));
     float wavelet = crest * (1.0 - smoothstep(RIM, WAVELET_START, depth)) * (1.0 - smoothstep(0.4, 1.6, pixel * WAVELET_DENSITY));
 
-    foam = max(foam, wavelet * 0.6);
+    foam = max(foam, wavelet * mix(0.25, 0.75, windward));
 
     gl_FragColor = vec4(mix(colour, uFoam, foam), mix(alpha, 1.0, foam));
 
@@ -133,7 +176,9 @@ const FRAGMENT = /* glsl */ `
 
 /**
  * The sea: one plane at the water level, pale over the shelf and dark past it,
- * with moving glints, thinning to foam where the land comes up through it.
+ * thinning to foam where the land comes up through it. Its ripples run before
+ * the wind, gusts cross it as darker patches, the foam is widest on the shore
+ * the wind blows onto, and the clouds lay their shadows on it.
  */
 export function createWater (world: World): Feature {
   let mesh: THREE.Mesh | null               = null
@@ -154,24 +199,23 @@ export function createWater (world: World): Feature {
         transparent:    true,
         fog:            true,
 
-        uniforms: THREE.UniformsUtils.merge([
-          THREE.UniformsLib.fog,
-          {
-            uTime:         { value: 0 },
-            uDeep:         { value: new THREE.Color(PALETTE.waterDeep) },
-            uShallow:      { value: new THREE.Color(PALETTE.waterShallow) },
-            uSky:          { value: new THREE.Color(PALETTE.skyFill) },
-            uFoam:         { value: new THREE.Color(PALETTE.foam) },
-            uSun:          { value: new THREE.Color(PALETTE.sun) },
-            uSunDirection: { value: SUN.clone() },
-            uGround:       { value: null },
-            uGroundScale:  { value: heights.scale },
-          },
-        ]),
+        // The wind's drift and the clouds' shadow are the world's own uniform
+        // objects, shared by reference, so they are spread in and not cloned.
+        uniforms: {
+          ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
+          ...world.wind.uniforms,
+          ...world.clouds.uniforms,
+          uTime:         { value: 0 },
+          uDeep:         { value: new THREE.Color(PALETTE.waterDeep) },
+          uShallow:      { value: new THREE.Color(PALETTE.waterShallow) },
+          uSky:          { value: new THREE.Color(PALETTE.skyFill) },
+          uFoam:         { value: new THREE.Color(PALETTE.foam) },
+          uSun:          { value: new THREE.Color(PALETTE.sun) },
+          uSunDirection: { value: SUN.clone() },
+          uGround:       { value: ground },
+          uGroundScale:  { value: heights.scale },
+        },
       })
-
-      // Set after the merge, which would hand back a copy of the texture.
-      material.uniforms.uGround!.value = ground
 
       const geometry = new THREE.PlaneGeometry(EXTENT, EXTENT)
 
@@ -202,5 +246,6 @@ export function createWater (world: World): Feature {
 }
 
 // perf: cheap — one draw call, two triangles, one small height texture. The
-// fragment shader is a dozen trig calls and one lookup; it covers a lot of
-// screen, so keep it that small.
+// fragment shader is a dozen trig calls and two lookups (the land under it and
+// the clouds over it), with a third only within a few units of the shore. It
+// covers a lot of screen, so keep it that small.

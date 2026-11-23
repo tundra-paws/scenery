@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import type { QualityTier } from 'threejs-scenes'
 import { smoothstep } from 'threejs-scenes/primitives'
 
+import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
 import { DEEP_WATER } from '../../shared/ground.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import type { Feature, World } from '../../world.ts'
@@ -92,13 +93,17 @@ export function createTerrain (world: World): Feature {
       geometry.computeBoundingBox()
       geometry.computeBoundingSphere()
 
-      mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+      const material = new THREE.MeshStandardMaterial({
         name:         'terrain',
         vertexColors: true,
         flatShading:  true,
         roughness:    0.96,
         metalness:    0,
-      }))
+      })
+
+      shadeUnderClouds(material, world)
+
+      mesh               = new THREE.Mesh(geometry, material)
       mesh.name          = 'terrain'
       mesh.castShadow    = true
       mesh.receiveShadow = true

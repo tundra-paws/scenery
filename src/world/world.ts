@@ -2,8 +2,12 @@
 import type { QualitySettings } from 'threejs-scenes'
 import type { AppModule } from 'threejs-scenes/core'
 
+import { createCloudShadow } from './shared/cloud-shadow.ts'
+import type { CloudShadow } from './shared/cloud-shadow.ts'
 import { createGround } from './shared/ground.ts'
 import type { Ground } from './shared/ground.ts'
+import { createWind } from './shared/wind.ts'
+import type { Wind } from './shared/wind.ts'
 
 
 /**
@@ -34,12 +38,15 @@ export type Feature = AppModule<WorldState>
  * `ctx` (scene, camera, renderer, rng) arrives later, in `build`. This is the
  * part that has to exist before any of that: the shape of the land, which the
  * terrain meshes, the scatterers place on, the water meets and the camera walks
- * over, and which must therefore be one function they all share.
+ * over, and which must therefore be one function they all share. The same goes
+ * for the air over it: one wind, and one shadow from the clouds it carries.
  */
 export interface World {
   seed:    number
   quality: QualitySettings
   ground:  Ground
+  wind:    Wind
+  clouds:  CloudShadow
 }
 
 interface WorldOptions {
@@ -48,5 +55,5 @@ interface WorldOptions {
 }
 
 export function createWorld ({ seed, quality }: WorldOptions): World {
-  return { seed, quality, ground: createGround({ seed }) }
+  return { seed, quality, ground: createGround({ seed }), wind: createWind(), clouds: createCloudShadow() }
 }

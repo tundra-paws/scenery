@@ -6,8 +6,12 @@ const VERTEX = /* glsl */ `
   varying vec3 vDirection;
 
   void main () {
-    vDirection  = normalize(position);
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vDirection = normalize(position);
+
+    // Turned with the view and never moved by it: the dome is drawn around the
+    // camera wherever that is, so walking never brings its wall closer and a
+    // picture from a new place needs nothing told to the sky first.
+    gl_Position = projectionMatrix * vec4(mat3(viewMatrix) * position, 1.0);
   }
 `
 

@@ -2,11 +2,10 @@
 import * as THREE from 'three'
 import { createHemisphereFill, createSun } from 'threejs-scenes/raster'
 import { PALETTE } from '../../shared/palette.ts'
+import { SUN } from '../../shared/sun.ts'
+import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { createSkyMaterial } from './sky.ts'
-
-/** Where the sun sits, as a direction from the origin. Low enough to rake the hills. */
-const SUN_DIRECTION = new THREE.Vector3(-0.62, 0.46, 0.3).normalize()
 
 /** Distance of the light from what it lights. Only has to clear the terrain. */
 const SUN_DISTANCE = 260
@@ -14,15 +13,13 @@ const SUN_DISTANCE = 260
 /** Radius of the sky dome. Inside the camera's far plane, outside everything else. */
 const SKY_RADIUS = 1200
 
-/** The direction the light comes from, for materials that shade against it by hand. */
-export const SUN = SUN_DIRECTION
-
 /**
- * Sky, sun, fill light and fog.
+ * Sky, sun, fill light, fog, and the wind's clock.
  *
  * Mounted first, because it is also where the renderer's shadow settings are
  * decided, and those have to be in place before any other feature creates a
- * material.
+ * material. For the same reason it is what moves the air on each step: every
+ * feature after it then reads the same wind.
  */
 export function createEnvironment (world: World): Feature {
   let sky: THREE.Mesh | null             = null
@@ -41,12 +38,15 @@ export function createEnvironment (world: World): Feature {
 
       scene.fog = new THREE.FogExp2(PALETTE.horizon, 0.0028)
 
+      // Before the first step too, so nothing is ever drawn in still air.
+      world.wind.blow(0)
+
       const reach = world.ground.size * 0.62
 
       sun = createSun({
         color:         PALETTE.sun,
         intensity:     3.2,
-        position:      SUN_DIRECTION.clone().multiplyScalar(SUN_DISTANCE),
+        position:      SUN.clone().multiplyScalar(SUN_DISTANCE),
         shadowMapSize: world.quality.shadowMapSize,
         shadowFrustum: reach,
         shadowFar:     SUN_DISTANCE * 2,
@@ -62,7 +62,7 @@ export function createEnvironment (world: World): Feature {
 
       sky = new THREE.Mesh(
         new THREE.SphereGeometry(SKY_RADIUS, 24, 12),
-        createSkyMaterial({ zenith: PALETTE.zenith, horizon: PALETTE.horizon, sun: PALETTE.sun, sunDirection: SUN_DIRECTION }),
+        createSkyMaterial({ zenith: PALETTE.zenith, horizon: PALETTE.horizon, sun: PALETTE.sun, sunDirection: SUN }),
       )
       sky.name          = 'sky'
       sky.frustumCulled = false
@@ -71,9 +71,8 @@ export function createEnvironment (world: World): Feature {
       scene.add(sun, sun.target, fill, sky)
     },
 
-    update (_state, _frame, { camera }) {
-      // The dome rides with the camera, so walking never brings its wall closer.
-      sky?.position.copy(camera.position)
+    update (_state, frame) {
+      world.wind.blow(frame.frame * STEP)
     },
 
     dispose () {
