@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" data-chrome="shown">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Scenery</title>
+  <meta name="description" content="A browser 3D world that is changed a little every day. Browse every daily snapshot, or open one and walk around in it.">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Scenery">
+  <meta property="og:description" content="A browser 3D world that is changed a little every day. Browse every daily snapshot.">
+  <meta property="og:image" content="https://tundra-paws.github.io/scenery/latest.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0d10'/%3E%3Cpath d='M3 23Q10 15 16 20T29 18V29H3Z' fill='%239fd3c7'/%3E%3Ccircle cx='22' cy='10' r='3' fill='%23e8e6e1'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="shell.css">
+  <script type="module" src="shell.js"></script>
+</head>
+<body>
+  <header hidden>
+    <h1>Scenery</h1>
+    <button type="button" id="chrome-toggle" aria-controls="chrome" aria-expanded="true" aria-keyshortcuts="h" title="Hide or show the timeline and info (H)">Panels</button>
+  </header>
+
+  <main>
+    <iframe id="world" title="Scenery" allow="fullscreen; gamepad; accelerometer; gyroscope"></iframe>
+
+    <section data-view="fallback" aria-label="Stored picture" hidden>
+      <img alt="" width="1600" height="900">
+      <article>
+        <p></p>
+        <button type="button">Try again</button>
+      </article>
+    </section>
+
+    <section data-view="notice" hidden>
+      <h2></h2>
+      <p></p>
+      <button type="button">Reload</button>
+    </section>
+
+    <noscript>
+      <section data-view="notice">
+        <h2>This page needs JavaScript</h2>
+        <p>Scenery is a 3D world that runs in the browser, so there is nothing to show without scripts.</p>
+      </section>
+    </noscript>
+  </main>
+
+  <aside id="chrome" aria-label="Iteration browser">
+    <section aria-labelledby="iteration-title">
+      <header>
+        <h2 id="iteration-title"></h2>
+        <menu aria-label="Step through iterations">
+          <li><button type="button" id="prev" aria-label="Previous iteration" aria-keyshortcuts="ArrowLeft" title="Previous (left arrow)">&lsaquo;</button></li>
+          <li><button type="button" id="next" aria-label="Next iteration" aria-keyshortcuts="ArrowRight" title="Next (right arrow)">&rsaquo;</button></li>
+        </menu>
+      </header>
+      <p id="meta"></p>
+      <p id="summary"></p>
+      <ul id="links" aria-label="Links"></ul>
+    </section>
+
+    <nav aria-label="Timeline">
+      <ol id="strip"></ol>
+    </nav>
+  </aside>
+
+  <output id="status"></output>
+</body>
+</html>

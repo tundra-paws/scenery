@@ -1,0 +1,48 @@
+{
+  "id": 1,
+  "dir": "i/0001/",
+  "date": "2026-11-23",
+  "sha": "56dbc60cbc920a14de47d020b822843748e92736",
+  "title": "Seed",
+  "summary": "A small island in open water under a clear sky. Grass, sand, bare rock, a few boulders. Plain on purpose.",
+  "kind": "feature",
+  "model": "claude-fable-5-2",
+  "journal": "journal/2026-11-23-seed.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 7,
+      "triangles": 148730,
+      "live": {
+        "buffers": 24,
+        "textures": 7,
+        "programs": 7,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 7
+      }
+    },
+    "mobile": {
+      "draws": 7,
+      "triangles": 55094,
+      "live": {
+        "buffers": 24,
+        "textures": 7,
+        "programs": 7,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 7
+      }
+    }
+  },
+  "bytes": {
+    "new": 862845,
+    "site": 894690
+  },
+  "three": "0.184.0",
+  "distHash": "1a26ccb24bf4f355434d00708de614bfa24a43afae8f01310420867a0c9d0ba6",
+  "withdrawn": false
+}
