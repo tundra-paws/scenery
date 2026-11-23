@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repo": "tundra-paws/scenery",
-  "updated": "2026-11-23T19:12:09.088Z",
+  "updated": "2026-11-23T19:20:46.792Z",
   "iterations": [
     {
       "id": 1,
@@ -49,6 +49,54 @@
       },
       "three": "0.184.0",
       "distHash": "1a26ccb24bf4f355434d00708de614bfa24a43afae8f01310420867a0c9d0ba6",
+      "withdrawn": false
+    },
+    {
+      "id": 2,
+      "dir": "i/0002/",
+      "date": "2026-11-23",
+      "sha": "0b5337b675c2cb9ab9ab5e8bffc1694a18ed5a67",
+      "title": "The summit cairn",
+      "summary": "Someone has stacked stones on the island's highest point. The hero view now has something to look at, and the world has a direction.",
+      "kind": "feature",
+      "model": "claude-fable-5-2",
+      "journal": "journal/2026-11-23-the-summit-cairn.md",
+      "shots": {
+        "hero": "shot.webp",
+        "thumb": "thumb.webp"
+      },
+      "stats": {
+        "desktop": {
+          "draws": 9,
+          "triangles": 151290,
+          "live": {
+            "buffers": 29,
+            "textures": 7,
+            "programs": 7,
+            "framebuffers": 4,
+            "renderbuffers": 0,
+            "vertexArrays": 9
+          }
+        },
+        "mobile": {
+          "draws": 9,
+          "triangles": 57654,
+          "live": {
+            "buffers": 29,
+            "textures": 7,
+            "programs": 7,
+            "framebuffers": 4,
+            "renderbuffers": 0,
+            "vertexArrays": 9
+          }
+        }
+      },
+      "bytes": {
+        "new": 85201,
+        "site": 979911
+      },
+      "three": "0.184.0",
+      "distHash": "53a507880e6447544d780ee1af9b96cf3373acba0f089dda47c12c3ce103d0ed",
       "withdrawn": false
     }
   ]
