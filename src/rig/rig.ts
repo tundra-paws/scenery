@@ -8,7 +8,7 @@ import type { Feature, World } from '../world/world.ts'
 import { attachInput, clearInput, createInput } from './input.ts'
 import { createRigState, stepRig } from './step.ts'
 import type { RigEnv, RigMode } from './step.ts'
-import { createTour } from './tour.ts'
+import { TOUR_CLEARANCE, createTour } from './tour.ts'
 
 
 /** Where the camera is, in the form a test or a capture tool can compare. */
@@ -53,10 +53,12 @@ interface RigOptions {
  * `step.ts` and this file only wires it to three and to the page.
  */
 export function createRig ({ world, canvas, stick = null, interactive, onMove }: RigOptions): Rig {
-  const tour        = createTour(VIEWS.map(view => resolveView(view, world.ground)))
+  const { ground }  = world
+  const surface     = (x: number, z: number): number => Math.max(ground.heightAt(x, z), ground.waterLevel)
+  const tour        = createTour(VIEWS.map(view => resolveView(view, ground)), { floor: { surface, clearance: TOUR_CLEARANCE }})
   const state       = createRigState()
   const input       = createInput()
-  const env: RigEnv = { tour, ground: world.ground, explore: false }
+  const env: RigEnv = { tour, ground, explore: false }
   const lookAt      = new THREE.Vector3()
 
   let pinned: Pose | null         = null
@@ -109,7 +111,7 @@ export function createRig ({ world, canvas, stick = null, interactive, onMove }:
       if (!view)
         throw new Error(`no view named "${name}" · known: ${VIEWS.map(known => known.name).join(', ')}`)
 
-      pinned = resolveView(view, world.ground)
+      pinned = resolveView(view, ground)
     },
 
     place,

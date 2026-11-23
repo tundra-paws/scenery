@@ -8,12 +8,18 @@ import type { Ground } from './shared/ground.ts'
  * photographed from, and the timelapse on the site only reads as one place
  * growing if that frame holds still. Add views freely; move `hero` only for a
  * reason worth breaking the timelapse over, and say so in the journal.
+ *
+ * The order is a circuit of the island: up from the sea to the summit, down to
+ * the western beach, round to the northern cove, up onto the ridge and back.
+ * The tour lifts itself over the land between two views, but it looks best
+ * when neighbours in this list are neighbours on the island too.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12 },
+  { name: 'summit', at: [ 2, 86 ], height: 28, look: [ 28, -40 ], lookHeight: 4 },
   { name: 'shore', at: [ -96, 44 ], height: 2.6, look: [ -24, -6 ], lookHeight: 7 },
-  { name: 'ridge', at: [ 8, -34 ], height: 13, look: [ 58, 62 ], lookHeight: 3 },
   { name: 'cove', at: [ -38, -104 ], height: 4.5, look: [ 4, -12 ], lookHeight: 9 },
+  { name: 'ridge', at: [ 8, -34 ], height: 13, look: [ 58, 62 ], lookHeight: 3 },
 ]
 
 /**
