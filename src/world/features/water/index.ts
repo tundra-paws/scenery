@@ -1,6 +1,7 @@
 // src/world/features/water/index.ts
 import * as THREE from 'three'
 
+import { DEEP_WATER } from '../../shared/ground.ts'
 import { createHeightMap } from '../../shared/height-map.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { STEP } from '../../world.ts'
@@ -30,9 +31,9 @@ const VERTEX = /* glsl */ `
 
 const FRAGMENT = /* glsl */ `
   uniform float     uTime;
-  uniform float     uOpacity;
   uniform vec3      uDeep;
   uniform vec3      uShallow;
+  uniform vec3      uSky;
   uniform vec3      uFoam;
   uniform vec3      uSun;
   uniform vec3      uSunDirection;
@@ -41,8 +42,20 @@ const FRAGMENT = /* glsl */ `
 
   varying vec3 vWorld;
 
-  // Depth of water, in world units, at which the sea is fully itself.
+  // Depth of water, in world units, over which the sea thins out to nothing
+  // on the sand.
   const float SHALLOWS = 0.9;
+
+  // Depth down to which the sea keeps all of its pale colour, and the depth
+  // from which it is its darkest and hides whatever is under it.
+  const float PALE = 0.3;
+  const float DEEP = ${DEEP_WATER.toFixed(1)};
+
+  // How much of what is under the shallows shows when looking straight down.
+  const float CLEAR = 0.18;
+
+  // How much of the sky the surface gives back when it is seen edge-on.
+  const float SHEEN = 0.25;
 
   // Depth the foam on the waterline reaches out to when the swell is level.
   const float RIM = 0.18;
@@ -71,22 +84,29 @@ const FRAGMENT = /* glsl */ `
     vec3 normal = normalize(vec3(across * calm, 1.0, along * calm));
     vec3 view   = normalize(cameraPosition - vWorld);
 
-    float fresnel = pow(1.0 - max(dot(normal, view), 0.0), 3.0);
-    vec3  colour  = mix(uDeep, uShallow, fresnel);
-
-    vec3 halfway = normalize(uSunDirection + view);
-
-    colour += uSun * pow(max(dot(normal, halfway), 0.0), 220.0) * 0.9;
-
     // How much water lies over the land here. The map is on the terrain's own
     // grid, so zero is where the mesh breaks the surface.
     float depth = -texture2D(uGround, at * uGroundScale + 0.5).r;
     float pixel = fwidth(depth);
 
+    // The sea's own colour is how much of it there is to look through: pale
+    // over the shelf, where the sand is close under it, and dark past the
+    // drop. On top of that the surface gives back some sky, most at a glance.
+    float murk    = smoothstep(PALE, DEEP, depth);
+    float fresnel = pow(1.0 - max(dot(normal, view), 0.0), 3.0);
+    vec3  colour  = mix(mix(uShallow, uDeep, murk), uSky, fresnel * SHEEN);
+
+    vec3 halfway = normalize(uSunDirection + view);
+
+    colour += uSun * pow(max(dot(normal, halfway), 0.0), 220.0) * 0.9;
+
     // The sea has no edge of its own: it thins over the last of the sand until
     // the sand is all there is. Over a couple of pixels at least, so the edge
-    // stays soft from across the bay.
-    float alpha = mix(uOpacity, 1.0, fresnel) * smoothstep(0.0, SHALLOWS + pixel * 2.0, depth);
+    // stays soft from across the bay. The other way it closes early, at half
+    // its darkness: a slanting look through the shallows runs on under the
+    // deep water, where the terrain has built no floor to find.
+    float veil  = max(fresnel, min(murk * 2.0, 1.0));
+    float alpha = mix(1.0 - CLEAR, 1.0, veil) * smoothstep(0.0, SHALLOWS + pixel * 2.0, depth);
 
     // Foam where it runs out, reaching further and whiter where the swell is
     // up and all but gone where it is down. Never thinner than a pixel or so,
@@ -112,8 +132,8 @@ const FRAGMENT = /* glsl */ `
 `
 
 /**
- * The sea: one plane at the water level, with moving glints and a fresnel fade,
- * thinning to foam where the land comes up through it.
+ * The sea: one plane at the water level, pale over the shelf and dark past it,
+ * with moving glints, thinning to foam where the land comes up through it.
  */
 export function createWater (world: World): Feature {
   let mesh: THREE.Mesh | null               = null
@@ -138,9 +158,9 @@ export function createWater (world: World): Feature {
           THREE.UniformsLib.fog,
           {
             uTime:         { value: 0 },
-            uOpacity:      { value: 0.82 },
             uDeep:         { value: new THREE.Color(PALETTE.waterDeep) },
             uShallow:      { value: new THREE.Color(PALETTE.waterShallow) },
+            uSky:          { value: new THREE.Color(PALETTE.skyFill) },
             uFoam:         { value: new THREE.Color(PALETTE.foam) },
             uSun:          { value: new THREE.Color(PALETTE.sun) },
             uSunDirection: { value: SUN.clone() },

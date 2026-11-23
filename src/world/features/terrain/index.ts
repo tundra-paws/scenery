@@ -3,11 +3,12 @@ import * as THREE from 'three'
 import type { QualityTier } from 'threejs-scenes'
 import { smoothstep } from 'threejs-scenes/primitives'
 
+import { DEEP_WATER } from '../../shared/ground.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import type { Feature, World } from '../../world.ts'
 
 
-/** Grid cells per side. Triangles are twice the square of this. */
+/** Grid cells per side. Triangles are twice the square of this, less the cells under deep water. */
 export const TERRAIN_SEGMENTS: Record<QualityTier, number> = { mobile: 96, desktop: 160, highEnd: 224 }
 
 const SAND  = new THREE.Color(PALETTE.sand)
@@ -34,6 +35,29 @@ function colourAt (world: World, x: number, z: number, height: number, out: THRE
   out.lerp(ROCK, smoothstep(0.16, 0.34, slope))
 
   return out
+}
+
+/**
+ * The grid's triangles, without the cells that lie wholly under deep water.
+ *
+ * The sea hides everything below `DEEP_WATER`, and two fifths of the square is
+ * that deep: its corners and the foot of the shelf. A cell is two triangles,
+ * six indices in a row, and stays if any corner of it is above `floor`. Whole
+ * cells, because the water reads its depth from the cell's four corners.
+ */
+function cellsAbove (geometry: THREE.BufferGeometry, floor: number): number[] {
+  const position       = geometry.getAttribute('position')
+  const index          = geometry.getIndex()
+  const kept: number[] = []
+
+  for (let cell = 0; index && cell < index.count; cell += 6) {
+    const corners = Array.from({ length: 6 }, (_, corner) => index.getX(cell + corner))
+
+    if (corners.some(corner => position.getY(corner) > floor))
+      kept.push(...corners)
+  }
+
+  return kept
 }
 
 /** The land: one heightfield mesh, coloured per vertex, shaded flat. */
@@ -63,6 +87,7 @@ export function createTerrain (world: World): Feature {
       }
 
       geometry.setAttribute('color', new THREE.BufferAttribute(colours, 3))
+      geometry.setIndex(cellsAbove(geometry, ground.waterLevel - DEEP_WATER))
       geometry.computeVertexNormals()
       geometry.computeBoundingBox()
       geometry.computeBoundingSphere()
@@ -93,5 +118,6 @@ export function createTerrain (world: World): Feature {
   }
 }
 
-// perf: medium — one draw call (two with its shadow pass). 18k triangles on the
-// mobile tier, 51k on desktop, 100k on highEnd. Built once; nothing per frame.
+// perf: medium — one draw call (two with its shadow pass). 11k triangles on the
+// mobile tier, 30k on desktop, 58k on highEnd: the grid less the two fifths of
+// it under deep water. Built once; nothing per frame.

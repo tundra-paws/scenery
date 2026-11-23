@@ -5,20 +5,25 @@ this short: a plan nobody can read in a minute is not a plan.
 
 ## Next
 
-1. Give the water depth: pale over the shallows, dark over the open sea. The water shader already
-   knows its depth (`uGround`, from `shared/height-map.ts`); today it only uses the first metre.
-2. Wind as one shared signal; the tufts read it first, then the swell that moves the foam.
-3. Clouds, or anything else that makes the sky more than a gradient.
+1. Wind as one shared signal; the tufts read it first, then the swell that moves the foam.
+2. Clouds, or anything else that makes the sky more than a gradient.
+3. A postcard that looks down on the island in its pale ring, so the quiet tour passes it. A
+   scratch view at `[ 20, 150 ]`, height 22, looking at the origin was the best picture so far.
 
 ## Known problems
 
-- The water has no depth past the first metre: one colour over the shelf and the open sea.
 - The tufts are static. Nothing on the land moves.
 - The sky is a gradient with a sun disc. No clouds, no change over time.
 - The boulder scatter does not know about the cairn: a reshuffle could drop one into it.
 - A boulder standing in the sea gets no foam: the height map holds the land, not the rocks.
 - `bun run diff` trusts the local `origin/main`, which was four commits behind in a fresh checkout
   and reported the cairn as today's change. Run `git fetch origin main` before believing it.
+- `bun run shot` with several views draws all but the first with the sky dome where the first
+  view's camera stood (the dome follows the camera in `update`; a capture steps the world once).
+  From high up that is a false horizon: shoot a high view alone. A fix in the world: centre the
+  dome in its vertex shader (`mat3(viewMatrix)`), which also removes the per-frame copy.
+- The waterline's clear fringe shows what is behind it, not the sand under it. On a far shore
+  seen at a slant that is the horizon colour, since the deep sea floor is no longer built.
 
 ## Ideas
 

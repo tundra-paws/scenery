@@ -5,7 +5,7 @@ import { createSeededRng } from 'threejs-scenes/primitives'
 
 import { VIEWS, resolveView } from '../views.ts'
 import { WORLD_SEED } from '../world.ts'
-import { createGround } from './ground.ts'
+import { DEEP_WATER, createGround } from './ground.ts'
 import { createHeightMap } from './height-map.ts'
 import { scatterOnGround } from './scatter.ts'
 
@@ -30,14 +30,14 @@ describe('ground', () => {
     expect(two.heightAt(10, 10)).not.toBe(one.heightAt(10, 10))
   })
 
-  test('the rim is under water, so the land has no visible edge', () => {
+  test('the rim is under deep water, so neither the land nor its square has a visible edge', () => {
     const ground = createGround({ seed: WORLD_SEED })
     const half   = ground.size / 2
 
     for (let step = 0; step < 72; step += 1) {
       const angle = step / 72 * Math.PI * 2
 
-      expect(ground.heightAt(Math.cos(angle) * half, Math.sin(angle) * half)).toBeLessThan(ground.waterLevel - 2)
+      expect(ground.heightAt(Math.cos(angle) * half, Math.sin(angle) * half)).toBeLessThan(ground.waterLevel - DEEP_WATER)
     }
   })
 
