@@ -131,7 +131,7 @@ describe('checkPolicy', () => {
     const out = judge(dir, base, commit({ 'journal/2026-12-05-first-light.md': ENTRY }))
 
     expect(out.verdict).toBe('rejected')
-    expect(out.failures.join(' ')).toContain('not a descendant')
+    expect(out.failures.join(' ')).toContain('shares no history')
   })
 
   test('touching a workflow is rejected even when a later commit reverts it', () => {
@@ -256,5 +256,58 @@ describe('checkPolicy on a push to main', () => {
 
     expect(out.verdict).toBe('candidate')
     expect(out.journal?.title).toBe('First light')
+  })
+})
+
+describe('checkPolicy when main has moved under a candidate', () => {
+  test('documents and ledger lines on main do not make a candidate stale-and-refused', () => {
+    const { dir, commit } = repository()
+    const git             = (...args: string[]): string => execFileSync('git', args, { cwd: dir, encoding: 'utf8' }).trim()
+    const fork            = git('rev-parse', 'HEAD')
+
+    git('checkout', '--quiet', '-b', 'claude/day')
+
+    const head = commit({ 'src/world/index.ts': 'export const world = 7\n', 'journal/2026-12-05-first-light.md': ENTRY })
+
+    // Meanwhile, on main: the owner adds a request and CI appends to the ledger.
+    git('checkout', '--quiet', 'main')
+
+    const main = commit({ 'REQUESTS.md': '- [ ] a lighthouse\n', 'ci/ledger.jsonl': '{}\n', 'journal/2026-12-04-yesterday.md': ENTRY })
+    const out  = checkPolicy({ repo: dir, base: main, head, mode: 'candidate' })
+
+    expect(main).not.toBe(fork)
+    expect(out.failures).toEqual([])
+    expect(out.verdict).toBe('candidate')
+    expect(out.stale).toBe(true)
+
+    // Judged over its own commits only: main's new journal entry is not counted as a second one.
+    expect(out.journal?.path).toBe('journal/2026-12-05-first-light.md')
+  })
+
+  test('code on main makes the candidate out of date', () => {
+    const { dir, commit } = repository()
+    const git             = (...args: string[]): string => execFileSync('git', args, { cwd: dir, encoding: 'utf8' }).trim()
+
+    git('checkout', '--quiet', '-b', 'claude/day')
+
+    const head = commit({ 'src/world/index.ts': 'export const world = 7\n', 'journal/2026-12-05-first-light.md': ENTRY })
+
+    git('checkout', '--quiet', 'main')
+
+    const main = commit({ 'src/world/other.ts': 'export const other = 1\n' })
+    const out  = checkPolicy({ repo: dir, base: main, head, mode: 'candidate' })
+
+    expect(out.verdict).toBe('rejected')
+    expect(out.failures.join(' ')).toContain('main has moved on')
+    expect(out.failures.join(' ')).toContain('src/world/other.ts')
+  })
+
+  test('a candidate built on the current main is not stale', () => {
+    const { dir, commit } = repository()
+    const base            = execFileSync('git', [ 'rev-parse', 'HEAD' ], { cwd: dir, encoding: 'utf8' }).trim()
+    const out             = checkPolicy({ repo: dir, base, head: commit({ 'journal/2026-12-05-first-light.md': ENTRY }), mode: 'candidate' })
+
+    expect(out.verdict).toBe('candidate')
+    expect(out.stale).toBe(false)
   })
 })

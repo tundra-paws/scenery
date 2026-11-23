@@ -25,7 +25,8 @@ as an iteration that never changes again. The site shows the newest one and ever
 
 ## Steering it
 
-- **Ask for something:** add a line to [`REQUESTS.md`](REQUESTS.md).
+- **Ask for something:** add a line to [`REQUESTS.md`](REQUESTS.md). Edit it whenever you like, even while a
+  run is under way: a change to a document never invalidates the day's work.
 - **Set the direction:** edit [`VISION.md`](VISION.md). The constraints at the top are yours.
 - **Pause it:** set the repository variable `SCENERY_PAUSED` to `true`, or turn the routine off.
 - **Approve each day by hand:** add yourself as a required reviewer on the `promotion`

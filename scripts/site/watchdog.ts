@@ -102,10 +102,14 @@ function streakAlerts ({ ledger }: WatchFacts): string[] {
   return alerts
 }
 
-/** A change to the framework's own controls landed since the last look. */
+/**
+ * The curator changed the framework's own controls since the last look.
+ *
+ * Only the curator's changes: the owner does not need telling what the owner pushed.
+ */
 function frameworkAlerts ({ now, ledger }: WatchFacts): string[] {
   return ledger
-    .filter(line => isLanded(line) && line.framework && now - Date.parse(line.ts) < RECENT)
+    .filter(line => line.mode === 'candidate' && isLanded(line) && line.framework && now - Date.parse(line.ts) < RECENT)
     .map(line => `A framework change landed (${plain((line.framework ?? []).slice(0, 6).join(', '))}): "${plain(line.journal?.title ?? line.sha.slice(0, 7))}". It takes effect from the next run.`)
 }
 

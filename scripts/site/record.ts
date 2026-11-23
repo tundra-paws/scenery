@@ -93,7 +93,7 @@ function landingTrouble ({ needs, mode }: RunFacts): Trouble | null {
     return { verdict: 'superseded', failed: []}
 
   if (mode === 'candidate' && job('promote') !== 'success')
-    return { verdict: 'rejected', failed: [ 'promote: main could not be fast-forwarded to this commit (did main move? rebase and push again)' ]}
+    return { verdict: 'rejected', failed: [ 'promote: this commit could not be landed on main (main moved on in a way that conflicts with it: redo the change on top of the current main)' ]}
 
   if (job('publish') !== 'success')
     return { verdict: 'infra-error', failed: [ 'publish: the site was not updated (see the run); the watchdog will retry' ]}

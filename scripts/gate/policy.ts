@@ -46,6 +46,12 @@ const GUARDED = [
 /** What a framework change must leave alone. */
 const WORLD = [ 'src/world/**', 'src/rig/**' ]
 
+/**
+ * What main may gain while a candidate is being made without making it stale:
+ * documents and the ledger. Neither changes what gets built.
+ */
+const INERT = [ '*.md', '**/*.md', 'ci/**' ]
+
 const KINDS = [ 'feature', 'polish', 'fix', 'framework', 'skip' ]
 
 /** `journal/2026-12-05-first-light.md` */
@@ -84,6 +90,22 @@ export interface PolicyResult {
   /** Guarded paths the change touches, for the ledger. */
   guarded: string[]
   changed: number
+
+  /**
+   * Main moved on after this branch was cut, but only by documents or ledger
+   * lines. The candidate is still what was judged; it lands with a merge.
+   */
+  stale: boolean
+}
+
+interface Origin {
+
+  /** The commit the candidate's own work starts from. */
+  fork:  string
+  stale: boolean
+
+  /** Why the candidate cannot be judged at all, or ''. */
+  problem: string
 }
 
 interface PolicyOptions {
@@ -294,6 +316,39 @@ function sizeRules (repo: string, head: string, paths: readonly string[], added:
 }
 
 /**
+ * Where a candidate's own work starts, and whether main has moved since.
+ *
+ * A person may edit REQUESTS.md while a run is under way, and CI appends to the
+ * ledger after every push. Neither changes what gets built, so a candidate cut
+ * before them is still the thing that was judged. If main gained anything else,
+ * the candidate was made against a world that no longer exists.
+ */
+function originOf (repo: string, base: string, head: string): Origin {
+  const fork = tryGit(repo, 'merge-base', base, head)
+  const tip  = tryGit(repo, 'rev-parse', '--verify', `${base}^{commit}`)
+
+  if (!fork || !tip)
+    return { fork: '', stale: false, problem: `shares no history with ${base}: start from the current main` }
+
+  if (fork === tip)
+    return { fork, stale: false, problem: '' }
+
+  const moving = (tryGit(repo, 'diff', '--name-only', `${fork}..${tip}`) ?? '').split('\n')
+    .filter(path => path !== '' && !matchesAny(path, INERT))
+
+  return moving.length === 0
+    ? { fork, stale: true, problem: '' }
+    : { fork, stale: false, problem: `main has moved on since this branch was cut (${moving.slice(0, 4).join(', ')}): redo the change on top of the current main and push again` }
+}
+
+/** The commits a push to main is judged over: all it brought, when it says where main was. */
+function pushedRange (repo: string, base: string, head: string): string {
+  const known = base !== head && tryGit(repo, 'merge-base', '--is-ancestor', base, head) !== null
+
+  return known ? `${base}..${head}` : `${head}~1..${head}`
+}
+
+/**
  * Judge a change by what it touches, without running any of it.
  *
  * Everything here reads git objects as data. That is the point: this is the
@@ -306,19 +361,19 @@ export function checkPolicy ({ repo, base, head, mode }: PolicyOptions): PolicyR
   const budgets            = JSON.parse(readFileSync(resolve(repo, 'budgets.json'), 'utf8')) as Budgets
   const candidate          = mode === 'candidate'
 
-  const result = (verdict: Verdict, journal: JournalEntry | null, guarded: string[], changed: number): PolicyResult =>
-    ({ verdict, failures, warnings, journal, framework: guarded.length > 0, guarded, changed })
+  const origin = candidate ? originOf(repo, base, head) : { fork: '', stale: false, problem: '' }
 
-  if (candidate && tryGit(repo, 'merge-base', '--is-ancestor', base, head) === null) {
-    failures.push(`not a descendant of ${base}: rebase onto the current main and push again`)
+  const result = (verdict: Verdict, journal: JournalEntry | null, guarded: string[], changed: number): PolicyResult =>
+    ({ verdict, failures, warnings, journal, framework: guarded.length > 0, guarded, changed, stale: origin.stale })
+
+  if (origin.problem) {
+    failures.push(origin.problem)
 
     return result('rejected', null, [], 0)
   }
 
-  // A push to main is judged over everything it brought, when the push says
-  // where main was before; otherwise over its last commit.
-  const pushed           = !candidate && base !== head && tryGit(repo, 'merge-base', '--is-ancestor', base, head) !== null
-  const range            = candidate || pushed ? `${base}..${head}` : `${head}~1..${head}`
+  // A candidate is judged over its own commits; a push to main over what it brought.
+  const range            = candidate ? `${origin.fork}..${head}` : pushedRange(repo, base, head)
   const { paths, added } = changes(repo, range)
   const journalled       = added.filter(path => matches(path, 'journal/*.md') && path !== 'journal/README.md')
 

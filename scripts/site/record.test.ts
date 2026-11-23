@@ -96,7 +96,7 @@ describe('describeRun', () => {
     expect(out?.verdict).toBe('infra-error')
   })
 
-  test('superseded and non-fast-forward', () => {
+  test('superseded, and a promotion that failed', () => {
     const superseded = describeRun(facts({ needs: { policy: OK, build: OK, verify: OK, promote: { result: 'success', outputs: { superseded: 'true' }}, publish: SKIPPED }, result: null }))
 
     expect(superseded?.verdict).toBe('superseded')
@@ -104,7 +104,7 @@ describe('describeRun', () => {
     const moved = describeRun(facts({ needs: { policy: OK, build: OK, verify: OK, promote: FAILED, publish: SKIPPED }, result: null }))
 
     expect(moved?.verdict).toBe('rejected')
-    expect(moved?.failed?.[0]).toContain('fast-forwarded')
+    expect(moved?.failed?.[0]).toContain('could not be landed')
   })
 
   test('a framework change is flagged', () => {

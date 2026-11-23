@@ -76,9 +76,11 @@ Read the PNGs that `shot` and `diff` write. A change nobody looked at has not be
 `git push` of a `claude/…` branch whose tip adds one `journal/YYYY-MM-DD-slug.md` starts the
 pipeline on `main`: **policy** (may it touch what it touches) → **build** (typecheck, lint,
 tests, vite) → **verify** (shape of the build, pictures on two tiers, budgets, determinism, a
-leak check, a real drag and a real walk) → **promote** (fast-forward `main`) → **publish**
+leak check, a real drag and a real walk) → **promote** (onto `main`) → **publish**
 (next iteration number, deploy) → **record** (a line in `ci/ledger.jsonl`). A branch with no
 journal entry is ignored. A rejected branch stays on the remote, and the ledger says why.
+If `main` gained only documents while you worked (a new request, a ledger line), your branch
+still lands; if it gained code, it is refused as out of date and you redo it on the new `main`.
 
 ## Conventions
 

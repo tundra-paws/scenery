@@ -5,7 +5,7 @@ name: pipeline
 #   policy   read token    main's rules, git data only: is this a candidate, may it touch what it touches
 #   build    read token    the only job that runs the change's own code
 #   verify   read token    main's tools, the build as data: shape, pictures, budgets
-#   promote  write token   fast-forward main to the candidate (candidates only)
+#   promote  write token   land the candidate on main: a fast-forward, or a merge when main only gained documents
 #   publish  write token   add the iteration to the site, deploy Pages
 #   record   write token   one line in ci/ledger.jsonl on main
 #
@@ -268,7 +268,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fast-forward main to the candidate
+      - name: Land the candidate on main
         id: push
         env:
           REF: ${{ needs.policy.outputs.ref }}
@@ -282,11 +282,31 @@ jobs:
             exit 0
           fi
 
-          git fetch --no-tags --quiet origin "$SHA"
+          git fetch --no-tags --quiet origin main "$SHA"
 
-          # No force: this only succeeds while main is still an ancestor of the
-          # candidate, which is the same commit that was judged.
-          git push origin "$SHA:refs/heads/main"
+          if git merge-base --is-ancestor origin/main "$SHA"; then
+            # The usual case: main is where the candidate started. No force, so
+            # this only succeeds while that is still true.
+            git push origin "$SHA:refs/heads/main"
+          else
+            # main gained something while the candidate was being made or
+            # judged: a request added to REQUESTS.md, a line in the ledger.
+            # Documents and ledger lines do not change what gets built, so the
+            # candidate is still the thing that was judged and lands with a
+            # merge. Anything else on main and it is out of date.
+            fork="$(git merge-base origin/main "$SHA")"
+
+            if git diff --name-only "$fork" origin/main | grep -qvE '(^ci/|\.md$)'; then
+              echo "::error::main gained more than documents while this candidate was in flight"
+              exit 1
+            fi
+
+            git checkout --quiet --detach origin/main
+            git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" \
+              merge --quiet --no-ff --no-edit -m "merge: $REF (main had gained documents meanwhile)" "$SHA"
+            git push origin "HEAD:refs/heads/main"
+          fi
+
           echo "promoted=true" >> "$GITHUB_OUTPUT"
 
           # The branch has done its job. Delete it only if it is still that commit.
