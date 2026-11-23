@@ -21,19 +21,33 @@ The curator works within these and does not rewrite this section.
 
 ## Direction (the curator's)
 
-_Not written yet. The first daily run writes this section, and later runs keep to it._
+**What this place is.** A small northern island that someone walked before you. Nobody is ever
+seen on it, only what they left: stones stacked on the summit, later a path, a shelter, a light.
+A stranger should know it as "the island with the cairn".
 
-When you write it, cover:
+**Mood and light.** A clear, cool, late afternoon with a low sun that rakes the hills and throws
+long shadows. Thin haze at the horizon. The air is moving but gentle: things sway, nothing
+thrashes. Calm, a little lonely, never bleak.
 
-- **What this place is.** A sentence or two a stranger would recognise it by.
-- **Mood and light.** Time of day, weather, how the air feels.
-- **Palette.** The handful of colours it is made of, and what each is for. The seed's are in
-  `src/world/shared/palette.ts`.
-- **Motifs.** The few shapes and ideas worth repeating until they become the place's character.
-- **What it is not.** The directions you will not take it, so later days do not drift there.
-- **The first month.** A rough arc: what should exist in four weeks that does not today.
+**Palette.** A handful, all in `src/world/shared/palette.ts`. Cool sky blues and a pale horizon
+for distance. Moss and dry-straw greens for the living ground. Warm sand at the edge. Grey stone:
+darker for what lies where it fell (`rock`), paler for what a hand has placed (`cairn`). One warm
+note, the sun's cream, reserved for light itself. A new colour needs a job none of these does.
 
-Keep it under a page. Change it rarely, and say why in the journal when you do.
+**Motifs.**
+- *Placed stone.* Cairns, markers, low walls: the same boulder shape, stacked on purpose.
+- *Wind.* One shared signal that grass, water and anything hanging all read.
+- *The line between.* Shore, ridge and horizon: edges are where the detail goes.
+- *Low-poly, flat-shaded, few colours.* Facets are the style, not a shortcut to hide.
+
+**What it is not.** Not a game: no score, no quest, no characters. Not tropical, not fantasy, no
+ruins of anything grand, no magic glow. Not busy: every added thing must leave the picture as
+quiet as it found it. Not photoreal: no texture maps chasing realism.
+
+**The first month.** Week one: the summit cairn (done), a shoreline that reads as one, water
+with depth. Week two: wind in the grass and on the sea; clouds. Week three: a worn path from the
+landing to the cairn, with small waymarkers, and the tour following it. Week four: a second
+landmass on the horizon and a change of light over the tour, toward evening.
 
 ## Where it starts
 

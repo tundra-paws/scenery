@@ -4,6 +4,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import type { QualityTier } from 'threejs-scenes'
 import { createNoise3D } from 'threejs-scenes/primitives'
 
+import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { scatterOnGround } from '../../shared/scatter.ts'
 import type { Feature, World } from '../../world.ts'
@@ -101,23 +102,12 @@ export function createTufts (world: World): Feature {
         mesh!.setColorAt(index, tint.set(place.next() < 0.3 ? PALETTE.grassDry : PALETTE.grass).offsetHSL(0, 0, place.range(-0.05, 0.08)))
       })
 
-      mesh.instanceMatrix.needsUpdate = true
-
-      if (mesh.instanceColor)
-        mesh.instanceColor.needsUpdate = true
-
-      mesh.computeBoundingSphere()
+      commitInstances(mesh)
       scene.add(mesh)
     },
 
     dispose () {
-      mesh?.geometry.dispose()
-
-      if (mesh?.material instanceof THREE.Material)
-        mesh.material.dispose()
-
-      mesh?.removeFromParent()
-      mesh?.dispose()
+      disposeInstances(mesh)
       mesh = null
     },
   }
