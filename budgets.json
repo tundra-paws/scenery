@@ -1,0 +1,61 @@
+{
+  "about": "What the world is allowed to cost. The gate reads this file from main, never from the change being judged, so a change cannot raise its own ceiling: raising one is its own framework change and takes effect the day after it lands. Everything here is a count, a byte size or a pixel measure, because a gate that fails on a timing fails on a busy runner.",
+
+  "capture": {
+    "width": 1280,
+    "height": 720,
+    "seconds": 10,
+    "tiers": ["desktop", "mobile"]
+  },
+
+  "render": {
+    "about": "Per frame of the hero view, counted from the WebGL calls themselves. Shadow passes count: a mesh that casts a shadow is drawn twice.",
+    "desktop": { "draws": 160, "triangles": 800000 },
+    "mobile": { "draws": 100, "triangles": 300000 }
+  },
+
+  "live": {
+    "about": "GPU objects alive after the hero frame, on the desktop tier.",
+    "textures": 48,
+    "programs": 40,
+    "buffers": 800,
+    "vertexArrays": 400,
+    "framebuffers": 24,
+    "renderbuffers": 24
+  },
+
+  "leak": {
+    "about": "How many more GPU objects may exist after running the world for this many extra seconds. Zero: a world at rest allocates nothing.",
+    "seconds": 4,
+    "growth": 0
+  },
+
+  "blank": {
+    "about": "A frame is blank when one colour covers more than this share of it, or its brightness barely varies.",
+    "dominantShare": 0.97,
+    "minDeviation": 4
+  },
+
+  "determinism": {
+    "about": "Pixels that may differ between two loads of the same build given different wall clocks and different Math.random streams.",
+    "pixels": 0
+  },
+
+  "bytes": {
+    "newPerIteration": 1500000,
+    "addedFile": 400000,
+    "siteWarn": 700000000,
+    "siteHardCap": 900000000
+  },
+
+  "docs": {
+    "about": "Instructions grow until nobody can read them. These are ceilings in bytes; recompose instead of appending.",
+    "CLAUDE.md": 8000,
+    ".claude/skills/curate/SKILL.md": 12000,
+    "VISION.md": 12000,
+    "ROADMAP.md": 16000,
+    "REQUESTS.md": 12000,
+    "PROPOSALS.md": 12000,
+    "journal/*.md": 6000
+  }
+}

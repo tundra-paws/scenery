@@ -1,0 +1,39 @@
+{
+  "name": "scenery",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "a 3d world created and improved upon by a daily llm curator run",
+  "packageManager": "bun@1.4.4",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0 --cache --cache-location node_modules/.cache/eslint/",
+    "test": "bun test",
+    "setup": "bun scripts/setup.ts",
+    "brief": "bun scripts/brief.ts",
+    "api:digest": "bun scripts/api-digest.ts",
+    "shot": "bun scripts/shot.ts",
+    "diff": "bun scripts/diff.ts",
+    "gate": "bun scripts/gate/index.ts",
+    "site": "bun scripts/site/preview.ts"
+  },
+  "dependencies": {
+    "three": "0.184.0",
+    "threejs-scenes": "3.0.0"
+  },
+  "devDependencies": {
+    "@tuomashatakka/eslint-config": "4.2.0",
+    "@types/bun": "1.4.5",
+    "@types/pngjs": "6.0.5",
+    "@types/three": "0.184.1",
+    "eslint": "10.15.0",
+    "pixelmatch": "7.2.0",
+    "playwright-core": "1.65.1",
+    "pngjs": "7.0.0",
+    "typescript": "6.0.3",
+    "vite": "8.3.8"
+  }
+}

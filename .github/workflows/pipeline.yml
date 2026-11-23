@@ -1,0 +1,443 @@
+name: pipeline
+
+# Judge a change, land it, publish it, record what happened.
+#
+#   policy   read token    main's rules, git data only: is this a candidate, may it touch what it touches
+#   build    read token    the only job that runs the change's own code
+#   verify   read token    main's tools, the build as data: shape, pictures, budgets
+#   promote  write token   fast-forward main to the candidate (candidates only)
+#   publish  write token   add the iteration to the site, deploy Pages
+#   record   write token   one line in ci/ledger.jsonl on main
+#
+# Jobs that hold a write token install nothing and run nothing from the change:
+# they move files with git and with the scripts that were on main before the run.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: candidate judges a pushed branch; republish publishes main again
+        type: choice
+        options: [candidate, republish]
+        default: republish
+      candidate_ref:
+        description: Branch the candidate was pushed to (candidate mode)
+        default: ''
+      candidate_sha:
+        description: Commit to judge (candidate mode)
+        default: ''
+  push:
+    branches: [main]
+    paths-ignore: ['**/*.md', 'ci/**']
+
+# One run at a time, and none dropped: main, the site and the ledger each have a
+# single writer, and a candidate that arrives while another is being judged waits.
+concurrency:
+  group: scenery-pipeline
+  queue: max
+
+permissions: {}
+
+env:
+  BUN_VERSION: '1.4.4'
+  NODE_VERSION: '22'
+  BOT_NAME: 'github-actions[bot]'
+  BOT_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com'
+
+jobs:
+  policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      mode: ${{ steps.plan.outputs.mode }}
+      ref: ${{ steps.plan.outputs.ref }}
+      head: ${{ steps.plan.outputs.head }}
+      verdict: ${{ steps.judge.outputs.verdict }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Work out what to judge
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          MODE: ${{ inputs.mode }}
+          REF: ${{ inputs.candidate_ref }}
+          SHA: ${{ inputs.candidate_sha }}
+        run: |
+          if [[ "$EVENT" == workflow_dispatch && "$MODE" == candidate ]]; then
+            if [[ ! "$REF" =~ ^claude/[A-Za-z0-9._/-]+$ || ! "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::error::candidate mode needs a claude/ branch and a full commit sha"
+              exit 1
+            fi
+
+            git fetch --no-tags --quiet origin "$SHA"
+            { echo "mode=candidate"; echo "ref=$REF"; echo "head=$SHA"; } >> "$GITHUB_OUTPUT"
+          else
+            { echo "mode=main"; echo "ref=main"; echo "head=$GITHUB_SHA"; } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Judge the change by what it touches
+        id: judge
+        env:
+          MODE: ${{ steps.plan.outputs.mode }}
+          HEAD: ${{ steps.plan.outputs.head }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          # A candidate is judged against main as it is now. A push to main is
+          # judged over what that push brought, when GitHub says where main was.
+          base="$GITHUB_SHA"
+
+          if [[ "$MODE" == main && "$BEFORE" =~ ^[0-9a-f]{40}$ && ! "$BEFORE" =~ ^0+$ ]]; then
+            base="$BEFORE"
+          fi
+
+          node scripts/gate/policy.ts --repo . --base "$base" --head "$HEAD" --mode "$MODE" --out policy.json | tee policy.txt || true
+          { echo '```'; cat policy.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          echo "verdict=$(jq -r .verdict policy.json)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: policy
+          path: policy.json
+          retention-days: 14
+
+  build:
+    needs: policy
+    if: needs.policy.outputs.verdict == 'candidate'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.policy.outputs.head }}
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run lint
+      - run: bun test
+      - run: bunx vite build
+
+      - name: Pack the build and the gallery, as data for the next job
+        run: tar -cf candidate.tar dist shell
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: candidate
+          path: candidate.tar
+          retention-days: 7
+
+  verify:
+    needs: [policy, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      verdict: ${{ steps.verify.outputs.verdict }}
+    steps:
+      # main as it was when the run started: the tools that judge are never the
+      # candidate's own copy.
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install the checker's own dependencies
+        run: bun install --frozen-lockfile
+
+      - uses: actions/download-artifact@v8
+        with:
+          path: incoming
+
+      - name: Unpack the candidate, as files
+        run: |
+          mkdir candidate
+          tar -xf incoming/candidate/candidate.tar -C candidate --no-same-owner --no-same-permissions
+
+      - name: Read what the site already holds
+        run: |
+          if git fetch --quiet --depth=1 origin site-store 2>/dev/null; then
+            git show FETCH_HEAD:iterations.json > site-index.json
+          else
+            echo "No site yet: this will be the first iteration."
+          fi
+
+      - name: Describe the iteration
+        env:
+          HEAD: ${{ needs.policy.outputs.head }}
+          MODE: ${{ needs.policy.outputs.mode }}
+        run: |
+          git fetch --no-tags --quiet --depth=1 origin "$HEAD" || true
+          subject="$(git log -1 --format=%s "$HEAD" 2>/dev/null || echo 'Iteration')"
+
+          # Titles and summaries are written by a model. They travel as JSON,
+          # never through the shell.
+          jq -n \
+            --slurpfile policy incoming/policy/policy.json \
+            --arg sha "$HEAD" --arg date "$(date -u +%F)" --arg subject "$subject" --arg mode "$MODE" '
+            ($policy[0].journal // {}) as $entry
+            | {
+                sha:     $sha,
+                date:    $date,
+                source:  $mode,
+                title:   ($entry.title // $subject),
+                summary: ($entry.summary // ""),
+                kind:    ($entry.kind // "feature"),
+                model:   ($entry.model // ""),
+                journal: ($entry.path // "")
+              }' > meta.json
+
+      - name: Verify
+        id: verify
+        run: |
+          flags=()
+          [[ -f site-index.json ]] && flags+=(--site-index site-index.json)
+
+          # The verdict is an output, not this step's exit code: a rejected
+          # candidate is a result to record, not a broken pipeline.
+          set +e
+          bun scripts/gate/verify.ts --dist candidate/dist --shell candidate/shell --out out --meta meta.json ${flags[@]+"${flags[@]}"} | tee verify.txt
+          set -e
+
+          verdict="$(jq -r .verdict out/report.json 2>/dev/null || echo infra-error)"
+          echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+          { echo '```'; cat verify.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$verdict" == pass ]]; then
+            tar -cf payload.tar -C out payload
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: report
+          path: |
+            out/report.json
+            out/shots
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v7
+        if: steps.verify.outputs.verdict == 'pass'
+        with:
+          name: payload
+          path: payload.tar
+          retention-days: 7
+
+  promote:
+    needs: [policy, verify]
+    if: needs.policy.outputs.mode == 'candidate' && needs.verify.outputs.verdict == 'pass'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    # No reviewers by default, so this runs at once. Add yourself as a required
+    # reviewer on this environment and every candidate waits for your approval.
+    environment: promotion
+    permissions:
+      contents: write
+    outputs:
+      promoted: ${{ steps.push.outputs.promoted }}
+      superseded: ${{ steps.push.outputs.superseded }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Fast-forward main to the candidate
+        id: push
+        env:
+          REF: ${{ needs.policy.outputs.ref }}
+          SHA: ${{ needs.policy.outputs.head }}
+        run: |
+          tip="$(git ls-remote origin "refs/heads/$REF" | cut -f1)"
+
+          if [[ "$tip" != "$SHA" ]]; then
+            echo "The branch moved on to ${tip:-nothing} while this commit was being judged."
+            echo "superseded=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git fetch --no-tags --quiet origin "$SHA"
+
+          # No force: this only succeeds while main is still an ancestor of the
+          # candidate, which is the same commit that was judged.
+          git push origin "$SHA:refs/heads/main"
+          echo "promoted=true" >> "$GITHUB_OUTPUT"
+
+          # The branch has done its job. Delete it only if it is still that commit.
+          git push --force-with-lease="refs/heads/$REF:$SHA" origin ":refs/heads/$REF" || true
+
+  publish:
+    needs: [policy, verify, promote]
+    if: >-
+      always() && needs.verify.outputs.verdict == 'pass' &&
+      (needs.policy.outputs.mode == 'main' || needs.promote.outputs.promoted == 'true')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - name: Check out the scripts that were on main before this run
+        uses: actions/checkout@v7
+        with:
+          path: trusted
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check out the site, or start one
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          if git ls-remote --exit-code --heads "$remote" site-store > /dev/null 2>&1; then
+            git clone --quiet --depth=1 --branch site-store "$remote" site
+          else
+            git init --quiet --initial-branch=site-store site
+            git -C site remote add origin "$remote"
+          fi
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: payload
+          path: incoming
+
+      - name: Put the iteration on the site
+        run: |
+          mkdir unpacked
+          tar -xf incoming/payload.tar -C unpacked --no-same-owner --no-same-permissions
+          node trusted/scripts/site/apply.ts --payload unpacked/payload --site site --repo "$GITHUB_REPOSITORY" --out result.json | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Save the site
+        run: |
+          cd site
+          git add --all
+
+          if git diff --cached --quiet; then
+            echo "The site did not change."
+          else
+            git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" \
+              commit --quiet --message "$(jq -r '"site: " + .verdict + " " + .dir' ../result.json)"
+            git push --quiet origin HEAD:site-store
+          fi
+
+      - name: Copy the site without its git directory
+        run: |
+          mkdir public
+          tar -C site --exclude=.git -cf - . | tar -C public -xf -
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+
+      - name: Deploy to Pages
+        id: deploy
+        uses: actions/deploy-pages@v5
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: result
+          path: result.json
+          retention-days: 30
+
+  record:
+    needs: [policy, build, verify, promote, publish]
+    if: always() && needs.policy.outputs.verdict != 'ignored'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the scripts that were on main before this run
+        uses: actions/checkout@v7
+        with:
+          path: trusted
+          persist-credentials: false
+
+      - name: Check out main as it is now
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          path: main
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          path: incoming
+
+      - name: Write the ledger line
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          MODE: ${{ needs.policy.outputs.mode }}
+          REF: ${{ needs.policy.outputs.ref }}
+          HEAD: ${{ needs.policy.outputs.head }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node trusted/scripts/site/record.ts \
+            --needs "$NEEDS" --mode "${MODE:-main}" --ref "${REF:-main}" --sha "${HEAD:-$GITHUB_SHA}" --run "$RUN" \
+            --policy incoming/policy/policy.json --report incoming/report/report.json --result incoming/result/result.json \
+            --file main/ci/ledger.jsonl | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit it to main
+        run: |
+          cd main
+          git add ci/ledger.jsonl
+
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+
+          git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" \
+            commit --quiet --message "ledger: $(tail -n 1 ci/ledger.jsonl | jq -r '.verdict + " " + .ref')"
+
+          # main only moves through this pipeline, one run at a time, so a
+          # rejected push here means a person pushed in the meantime.
+          for attempt in 1 2 3; do
+            if git push --quiet origin HEAD:main; then
+              exit 0
+            fi
+
+            git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" pull --quiet --rebase origin main
+          done
+
+          echo "::error::could not record the run on main"
+          exit 1

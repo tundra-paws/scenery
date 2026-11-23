@@ -1,0 +1,89 @@
+name: watchdog
+
+# Once a day, look at what the loop left behind and repair or report it:
+# candidates that were pushed and never judged, a publish that broke, a daily run
+# that has gone quiet, and branches nobody will come back to. The decisions are
+# made by scripts/site/watchdog.ts; this file only gathers facts and acts.
+on:
+  schedule:
+    # A few hours after the curator's early-morning slot. Off the hour on purpose.
+    - cron: '41 9 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  watch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: write
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Fetch the candidate branches
+        run: git fetch --quiet --prune origin '+refs/heads/claude/*:refs/remotes/origin/claude/*' || true
+
+      - name: Decide what needs doing
+        env:
+          PAUSED: ${{ vars.SCENERY_PAUSED }}
+        run: |
+          node scripts/site/watchdog.ts --repo . --paused "${PAUSED:-false}" --out plan.json | tee plan.txt
+          { echo '```'; cat plan.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Judge what was pushed and never judged, and retry a broken publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          jq -c '.dispatch[]' plan.json | while read -r item; do
+            ref="$(jq -r .ref <<< "$item")"
+            sha="$(jq -r .sha <<< "$item")"
+
+            [[ "$ref" =~ ^claude/[A-Za-z0-9._/-]+$ && "$sha" =~ ^[0-9a-f]{40}$ ]] || continue
+
+            gh api -X POST "repos/$GITHUB_REPOSITORY/actions/workflows/pipeline.yml/dispatches" \
+              -f ref=main -f "inputs[mode]=candidate" -f "inputs[candidate_ref]=$ref" -f "inputs[candidate_sha]=$sha"
+          done
+
+          if [[ "$(jq -r .republish plan.json)" == true ]]; then
+            gh api -X POST "repos/$GITHUB_REPOSITORY/actions/workflows/pipeline.yml/dispatches" \
+              -f ref=main -f "inputs[mode]=republish"
+          fi
+
+      - name: Delete branches nobody will come back to
+        run: |
+          jq -r '.prune[]' plan.json | while read -r ref; do
+            [[ "$ref" =~ ^claude/[A-Za-z0-9._/-]+$ ]] || continue
+            git push --quiet origin --delete "$ref" || true
+          done
+
+      - name: Tell a person, or stand down
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ vars.SCENERY_OWNER }}
+        run: |
+          title='Scenery needs a look'
+          open="$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number // empty')"
+          count="$(jq '.alerts | length' plan.json)"
+
+          if [[ "$count" -gt 0 ]]; then
+            body="$(jq -r '.alerts | map("- " + .) | join("\n")' plan.json)"
+
+            if [[ -n "$open" ]]; then
+              gh issue comment "$open" --body "$body"
+            else
+              args=(--title "$title" --body "$body")
+              [[ -n "$OWNER" ]] && args+=(--assignee "$OWNER")
+              gh issue create "${args[@]}"
+            fi
+          elif [[ -n "$open" ]]; then
+            gh issue close "$open" --comment 'Nothing to report today.'
+          fi

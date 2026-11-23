@@ -1,0 +1,190 @@
+/* src/ui/style.css */
+@layer reset, tokens, base, layout, components;
+
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    block-size: 100%;
+    margin:     0;
+  }
+}
+
+
+@layer tokens {
+  :root {
+    --color-bg:      oklch(22% 0.02 250deg);
+    --color-fg:      oklch(97% 0.01 250deg);
+    --color-accent:  oklch(86% 0.09 90deg);
+    --surface-glass: oklch(20% 0.03 250deg / 55%);
+    --surface-line:  oklch(100% 0 0deg / 22%);
+    --space-2:       8px;
+    --space-3:       12px;
+    --space-4:       16px;
+    --space-6:       24px;
+    --radius-pill:   999px;
+    --font-body:     system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --size-small:    0.8125rem;
+    --stick-size:    112px;
+    --duration:      200ms;
+    --hint-stay:     9s;
+
+    /* The top band is left clear for whatever page embeds this one in a frame. */
+    --embed-clear: 56px;
+  }
+}
+
+
+@layer base {
+  html {
+    background:               var(--color-bg);
+    color:                    var(--color-fg);
+    font-family:              var(--font-body);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    overflow: hidden;
+  }
+
+  canvas {
+    display:      block;
+    inline-size:  100%;
+    block-size:   100%;
+    touch-action: none;
+  }
+
+  button {
+    padding:         var(--space-2) var(--space-4);
+    border:          1px solid var(--surface-line);
+    border-radius:   var(--radius-pill);
+    background:      var(--surface-glass);
+    color:           inherit;
+    font:            inherit;
+    font-size:       var(--size-small);
+    cursor:          pointer;
+    backdrop-filter: blur(10px);
+    transition:      border-color var(--duration);
+
+    &:hover,
+    &[aria-pressed='true'] {
+      border-color: var(--color-accent);
+    }
+
+    &:focus-visible {
+      outline:        2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+
+@layer layout {
+  main {
+    position: fixed;
+    inset:    0;
+  }
+
+  nav {
+    position:         fixed;
+    inset-block-end:  max(var(--space-4), env(safe-area-inset-bottom));
+    inset-inline-end: max(var(--space-4), env(safe-area-inset-right));
+  }
+
+  aside {
+    position:          fixed;
+    inset-block-start: calc(var(--embed-clear) + env(safe-area-inset-top, 0px));
+    inset-inline:      var(--space-4);
+    text-align:        center;
+    pointer-events:    none;
+  }
+
+  output {
+    position:          fixed;
+    inset-block-start: 45%;
+    inset-inline:      var(--space-6);
+    text-align:        center;
+  }
+
+  scenery-stick {
+    position:           fixed;
+    inset-block-end:    max(var(--space-6), env(safe-area-inset-bottom));
+    inset-inline-start: max(var(--space-6), env(safe-area-inset-left));
+  }
+}
+
+
+@layer components {
+  /* A hint says its piece and gets out of the way. */
+  aside p {
+    display:     none;
+    font-size:   var(--size-small);
+    text-shadow: 0 1px 6px oklch(0% 0 0deg / 70%);
+    animation:   hint-leave var(--duration) var(--hint-stay) forwards;
+  }
+
+  [data-scenery-mode='tour'] aside p[data-for='tour'],
+  [data-scenery-mode='explore'] aside p[data-for='explore'] {
+    display: block;
+  }
+
+  /* Nothing to say until the world is there to be looked at. */
+  [data-scenery-state='booting'] :is(nav, aside),
+  [data-scenery-state='failed'] :is(nav, aside) {
+    display: none;
+  }
+
+  /* The stick exists for thumbs: only while exploring, only on touch. */
+  scenery-stick {
+    --stick-x: 0;
+    --stick-y: 0;
+
+    display:       none;
+    inline-size:   var(--stick-size);
+    block-size:    var(--stick-size);
+    border:        1px solid var(--surface-line);
+    border-radius: 50%;
+    background:    var(--surface-glass);
+    touch-action:  none;
+
+    &::after {
+      position:      absolute;
+      inset:         30%;
+      border-radius: 50%;
+      background:    var(--color-fg);
+      content:       '';
+      opacity:       0.7;
+      translate:     calc(var(--stick-x) * 60%) calc(var(--stick-y) * 60%);
+    }
+  }
+
+  @media (pointer: coarse) {
+    [data-scenery-mode='explore'] scenery-stick {
+      display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    aside p {
+      animation-duration: 1ms;
+    }
+  }
+}
+
+
+@keyframes hint-leave {
+  to {
+    opacity:    0;
+    visibility: hidden;
+  }
+}

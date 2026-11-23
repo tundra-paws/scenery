@@ -1,0 +1,41 @@
+name: candidate
+
+# A branch pushed under claude/ may be a day's iteration. This workflow decides
+# nothing about it: it hands the branch to the pipeline on main. A push event
+# runs the workflow file from the pushed branch, so anything that judged the
+# branch here would be judging it with the branch's own copy of the rules. The
+# pipeline it dispatches always runs main's copy, on main.
+on:
+  push:
+    branches: ['claude/**']
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    # Deleting a branch fires a push event too, with nothing to judge.
+    # SCENERY_PAUSED is the repository variable that stops the loop.
+    if: ${{ !github.event.deleted && vars.SCENERY_PAUSED != 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Hand the branch to the pipeline on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          # A branch name is a string somebody else chose. It reaches the shell
+          # only through the environment, and only if it looks like one.
+          if [[ ! "$REF" =~ ^claude/[A-Za-z0-9._/-]+$ || ! "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::unexpected branch name or commit"
+            exit 1
+          fi
+
+          gh api -X POST "repos/$GITHUB_REPOSITORY/actions/workflows/pipeline.yml/dispatches" \
+            -f ref=main \
+            -f "inputs[mode]=candidate" \
+            -f "inputs[candidate_ref]=$REF" \
+            -f "inputs[candidate_sha]=$SHA"
