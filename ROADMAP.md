@@ -5,10 +5,18 @@ this short: a plan nobody can read in a minute is not a plan.
 
 ## Next
 
-1. Wind as one shared signal; the tufts read it first, then the swell that moves the foam.
-2. Clouds, or anything else that makes the sky more than a gradient.
-3. A postcard that looks down on the island in its pale ring, so the quiet tour passes it. A
-   scratch view at `[ 20, 150 ]`, height 22, looking at the origin was the best picture so far.
+Each item is one day: a whole chapter, built complete (both tiers, a postcard, the tour).
+
+1. **Wind and sky.** One shared wind signal. Every tuft sways to it, the swell and the foam run
+   with it, and clouds drift across the sky on it, so the sky is more than a gradient.
+2. **The way up.** A landing on the shore and a worn path from it to the cairn, with small
+   waymarker cairns (reuse `shared/stone.ts`), the tour following it, and a postcard looking
+   down on the island in its pale ring (a scratch view at `[ 20, 150 ]`, height 22, looking at
+   the origin was the best picture so far).
+3. **A shelter and a light.** The first built things: low walls of placed stone and a roof, a
+   lamp that shows as the light goes. The palette's one warm note is reserved for it.
+4. **Beyond.** A second landmass on the horizon, and the light turning toward evening over the
+   tour.
 
 ## Known problems
 
@@ -24,12 +32,14 @@ this short: a plan nobody can read in a minute is not a plan.
   dome in its vertex shader (`mat3(viewMatrix)`), which also removes the per-frame copy.
 - The waterline's clear fringe shows what is behind it, not the sand under it. On a far shore
   seen at a slant that is the horizon colour, since the deep sea floor is no longer built.
+- The pipeline's `publish` job can fail on a race with its own upload (`infra-error`, the site
+  left behind). The fix is the owner's: see `PROPOSALS.md`.
 
 ## Ideas
 
-- A worn path from the shore to the cairn, with small waymarker cairns (reuse `shared/stone.ts`).
+Parts for a chapter, never a day by themselves.
+
 - A postcard view from beside the cairn, looking back down over the island.
-- A second landmass in the distance, so the horizon is not empty.
-- Paths: the tour camera could follow something on the ground instead of a curve in the air.
 - Re-aim the `shore` postcard along the waterline: it shows a sliver of sea in one corner.
 - Wet sand: a darker band just above the waterline, from the same height map.
+- Paths: the tour camera could follow something on the ground instead of a curve in the air.

@@ -1,10 +1,19 @@
 # scenery
 
-A 3D world that an unattended daily Claude run (the curator) improves one step at a time.
-CI judges each step, lands it on `main`, and publishes it to
+A 3D world that an unattended daily Claude run (the curator) moves forward by one major update
+a day. CI judges each update, lands it on `main`, and publishes it to
 <https://tundra-paws.github.io/scenery/> as an iteration that never changes again.
 
 **If you are the daily run, follow `.claude/skills/curate/SKILL.md`. It is the whole procedure.**
+
+**Every day is a major update.** The owner has said the changes were too minor. A day is a
+chapter: something new in the world, or a system that changes the whole scene, built complete
+and plain to see in the `hero` thumbnail. A tweak to one colour or one prop is a part of a day,
+never the day. Major is not careless: every rule below still holds.
+
+**The run ends when the ledger says so, not at the push.** Run the full gate on the committed
+tree before pushing, then wait for the verdict on your commit in `ci/ledger.jsonl` and act on
+it (curate skill, steps 7 and 8).
 
 ## Rules that do not bend
 
@@ -78,9 +87,11 @@ pipeline on `main`: **policy** (may it touch what it touches) → **build** (typ
 tests, vite) → **verify** (shape of the build, pictures on two tiers, budgets, determinism, a
 leak check, a real drag and a real walk) → **promote** (onto `main`) → **publish**
 (next iteration number, deploy) → **record** (a line in `ci/ledger.jsonl`). A branch with no
-journal entry is ignored. A rejected branch stays on the remote, and the ledger says why.
-If `main` gained only documents while you worked (a new request, a ledger line), your branch
-still lands; if it gained code, it is refused as out of date and you redo it on the new `main`.
+journal entry is ignored. A rejected branch stays on the remote, and the ledger says why:
+fix it there and push again. If `main` gained only documents while you worked (a new request, a
+ledger line), your branch still lands; if it gained code, it is refused as out of date and you
+redo it on the new `main`. `infra-error` means the pipeline broke, not the change: when it names
+`publish`, the commit is on `main` and the site is behind until the pipeline next publishes.
 
 ## Conventions
 

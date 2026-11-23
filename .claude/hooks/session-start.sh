@@ -40,9 +40,11 @@ compare      bun run diff                         what moved on screen since ori
 verify       bun run gate                         everything CI checks (--quick: no browser)
              bunx eslint --fix <file> · bun test <file>
 preview      bun run site                         the published site, assembled locally
-ship         one journal/YYYY-MM-DD-slug.md, one commit, one plain push of this claude/ branch
+ship         one journal/YYYY-MM-DD-slug.md, full gate on the commit, plain push of a claude/ branch
+land         wait for your commit's line in ci/ledger.jsonl on origin/main; act on the verdict
 
-one visible change + one thing made smaller · deterministic · inside budgets.json · hero stays put
+a MAJOR update every day, plain to see in the hero thumbnail: a chapter, never a tweak
+deterministic · inside budgets.json · hero stays put · the run ends at "published", not at the push
 never: force-push, push main, open or merge a PR, touch .github/ or ci/, add a package
 traps: one software-rendered browser at a time · give the gate a long timeout · read the PNGs
 

@@ -45,10 +45,11 @@ for light itself. A new colour needs a job none of these does.
 ruins of anything grand, no magic glow. Not busy: every added thing must leave the picture as
 quiet as it found it. Not photoreal: no texture maps chasing realism.
 
-**The first month.** Week one: the summit cairn and a shoreline that reads as one (both done),
-water with depth. Week two: wind in the grass and on the sea; clouds. Week three: a worn path
-from the landing to the cairn, with small waymarkers, and the tour following it. Week four: a
-second landmass on the horizon and a change of light over the tour, toward evening.
+**The chapters ahead.** Each is one day's major update, not a week's. Done: the summit cairn, a
+shoreline that reads as one, water with depth. Next: wind in the grass and on the sea, with
+clouds drifting on it. Then a landing on the shore and a worn path from it to the cairn, with
+small waymarkers and the tour following it. Then a shelter and a light, the first built things.
+Then a second landmass on the horizon and the light turning toward evening over the tour.
 
 ## Where it starts
 

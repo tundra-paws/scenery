@@ -6,16 +6,18 @@ A 3D world created and improved upon by a daily LLM curator run.
 
 [![The world as of the latest iteration](https://tundra-paws.github.io/scenery/latest.webp)](https://tundra-paws.github.io/scenery/)
 
-Once a day an unattended Claude session looks at the world, picks one thing to improve, builds
-it, checks its own work, and pushes a branch. CI judges the branch, lands it, and publishes it
-as an iteration that never changes again. The site shows the newest one and every one before it.
+Once a day an unattended Claude session looks at the world, takes on its next major update,
+builds it, checks its own work, and pushes a branch. CI judges the branch, lands it, and
+publishes it as an iteration that never changes again. The site shows the newest one and every
+one before it.
 
 ## How a day goes
 
 1. The curator reads the brief (what happened yesterday, what was asked for, what was planned),
-   photographs the world, and chooses one visible change.
-2. It builds the change, photographs the world again, and runs the same gate CI will run.
-3. It writes a journal entry and pushes a `claude/…` branch.
+   photographs the world, and chooses the day's major update: a chapter, not a tweak.
+2. It builds the update in stages, photographs the world again, and runs the same gate CI will
+   run.
+3. It writes a journal entry, pushes a `claude/…` branch, and waits for the verdict.
 4. CI checks the branch with the rules and tools that are already on `main`: what it touches,
    that it builds, that it draws something, that it draws the same thing twice, what it costs,
    and that the camera still answers a drag and a walk.
