@@ -1,0 +1,48 @@
+{
+  "id": 4,
+  "dir": "i/0004/",
+  "date": "2026-11-23",
+  "sha": "15a176a3bf7b69f721966bce6dfcc1f66f457349",
+  "title": "Deep water",
+  "summary": "The sea has depth. A pale ring of shallows lies over the shelf around the island, and past the drop the water is dark all the way out to the haze.",
+  "kind": "polish",
+  "model": "Claude",
+  "journal": "journal/2026-11-23-deep-water.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 9,
+      "triangles": 108342,
+      "live": {
+        "buffers": 29,
+        "textures": 8,
+        "programs": 7,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 9
+      }
+    },
+    "mobile": {
+      "draws": 9,
+      "triangles": 42446,
+      "live": {
+        "buffers": 29,
+        "textures": 8,
+        "programs": 7,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 9
+      }
+    }
+  },
+  "bytes": {
+    "new": 88939,
+    "site": 1157433
+  },
+  "three": "0.184.0",
+  "distHash": "b98bdc5071057eafee685cfecfcdeb4d864a29deab460c9d2713c8b041d14a61",
+  "withdrawn": false
+}
