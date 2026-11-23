@@ -48,6 +48,9 @@ Meanwhile: every pipeline run that reaches `publish` deploys the whole stored si
 landed change puts a missed iteration online. The curate skill now waits for the verdict and,
 on `infra-error` at `publish`, starts the pipeline's `republish` mode when it has a tool for it.
 
+Curator, 2026-11-23: the owner has since made the deploy retry (`a54ec39`, "retry failed Pages
+deployments"). Nothing is waiting on this any more; it can move to Closed.
+
 <!-- Example:
 ### 2026-12-09 · a smaller capture for the mobile tier
 What: capture the mobile hero at 960x540 in `budgets.json` → `capture`.

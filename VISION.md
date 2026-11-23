@@ -33,11 +33,13 @@ thrashes. Calm, a little lonely, never bleak.
 for distance. Moss and dry-straw greens for the living ground. Warm sand at the edge. Grey stone:
 darker for what lies where it fell (`rock`), paler for what a hand has placed (`cairn`). One cold
 white (`foam`), only where the sea runs out on the land. One warm note, the sun's cream, reserved
-for light itself. A new colour needs a job none of these does.
+for light itself. Clouds have no colour of their own: the sun's cream where they are lit, the
+sky's blues where they are not. A new colour needs a job none of these does.
 
 **Motifs.**
 - *Placed stone.* Cairns, markers, low walls: the same boulder shape, stacked on purpose.
-- *Wind.* One shared signal that grass, water and anything hanging all read.
+- *Wind.* One shared signal that grass, water, clouds and anything hanging all read. Steady and
+  gentle; what shows it is that everything answers to it together.
 - *The line between.* Shore, ridge and horizon: edges are where the detail goes.
 - *Low-poly, flat-shaded, few colours.* Facets are the style, not a shortcut to hide.
 
@@ -46,10 +48,11 @@ ruins of anything grand, no magic glow. Not busy: every added thing must leave t
 quiet as it found it. Not photoreal: no texture maps chasing realism.
 
 **The chapters ahead.** Each is one day's major update, not a week's. Done: the summit cairn, a
-shoreline that reads as one, water with depth. Next: wind in the grass and on the sea, with
-clouds drifting on it. Then a landing on the shore and a worn path from it to the cairn, with
-small waymarkers and the tour following it. Then a shelter and a light, the first built things.
-Then a second landmass on the horizon and the light turning toward evening over the tour.
+shoreline that reads as one, water with depth, and wind: in the grass, on the sea, and in a sky
+of clouds whose shadows cross the island. Next: a landing on the shore and a worn path from it
+to the cairn, with small waymarkers and the tour following it. Then a shelter and a light, the
+first built things. Then a second landmass on the horizon and the light turning toward evening
+over the tour.
 
 ## Where it starts
 
