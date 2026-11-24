@@ -47,6 +47,36 @@ describe('createHeightGrid', () => {
     expect(off).toBe(0)
   })
 
+  test('knows the height of the drawn land between its corners: the triangle a place falls in', () => {
+    const grid     = createHeightGrid(ground, GRID_SEGMENTS.mobile)
+    const geometry = new THREE.PlaneGeometry(ground.size, ground.size, grid.segments, grid.segments)
+
+    geometry.rotateX(-Math.PI / 2)
+
+    const position = geometry.getAttribute('position')
+
+    for (let index = 0; index < position.count; index += 1)
+      position.setY(index, grid.heights[index]!)
+
+    const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }))
+    const ray  = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0))
+    let largest = 0
+
+    for (let step = 0; step < 400; step += 1) {
+      const x = Math.sin(step * 12.9898) * 90
+      const z = Math.cos(step * 78.233) * 90
+
+      ray.ray.origin.set(x, 500, z)
+
+      const [ hit ] = ray.intersectObject(mesh)
+
+      largest = Math.max(largest, Math.abs(hit!.point.y - grid.heightAt(x, z)))
+    }
+
+    expect(largest).toBeLessThan(1e-3)
+    expect(grid.heightAt(grid.cell * 3 - ground.size / 2, grid.cell * 5 - ground.size / 2)).toBe(grid.heights[5 * grid.side + 3])
+  })
+
   test('the slope is level on the flat sea floor and steep where the land is', () => {
     const grid   = createHeightGrid(ground, GRID_SEGMENTS.desktop)
     const slopes = Array.from(grid.heights, (_, index) => grid.slopeAt(index % grid.side, Math.floor(index / grid.side)))

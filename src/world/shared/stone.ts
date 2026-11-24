@@ -7,9 +7,10 @@ import { createNoise3D } from 'threejs-scenes/primitives'
  *
  * Every stone in the world is this shape at some scale, loose on a slope or
  * stacked by hand, which is what makes a cairn read as built from the island.
+ * Eighty triangles; at `detail` 0 a rougher twenty, for walls of hundreds.
  */
-export function createStoneGeometry (seed: number): THREE.BufferGeometry {
-  const geometry = new THREE.IcosahedronGeometry(1, 1)
+export function createStoneGeometry (seed: number, detail = 1): THREE.BufferGeometry {
+  const geometry = new THREE.IcosahedronGeometry(1, detail)
   const noise    = createNoise3D(seed)
   const position = geometry.getAttribute('position')
 

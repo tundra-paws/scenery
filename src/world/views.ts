@@ -15,8 +15,9 @@ import type { Ground } from './shared/ground.ts'
  * the whole island is in the frame; then round it: the western beach, the
  * northern cove, the ridge, the eastern shore, in to the edge of the wood
  * where the stumps and the stacked logs are, close under the shelter with
- * the cairn over it, and last back down to the water beside the boat at its
- * anchor, each stop a little further out until `hero` again.
+ * the cairn over it, back down to the water beside the boat at its anchor,
+ * and last off the beach below the field, looking up its rigs to the gate
+ * and the house, each stop a little further out until `hero` again.
  *
  * The loop is also a day (`shared/daylight.ts`), so the order is the hours
  * too. `hero` is the last of the afternoon, the landing is sunset, the walk
@@ -32,8 +33,9 @@ import type { Ground } from './shared/ground.ts'
  * looking west wants a third between them. A leg that is a long way round
  * can be given its own time (`travel`); the day is then that much longer.
  * A short hop can be given less: `wood` stands between `east` and `shelter`
- * on time taken from the three legs round it, so the day is the length it
- * was and every stop before them keeps its hour.
+ * on time taken from the three legs round it, and `infield` between `boat`
+ * and `hero` on the one leg it splits, so the day is the length it was and
+ * every stop before them keeps its hour.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12 },
@@ -48,7 +50,8 @@ export const VIEWS: readonly View[] = [
   { name: 'east', at: [ 112, 52 ], height: 9, look: [ 18, 50 ], lookHeight: 8, travel: 8 },
   { name: 'wood', at: [ 74, 66 ], height: 3.2, look: [ 59, 50 ], lookHeight: 3, travel: 7 },
   { name: 'shelter', at: [ 64, 73 ], height: 7, look: [ 50, 58 ], lookHeight: 4, travel: 10 },
-  { name: 'boat', at: [ 75, 92 ], height: 2.4, look: [ 48, 86.5 ], lookHeight: 6 },
+  { name: 'boat', at: [ 75, 92 ], height: 2.4, look: [ 48, 86.5 ], lookHeight: 6, travel: 5 },
+  { name: 'infield', at: [ 70, 87 ], height: 4, look: [ 53, 69 ], lookHeight: 4, travel: 5 },
 ]
 
 /**

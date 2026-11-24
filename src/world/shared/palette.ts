@@ -23,6 +23,7 @@ export const PALETTE = {
   timber:       '#8f7a5c',
   bark:         '#d9d3c3',
   pennant:      '#a8483a',
+  barley:       '#c4b56e',
   waterDeep:    '#1d4d68',
   waterShallow: '#8fc2cc',
   foam:         '#eef2f5',

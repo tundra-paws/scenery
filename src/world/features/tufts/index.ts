@@ -21,6 +21,9 @@ const OFF_PATH    = 1.9
 const OFF_SHELTER = 0.9
 const OFF_SPUR    = 1.1
 
+/** How far from the middle of a field wall the grass is kept: its foot, and the strip a scythe misses. */
+const OFF_DYKE = 0.6
+
 /** Length of a blade before it is leant and scaled. */
 const BLADE = 0.8
 
@@ -164,11 +167,14 @@ export function createTufts (world: World): Feature {
         dummy.updateMatrix()
         tint.set(place.next() < 0.3 ? PALETTE.grassDry : PALETTE.grass).offsetHSL(0, 0, place.range(-0.05, 0.08))
 
-        // Nothing grows where feet go, or under a wall. Left out after its
-        // draws are taken, so every other tuft stays where it was.
+        // Nothing grows where feet go, under a wall, or where the ground was
+        // dug. Left out after its draws are taken, so every other tuft stays
+        // where it was.
         const trodden = world.path.distanceTo(spot.x, spot.z) < OFF_PATH ||
           world.shelter.distanceTo(spot.x, spot.z) < OFF_SHELTER ||
-          world.shelter.distanceToSpur(spot.x, spot.z) < OFF_SPUR
+          world.shelter.distanceToSpur(spot.x, spot.z) < OFF_SPUR ||
+          world.infield.distanceTo(spot.x, spot.z) < OFF_DYKE ||
+          world.infield.inField(spot.x, spot.z)
 
         if (trodden)
           continue

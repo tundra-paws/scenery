@@ -12,6 +12,8 @@ import { createGround } from './shared/ground.ts'
 import type { Ground } from './shared/ground.ts'
 import { GRID_SEGMENTS, createHeightGrid } from './shared/height-grid.ts'
 import type { HeightGrid } from './shared/height-grid.ts'
+import { createInfield } from './shared/infield.ts'
+import type { Infield } from './shared/infield.ts'
 import { createPath, findSummit } from './shared/path.ts'
 import type { Path, Waypoint } from './shared/path.ts'
 import { createShelter } from './shared/shelter.ts'
@@ -55,8 +57,8 @@ export type Feature = AppModule<WorldState>
  * one hour of the day that the sky, the light and the sea all keep, under a
  * horizon with land on it.
  * And for what was made on it: the summit the cairn stands on, the one path
- * up to it, and the shelter beside that path. And for what grows on it: the
- * wood beside the shelter.
+ * up to it, the shelter beside that path, and the walls round the ground
+ * worked from it. And for what grows on it: the wood beside the shelter.
  */
 export interface World {
   seed:    number
@@ -76,6 +78,9 @@ export interface World {
   summit:  Waypoint
   path:    Path
   shelter: Shelter
+
+  /** The field below the shelter, its dyke and gate, and the fold across the path. */
+  infield: Infield
   wood:    Wood
 }
 
@@ -97,12 +102,13 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     ground,
     summit,
     path,
-    grid:   createHeightGrid(ground, GRID_SEGMENTS[quality.tier]),
-    wind:   createWind(),
-    clouds: createCloudShadow(),
+    grid:    createHeightGrid(ground, GRID_SEGMENTS[quality.tier]),
+    wind:    createWind(),
+    clouds:  createCloudShadow(),
     beyond,
-    day:    createDaylight(createSkyline(beyond)),
+    day:     createDaylight(createSkyline(beyond)),
     shelter,
-    wood:   createWood({ ground, summit, path, shelter }, seed),
+    infield: createInfield(shelter),
+    wood:    createWood({ ground, summit, path, shelter }, seed),
   }
 }

@@ -16,12 +16,13 @@ const COUNT: Record<QualityTier, number> = { mobile: 60, desktop: 140, highEnd: 
  * Clear ground kept round a boulder, on top of its own size: from the middle of
  * the path, far enough that it never leans on a waymark, from the summit,
  * where the cairn and its spill stand, from the shelter's walls and the way
- * to its door, and from the foot of a tree.
+ * to its door, from the foot of a tree, and from a wall.
  */
 const OFF_PATH    = 3
 const OFF_SUMMIT  = 4
 const OFF_SHELTER = 2
 const OFF_TREE    = 0.8
+const OFF_DYKE    = 1
 
 /** Module-scope scratch, so placing an instance allocates nothing. */
 const dummy = new THREE.Object3D()
@@ -35,7 +36,7 @@ export function createRocks (world: World): Feature {
     name: 'rocks',
 
     build ({ scene, rng }) {
-      const { ground, summit, path, shelter, wood } = world
+      const { ground, summit, path, shelter, wood, infield } = world
 
       const place = rng.fork('rocks:place')
       const shape = rng.fork('rocks:shape')
@@ -71,9 +72,12 @@ export function createRocks (world: World): Feature {
 
         // A boulder lying on the path was rolled off it long ago, one on the
         // summit went into the cairn, and one where the shelter stands into
-        // its walls. No tree took root on one. Left out after its draws are taken, so every other
-        // boulder stays where it was.
+        // its walls. No tree took root on one. The field was cleared into its
+        // dyke, and a dyke goes round a boulder, not over it. Left out after
+        // its draws are taken, so every other boulder stays where it was.
         const taken = path.distanceTo(spot.x, spot.z) < size + OFF_PATH ||
+          infield.inField(spot.x, spot.z) ||
+          infield.distanceTo(spot.x, spot.z) < size + OFF_DYKE ||
           Math.hypot(spot.x - summit.x, spot.z - summit.z) < size + OFF_SUMMIT ||
           Math.min(shelter.distanceTo(spot.x, spot.z), shelter.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
           wood.distanceTo(spot.x, spot.z) < size + OFF_TREE

@@ -41,6 +41,14 @@ export interface HeightGrid {
    * either side: a facet coloured as rock is a facet that is steep.
    */
   slopeAt (column: number, row: number): number
+
+  /**
+   * World height of the drawn land at a place: inside the triangle of the
+   * terrain's mesh the place falls in, not of the function behind it. What
+   * is laid flat on the land (a field's rigs) asks this, so that on the
+   * coarse grid of a phone it lies on the facets it is seen on, not under them.
+   */
+  heightAt (x: number, z: number): number
 }
 
 export function createHeightGrid (ground: Ground, segments: number): HeightGrid {
@@ -70,7 +78,26 @@ export function createHeightGrid (ground: Ground, segments: number): HeightGrid 
     return 1 - 1 / Math.hypot(dx, 1, dz)
   }
 
-  return { segments, side, cell, heights, slopeAt }
+  function heightAt (x: number, z: number): number {
+    const u      = Math.min(Math.max((x + half) / cell, 0), segments - 1e-9)
+    const v      = Math.min(Math.max((z + half) / cell, 0), segments - 1e-9)
+    const column = Math.floor(u)
+    const row    = Math.floor(v)
+    const across = u - column
+    const down   = v - row
+    const a      = heights[row * side + column]!
+    const b      = heights[(row + 1) * side + column]!
+    const c      = heights[(row + 1) * side + column + 1]!
+    const d      = heights[row * side + column + 1]!
+
+    // `PlaneGeometry` splits each cell from its corner at (column, row + 1)
+    // to the one at (column + 1, row): triangles a-b-d and b-c-d.
+    return across + down <= 1
+      ? a + (d - a) * across + (b - a) * down
+      : c + (b - c) * (1 - across) + (d - c) * (1 - down)
+  }
+
+  return { segments, side, cell, heights, slopeAt, heightAt }
 }
 
 // perf: cheap, once — a ground sample a corner (9k, 26k or 51k by tier) and
