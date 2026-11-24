@@ -26,9 +26,14 @@ seen on it, only what they left: stones stacked on the summit, later a path, a s
 A stranger should know it as "the island with the cairn", and now there is a house under it
 with the lamp lit and the fire in, a boat at anchor off the landing, and still nobody.
 
-**Mood and light.** A clear, cool, late afternoon with a low sun that rakes the hills and throws
-long shadows. Thin haze at the horizon. The air is moving but gentle: things sway, nothing
-thrashes. Calm, a little lonely, never bleak.
+**Mood and light.** One summer's day in the north, turning once in the time the tour takes, so
+every stop has its hour. The visit opens on the last of a clear, cool afternoon: a low sun over
+the western shoulder, the land in long shadow under an apricot sky. It sets as the tour comes in
+to the landing; the walk up is dusk, and the lamp and the window come into their own; the cairn
+stands under the first stars; a full moon, never high, lays its path on the sea; then first
+light, a rose sunrise, the morning, and round by a short bright noon to the gold again. The
+air is moving but gentle: things sway, nothing thrashes. Calm, a little lonely, never bleak:
+the night is blue, not black, and there is always a light to see by.
 
 **Palette.** A handful, all in `src/world/shared/palette.ts`. Cool sky blues and a pale horizon
 for distance. Moss and dry-straw greens for the living ground. Warm sand at the edge. Grey stone:
@@ -41,12 +46,19 @@ lit, the sky's blues where they are not. Smoke is the same. Weathered wood (`tim
 came by sea and did not grow here: the boat, its oars, its mast; tarred near black where it
 keeps the water out. And one dyed thing, a worn red (`pennant`): cloth made only to be seen
 from the water, and never more than a scrap of it. A new colour needs a job none of these does.
+The sky and its light are the exception that is not one: the same few roles (zenith, horizon,
+light, fill, ground) at five hours, day, gold, sunset, dusk and night (`HOURS`), blended by how
+high the sun stands. At night the light is the moon's cold blue-white, which the stars share.
 
 **Motifs.**
 - *Placed stone.* Cairns, markers, walls: the same boulder shape, stacked on purpose. A wall is
   laid in level courses with its corners locked; a roof is the hill's own turf.
 - *Wind.* One shared signal that grass, water, clouds, smoke, a pennant and a boat at its
   anchor all read. Steady and gentle; what shows it is that everything answers to it together.
+- *The hour.* The other shared signal (`world.day`): where the sun is, and from that the sky,
+  the one light and its shadows, the fill, the haze, the sea's colours and the clouds'. Nothing
+  keeps a colour of the sky for itself. Sun and moon are one light that is out as it changes
+  hands; the lamp is the only light that is somebody's.
 - *The line between.* Shore, ridge and horizon: edges are where the detail goes.
 - *Low-poly, flat-shaded, few colours.* Facets are the style, not a shortcut to hide.
 
@@ -56,13 +68,11 @@ quiet as it found it. Not photoreal: no texture maps chasing realism.
 
 **The chapters ahead.** Each is one day's major update, not a week's. Done: the summit cairn, a
 shoreline that reads as one, water with depth, wind (in the grass, on the sea, and in a sky of
-clouds whose shadows cross the island), the way up: a landing on the near shore and a worn
-path from it to the cairn, waymarked, which the tour walks, and the shelter: a low house of
-placed stone under turf on the shoulder above the path's first bend, a lamp in its door, a
-fire in its hearth, its smoke on the wind, and the boat they came in, lying to its anchor off
-the landing with a pennant at the masthead. Next: the light turning toward evening over the
-tour, which the lamp is waiting for. Then a second landmass on the horizon, and the inside of
-the shelter.
+clouds whose shadows cross the island), the way up (a landing, a worn and waymarked path to the
+cairn, which the tour walks), the shelter with its lamp, its fire and its smoke, the boat at
+anchor off the landing, and the day itself: evening, night with a moon and stars, and morning,
+once round in a visit. Next: a second landmass on the horizon, for the sun to go down behind;
+the inside of the shelter; and a sea that answers to what stands in it.
 
 ## Where it starts
 

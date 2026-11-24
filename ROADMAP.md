@@ -7,23 +7,23 @@ this short: a plan nobody can read in a minute is not a plan.
 
 Each item is one day: a whole chapter, built complete (both tiers, a postcard, the tour).
 
-1. **Evening.** The light turning over the tour, which the lamp and the window are waiting for:
-   by day they are two orange points. `SUN` is one constant that the light, the sky, the sea's
-   glint and the clouds' shadow all read, and the shadow's slant is written into GLSL as a
-   number (`cloud-shadow.ts`): moving the sun means making that a uniform first.
-2. **Beyond.** A second landmass on the horizon.
-3. **Inside.** The shelter is a shell. A floor, a hearth with the fire in it, a bench, and a rig
+1. **Beyond.** A second landmass on the horizon, to the north-west where `hero` looks, for the
+   sun to go down behind. The haze and the sea's far glow (`skyGlow`) are there to sit it in.
+2. **Inside.** The shelter is a shell. A floor, a hearth with the fire in it, a bench, and a rig
    that knows a wall from a door, for the visitor who walks in.
-4. **The sea answers.** The sea takes nothing from what stands in it: no shadow under the boat,
+3. **The sea answers.** The sea takes nothing from what stands in it: no shadow under the boat,
    no foam at its waterline or round the landing's stones, no wake when it sheers. The water is
    a shader of its own with one height map of the land (`water/index.ts`); a second small map
    of what floats and stands in it would give all three.
+4. **A night worth staying up for.** The night is a moon, stars and one lamp. A lantern at the
+   boat's masthead, the window's light falling on the grass, and something in the sky that
+   moves: thin high cloud combed by the wind, or a meteor now and then.
 
 ## Known problems
 
 - The first frame still waits for every shader program to link: 87 to 90 ms in Firefox, 35 ms
   in Chromium. Compiling after each feature did not help (`lib-stack/README.md`, "Tried and
-  dropped"). Fewer programs would: the gate counts twelve.
+  dropped"). Fewer programs would: the gate counts thirteen (the stars are one).
 - Nothing guards how long the world takes to start: `budgets.json` holds counts, not times.
   Ground samples per boot is a count, and tracks it. It would need a counter in the harness.
 - The terrain's slope is read from `world.grid`, so it is measured across grid points, which
@@ -66,11 +66,35 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - The smoke is opaque puffs that shade nothing. From `hero` at second ten the top of the plume
   stands against a cloud of the same colours.
 - The clouds' shadow and the sun's shadow map do not know about each other: a boulder's own
-  shadow is as dark under a cloud as in the open.
+  shadow is as dark under a cloud as in the open. The clouds' shadow is also only roughly
+  theirs now: it is laid as if the light never stood lower than 24 degrees (`REACH`), and a
+  puff's height over its cloud's base is ignored, so that a turning sun cannot send it racing.
 - `HEAD_START` in `shared/wind.ts` was picked by looking at second ten of this layout of
-  clouds. Changing their count, their layout, the wind's speed or its heading moves every
-  shadow, and the `hero` thumbnail with it: pick it again. Today the lower path lies under one.
-  The same clock decides the gusts the smoke at second ten left the chimney in, and so its bend.
+  clouds: the low sun stands clear in `hero` with two bars of cloud under it. Changing their
+  count, their layout, the wind's speed or heading, or the sun's place at second ten
+  (`OPENING`, `NORTH` in `shared/daylight.ts`) moves them: pick it again. The same clock
+  decides the gusts the smoke at second ten left the chimney in, and so its bend.
+
+- **The day is typed in to fit the tour.** `DAY` in `shared/daylight.ts` is the loop's length
+  (277.5 s) and `OPENING`, `EDGE` and `SLOW` put each stop at its hour. Add a view, or give a
+  leg its own `travel`, and a test in `rig/tour.test.ts` fails until `DAY` follows; then print
+  the sun's height at every stop and look at the night ones again. A visitor who takes the
+  camera keeps the same clock: nothing lets them wait for the moon or hurry the dawn.
+- Every postcard, and so every thumbnail in the gallery, is taken at second ten: the gallery
+  will never show the night. A second picture of an iteration (`seaward` at second 90) needs
+  `budgets.json` and the site's scripts: a framework day.
+- The moon and the shelter do not fit in one frame from any ground the smoke does not blow
+  across: the hill behind the shelter is too steep. `seaward` settles for the path, the
+  landing's stones, the boat and the moon's road on the water; the lamp shows only as a warm
+  stone at the picture's foot.
+- At the handover (sun seven degrees down) nothing casts a shadow for a few seconds and the
+  land is lit by the sky alone. The light on the land never comes from lower than seven
+  degrees (`LOWEST`), so at sunset the shadows are shorter than the sun says.
+- The haze on the land is one colour, the horizon's. Only the sea fades into the glow on the
+  sun's side, so a far headland in front of a sunset greys where it should warm.
+- The lamp's light grows at night (`DARK_GAIN`) because the picture is exposed for the dark,
+  not because the flame does. The window still lights nothing but itself.
+- Stars are points of a fixed size in pixels; on a very dense screen they are small.
 
 ## Ideas
 
@@ -80,7 +104,10 @@ Parts for a chapter, never a day by themselves.
 - Wet sand: a darker band just above the waterline, from the same height map.
 - Fainter tracks contouring the hills, from a second channel of the path's texture (`wear.ts`).
 - Flat stones set as steps into the steepest stretch of the path.
-- A high, thin layer of cloud on the dome itself, combed by the wind, for evenings.
+- A second colour of dawn: the stops are by the sun's height alone, so morning and evening
+  are the same sky. A cooler, pinker east would need the hour as well as the height.
+- The moon always full, because it stands opposite the sun. A phase would need it to be its
+  own body, and then some nights would have none.
 - Whitecaps far out where a gust crosses deep water; today a gust only darkens it.
 - A low wall running off from the shelter's gable, or a fold beside it: `shelter/walls.ts` lays
   any course from a line and the land under it.
