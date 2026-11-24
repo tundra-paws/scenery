@@ -21,6 +21,15 @@ const SPUR_HALF = 0.75
 /** How far from the path the picture still knows the distance, in half-widths. Past that it is plain ground. */
 const REACH = 4
 
+/**
+ * Half the width of a sheep's trod, how far from one the picture's second
+ * channel knows the distance (in its half-widths), and how much of the
+ * grass it wears to earth: a trod is a line in the turf, not bare ground.
+ */
+const TROD_HALF  = 0.3
+const TROD_REACH = 3
+const TROD_BARE  = 0.45
+
 /** Where the yellowed grass beside the path ends, in half-widths, and how much of the ground's own colour it takes. */
 const VERGE      = 2.8
 const VERGE_TINT = 0.55
@@ -51,19 +60,24 @@ const WEAR_FRAGMENT = /* glsl */ `
 
   diffuseColor.rgb = mix(diffuseColor.rgb, uPathVerge, ${VERGE_TINT} * pathTurf * (1.0 - smoothstep(1.0, ${VERGE}, pathAway)));
   diffuseColor.rgb = mix(diffuseColor.rgb, uPathBare, ${BARE} * (1.0 - smoothstep(1.0 - pathEdge, 1.0 + pathEdge, pathAway)));
+
+  float trodAway = (1.0 - texture2D(uPathWear, vPathAt.xy).g) * ${TROD_REACH.toFixed(1)};
+  float trodEdge = max(fwidth(trodAway), 0.08);
+
+  diffuseColor.rgb = mix(diffuseColor.rgb, uPathBare, ${TROD_BARE} * pathTurf * (1.0 - smoothstep(1.0 - trodEdge, 1.0 + trodEdge, trodAway)));
 `
 
 /** The path as something the terrain's shader can look up. */
 export interface PathWear {
 
-  /** One channel: 255 on the middle of the path, 0 from `REACH` half-widths away. */
+  /** Two channels: red 255 on the middle of the path, 0 from `REACH` half-widths away; green the same for the trods. */
   texture: THREE.DataTexture
 
   /** World position to texture coordinate: `uv = (xz - frame.xy) * frame.zw`. */
   frame: THREE.Vector4
 }
 
-/** The picture being painted: its texels, how many, how big, and where its corner is in the world. */
+/** The picture being painted: its texels (two channels each), how many, how big, and where its corner is in the world. */
 interface Canvas {
   data:    Uint8Array<ArrayBuffer>
   columns: number
@@ -83,8 +97,8 @@ function halfWidthAt (along: number): number {
  * in units of its own half-width there, so a wider stretch is simply a
  * stretch whose edge lies further out.
  */
-function stamp ({ data, columns, rows, texel, minX, minZ }: Canvas, from: Waypoint, to: Waypoint, half: number): void {
-  const reach = Math.ceil(REACH * half / texel) + 1
+function stamp ({ data, columns, rows, texel, minX, minZ }: Canvas, from: Waypoint, to: Waypoint, half: number, [ channel, extent ] = [ 0, REACH ]): void {
+  const reach = Math.ceil(extent * half / texel) + 1
   const left  = Math.max(0, Math.floor((Math.min(from.x, to.x) - minX) / texel) - reach)
   const right = Math.min(columns - 1, Math.floor((Math.max(from.x, to.x) - minX) / texel) + reach)
   const near  = Math.max(0, Math.floor((Math.min(from.z, to.z) - minZ) / texel) - reach)
@@ -93,9 +107,10 @@ function stamp ({ data, columns, rows, texel, minX, minZ }: Canvas, from: Waypoi
   for (let row = near; row <= far; row += 1)
     for (let column = left; column <= right; column += 1) {
       const away  = distanceToSpan(minX + (column + 0.5) * texel, minZ + (row + 0.5) * texel, from, to) / half
-      const value = Math.round(255 * (1 - away / REACH))
+      const value = Math.round(255 * (1 - away / extent))
+      const at    = (row * columns + column) * 2 + channel
 
-      data[row * columns + column] = Math.max(data[row * columns + column]!, value)
+      data[at] = Math.max(data[at]!, value)
     }
 }
 
@@ -104,9 +119,11 @@ function stamp ({ data, columns, rows, texel, minX, minZ }: Canvas, from: Waypoi
  * from the side ways that leave it, which are narrower.
  *
  * The picture covers the bounds of all of them and a margin; everything
- * outside reads as its edge, which is zero.
+ * outside reads as its edge, which is zero. The sheep's trods go in its
+ * second channel, as far as it reaches: it is not made bigger for them, so
+ * the path keeps its texels, and a trod off its edge is not worn.
  */
-export function createPathWear (path: Path, tier: QualityTier, spurs: readonly (readonly Waypoint[])[] = []): PathWear {
+export function createPathWear (path: Path, tier: QualityTier, spurs: readonly (readonly Waypoint[])[] = [], trods: readonly (readonly Waypoint[])[] = []): PathWear {
   const { points } = path
   const all        = [ ...points, ...spurs.flat() ]
   const pad        = REACH * HALF_WIDTH * (1 + WANDER) + 2
@@ -117,7 +134,7 @@ export function createPathWear (path: Path, tier: QualityTier, spurs: readonly (
   const texel      = Math.max(spanX, spanZ) / SIDE[tier]
   const columns    = Math.ceil(spanX / texel)
   const rows       = Math.ceil(spanZ / texel)
-  const canvas     = { data: new Uint8Array(columns * rows), columns, rows, texel, minX, minZ }
+  const canvas     = { data: new Uint8Array(columns * rows * 2), columns, rows, texel, minX, minZ }
 
   for (let index = 1; index < points.length; index += 1)
     stamp(canvas, points[index - 1]!, points[index]!, halfWidthAt(index * path.spacing))
@@ -126,7 +143,11 @@ export function createPathWear (path: Path, tier: QualityTier, spurs: readonly (
     for (let index = 1; index < spur.length; index += 1)
       stamp(canvas, spur[index - 1]!, spur[index]!, SPUR_HALF)
 
-  const texture = new THREE.DataTexture(canvas.data, columns, rows, THREE.RedFormat, THREE.UnsignedByteType)
+  for (const trod of trods)
+    for (let index = 1; index < trod.length; index += 1)
+      stamp(canvas, trod[index - 1]!, trod[index]!, TROD_HALF, [ 1, TROD_REACH ])
+
+  const texture = new THREE.DataTexture(canvas.data, columns, rows, THREE.RGFormat, THREE.UnsignedByteType)
 
   texture.name        = 'path-wear'
   texture.magFilter   = THREE.LinearFilter
@@ -162,6 +183,7 @@ export function wearPath (material: THREE.Material, wear: PathWear): void {
   })
 }
 
-// perf: cheap — one single-channel texture of at most 160, 256 or 384 texels a
-// side (26 KB to 147 KB), painted once from the path's hundred-odd spans, and
-// one lookup a fragment of the terrain. Nothing per frame.
+// perf: cheap — one two-channel texture of at most 160, 256 or 384 texels a
+// side (52 KB to 295 KB), painted once from the path's hundred-odd spans and
+// the trods' few hundred, and two lookups a fragment of the terrain. Nothing
+// per frame.

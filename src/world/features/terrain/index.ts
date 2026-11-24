@@ -5,6 +5,7 @@ import { smoothstep } from 'threejs-scenes/primitives'
 import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
 import { DEEP_WATER } from '../../shared/ground.ts'
 import { PALETTE } from '../../shared/palette.ts'
+import { traceTrods } from '../../shared/trods.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { createPathWear, wearPath } from './wear.ts'
@@ -103,7 +104,7 @@ export function createTerrain (world: World): Feature {
         metalness:    0,
       })
 
-      wear = createPathWear(world.path, world.quality.tier, [ world.shelter.spur, world.infield.track ])
+      wear = createPathWear(world.path, world.quality.tier, [ world.shelter.spur, world.infield.track ], traceTrods(world, world.seed))
 
       wearPath(material, wear)
       shadeUnderClouds(material, world)

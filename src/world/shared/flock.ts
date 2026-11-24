@@ -23,7 +23,7 @@ import type { Wood } from './wood.ts'
  * of its own, for the morning's stops. Which ground a sheep stands on is read
  * from the land, the walls, the path, the trees and the boulders.
  */
-const HEFTS: readonly Heft[] = [
+export const HEFTS: readonly Heft[] = [
   { name: 'brae', x: 21, z: 72, reach: 11, count: { mobile: 9, desktop: 16, highEnd: 20 }},
   { name: 'inbye', x: 24, z: 88, reach: 10, count: { mobile: 7, desktop: 12, highEnd: 14 }},
   { name: 'dooryard', x: 64.5, z: 64.5, reach: 3.6, count: { mobile: 3, desktop: 4, highEnd: 4 }},
@@ -92,7 +92,7 @@ const LAG     = 0.7
 export type Coat = 'fleece' | 'moorit' | 'black'
 
 /** A heft: its middle, how far it reaches, and how many ewes keep to it on each tier. */
-interface Heft extends Waypoint {
+export interface Heft extends Waypoint {
   name:    string
   reach:   number
   count:   Record<QualityTier, number>

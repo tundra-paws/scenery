@@ -17,8 +17,8 @@ const REACH = BODY.long * 0.4
 
 /** How far a grazing sheep's head goes down, and a walking one's is held up; how high a lying one holds it. In radians about the neck. */
 const DOWN = 1.32
-const UP   = -0.5
-const REST = -0.3
+const UP   = -0.22
+const REST = -0.12
 
 /** How far she leans forward to graze, how far she sweeps her head across the grass, and how fast. */
 const DIP   = 0.07
