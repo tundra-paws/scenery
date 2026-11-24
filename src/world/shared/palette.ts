@@ -20,6 +20,8 @@ export const PALETTE = {
   path:         '#c0ad86',
   rock:         '#7d7a74',
   cairn:        '#a8a193',
+  timber:       '#8f7a5c',
+  pennant:      '#a8483a',
   waterDeep:    '#1d4d68',
   waterShallow: '#8fc2cc',
   foam:         '#eef2f5',
