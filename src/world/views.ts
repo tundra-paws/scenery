@@ -10,23 +10,34 @@ import type { Ground } from './shared/ground.ts'
  * reason worth breaking the timelapse over, and say so in the journal.
  *
  * The order is a visit and then a circuit. In from the sea to the landing, up
- * the path on foot, past the shelter, to the cairn, and back out over the
- * water until the whole island is in the frame; then round it: the summit, the
- * western beach, the northern cove, the ridge, the eastern shore, where the
- * island stands against the sun, in close under the shelter, with its lamp
- * lit and the cairn over it, and last back down to the water beside the boat
- * at its anchor, each stop a little further out until `hero` again. The tour
- * lifts itself over the land between two views, but it looks best when
- * neighbours in this list are neighbours on the island too, and when no leg
- * has to turn the camera right round: a view looking east followed by one
- * looking west wants a third between them.
+ * the path on foot, past the shelter, to the cairn; round to look back over
+ * the way up and out to sea; over the summit, and out over the water until
+ * the whole island is in the frame; then round it: the western beach, the
+ * northern cove, the ridge, the eastern shore, in close under the shelter
+ * with the cairn over it, and last back down to the water beside the boat at
+ * its anchor, each stop a little further out until `hero` again.
+ *
+ * The loop is also a day (`shared/daylight.ts`), so the order is the hours
+ * too. `hero` is the last of the afternoon, the landing is sunset, the walk
+ * up is dusk, `climb` the first stars, `seaward` the moon on the water,
+ * `summit` and `island` the night, `shore` and `cove` first light and
+ * sunrise, `ridge` the morning, and the rest the day going round to gold
+ * again. Every postcard is taken at second ten, in the evening light: the
+ * hour a stop has on the tour is for the visitor who stays.
+ *
+ * The tour lifts itself over the land between two views, but it looks best
+ * when neighbours in this list are neighbours on the island too, and when no
+ * leg has to turn the camera right round: a view looking east followed by one
+ * looking west wants a third between them. A leg that is a long way round
+ * can be given its own time (`travel`); the day is then that much longer.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12 },
   { name: 'landing', at: [ 56.3, 103.3 ], height: 2.4, look: [ 36, 74 ], lookHeight: 3, walk: true },
   { name: 'climb', at: [ 31.3, 45.5 ], height: 3, look: [ 14, 58 ], lookHeight: 5 },
-  { name: 'island', at: [ 150, 150 ], height: 40, look: [ 10, 20 ], lookHeight: 10 },
+  { name: 'seaward', at: [ 28, 42 ], height: 4, look: [ 60, 92 ], lookHeight: 25, travel: 18 },
   { name: 'summit', at: [ 2, 86 ], height: 28, look: [ 28, -40 ], lookHeight: 4 },
+  { name: 'island', at: [ 150, 150 ], height: 40, look: [ 10, 20 ], lookHeight: 10, travel: 22 },
   { name: 'shore', at: [ -96, 44 ], height: 2.6, look: [ -24, -6 ], lookHeight: 7 },
   { name: 'cove', at: [ -38, -104 ], height: 4.5, look: [ 4, -12 ], lookHeight: 9 },
   { name: 'ridge', at: [ 8, -34 ], height: 13, look: [ 58, 62 ], lookHeight: 3 },
@@ -61,6 +72,9 @@ export interface View {
    * nearest point of the path, along it, and off it again to the next view.
    */
   walk?: true
+
+  /** Seconds the tour takes to fly from this view to the next, where the usual time would hurry it. */
+  travel?: number
 }
 
 /** A camera position and the point it looks at, in world space. */

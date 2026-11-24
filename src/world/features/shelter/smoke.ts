@@ -52,6 +52,9 @@ interface SmokeOptions {
 
   /** The top of the chimney, in the world. */
   from: THREE.Vector3
+
+  /** The horizon's colour at this hour, kept by whoever turns the day: the smoke's own thin light. */
+  haze: THREE.Color
 }
 
 /** One puff: the clouds' own shape in small, all the way round. */
@@ -86,20 +89,23 @@ function createPuffGeometry (seed: number): THREE.BufferGeometry {
  * whenever it is asked for. Puffs are opaque, like the clouds: they come from
  * nothing and thin to nothing by size, not by fading.
  */
-export function createSmoke ({ tier, seed, wind, from }: SmokeOptions): Smoke {
+export function createSmoke ({ tier, seed, wind, from, haze }: SmokeOptions): Smoke {
   const count = PUFFS[tier]
 
   // No colour of its own, like the clouds: the horizon's pale, which the
-  // sun's cream lights on one side and the sky's blue fills on the other.
+  // light's colour lights on one side and the sky's fills on the other.
   const material = new THREE.MeshStandardMaterial({
     name:              'smoke',
     color:             PALETTE.horizon,
-    emissive:          PALETTE.horizon,
     emissiveIntensity: THIN,
     flatShading:       true,
     roughness:         1,
     metalness:         0,
   })
+
+  // What shows through it is the haze of the hour: the same colour object,
+  // not a copy, so smoke at night is not lit from within by the day's sky.
+  material.emissive = haze
 
   const mesh  = new THREE.InstancedMesh(createPuffGeometry(seed), material, count)
   const reach = LIFE * (RISE + wind.speed * (CARRY + GUST))

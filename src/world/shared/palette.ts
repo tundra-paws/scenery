@@ -27,4 +27,25 @@ export const PALETTE = {
   foam:         '#eef2f5',
 } as const
 
+/**
+ * The sky and its light at five hours, by how high the sun stands.
+ *
+ * `zenith` and `horizon` are the dome, and the horizon is the haze's colour
+ * too. `light` is the body that lights the land: the sun's cream by day,
+ * deepening as it sinks to the rose that is left on the clouds after it has
+ * set, and at night the moon's cold blue-white, which the stars share. `fill`
+ * and `ground` are what the sky and the land give back to what the light does
+ * not reach. The day's row is the palette's own colours: the other four are
+ * the same place later on.
+ */
+export const HOURS = {
+  day:    { zenith: PALETTE.zenith, horizon: PALETTE.horizon, light: PALETTE.sun, fill: PALETTE.skyFill, ground: PALETTE.groundFill },
+  gold:   { zenith: '#3a5c9a', horizon: '#efd0a2', light: '#ffc98a', fill: '#b6b4d2', ground: '#6e5b47' },
+  sunset: { zenith: '#2c417c', horizon: '#eda772', light: '#ff9455', fill: '#9a8fb8', ground: '#5c4a48' },
+  dusk:   { zenith: '#16254c', horizon: '#6f6f96', light: '#e68c7c', fill: '#8189bb', ground: '#4d4c63' },
+  night:  { zenith: '#091126', horizon: '#1c2b47', light: '#c2d2f0', fill: '#3a4d78', ground: '#1b2132' },
+} as const
+
 export type PaletteName = keyof typeof PALETTE
+
+export type HourName = keyof typeof HOURS

@@ -20,6 +20,15 @@ const GLOW    = 5
 const REACH   = 11
 const FLICKER = 0.09
 
+/**
+ * What the dark adds to it. The flame is the same flame, but an eye that has
+ * opened to the night sees it further and brighter, and the picture is drawn
+ * for that eye: at night the lamp is this many times as strong, and reaches
+ * this much further.
+ */
+const DARK_GAIN  = 2.6
+const DARK_REACH = 15
+
 const WARM = new THREE.Color(PALETTE.lamp)
 
 /** The dark of a doorway with a fire somewhere behind it: no light of its own to speak of, and what there is, warm. */
@@ -93,9 +102,14 @@ export function createLamp (): THREE.PointLight {
   return lamp
 }
 
-/** How bright the lamp burns at `time` seconds: a flame, so never quite steady. */
-export function lampGlow (time: number): number {
-  return GLOW * (1 + FLICKER * Math.sin(time * 7.3) * Math.sin(time * 3.1 + 1.7))
+/** How bright the lamp burns at `time` seconds, by day (`night` 0) or in the dark (1): a flame, so never quite steady. */
+export function lampGlow (time: number, night: number): number {
+  return GLOW * (1 + (DARK_GAIN - 1) * night) * (1 + FLICKER * Math.sin(time * 7.3) * Math.sin(time * 3.1 + 1.7))
+}
+
+/** How far its light reaches, by day or in the dark. */
+export function lampReach (night: number): number {
+  return REACH + DARK_REACH * night
 }
 
 // perf: cheap — one unlit draw call of 14 triangles, and one point light with

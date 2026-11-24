@@ -2,7 +2,6 @@
 import * as THREE from 'three'
 
 import { amendShader, insertAfter } from './amend.ts'
-import { SUN } from './sun.ts'
 import { WEATHER_SPAN, WIND_GLSL } from './wind.ts'
 import type { Wind } from './wind.ts'
 
@@ -24,8 +23,17 @@ const CORE = 0.3
 const EDGE = 1.7
 const RIM  = [ 0.42, 0.58 ] as const
 
-/** Horizontal distance the sun's ray covers for each unit it climbs. */
-const SLANT = [ SUN.x / SUN.y, SUN.z / SUN.y ] as const
+/**
+ * The furthest a cloud's shadow is laid from under it, as ground covered for
+ * each unit the light's ray climbs. A sun on the horizon would throw it clean
+ * off the island, and a small turn of the sky would send it racing: the low
+ * light comes in under the clouds, and their shadows stay where one of
+ * twenty-four degrees would put them.
+ */
+const REACH = 2.25
+
+/** Strength of the light on the land at which the clouds shade it in full. Under that the shadow thins with the light. */
+const FULL = 1.2
 
 /**
  * The lookup for a shader, to go after `WIND_GLSL`: `cloudShadowUv` in a
@@ -34,19 +42,21 @@ const SLANT = [ SUN.x / SUN.y, SUN.z / SUN.y ] as const
  */
 export const CLOUD_SHADOW_GLSL = /* glsl */ `
   uniform sampler2D uCloudShadow;
+  uniform vec2      uCloudSlant;
+  uniform float     uCloudShade;
 
   // Where in the picture of the sky to look for a point in the world: up the
-  // sun's ray to the height the clouds ride at, then back to where the air
+  // light's ray to the height the clouds ride at, then back to where the air
   // that is there now started from.
   vec2 cloudShadowUv (vec3 at) {
-    vec2 under = at.xz + vec2(${SLANT[0]}, ${SLANT[1]}) * (${CLOUD_BASE.toFixed(1)} - at.y);
+    vec2 under = at.xz + uCloudSlant * (${CLOUD_BASE.toFixed(1)} - at.y);
 
     return (under - uWindDrift) / WEATHER_SPAN + 0.5;
   }
 
-  // How much of the sun gets through: 1 in the open, less under a cloud.
+  // How much of the light gets through: 1 in the open, less under a cloud.
   float cloudLight (vec2 uv) {
-    return 1.0 - ${SHADE} * smoothstep(${RIM[0]}, ${RIM[1]}, texture2D(uCloudShadow, uv).r);
+    return 1.0 - uCloudShade * smoothstep(${RIM[0]}, ${RIM[1]}, texture2D(uCloudShadow, uv).r);
   }
 `
 
@@ -59,13 +69,23 @@ export const CLOUD_SHADOW_GLSL = /* glsl */ `
  * builds; every material that reads it shares this one object.
  */
 export interface CloudShadow {
-  uniforms: { uCloudShadow: { value: THREE.Texture | null }}
+  uniforms: {
+    uCloudShadow: { value: THREE.Texture | null }
+
+    /** Ground covered for each unit the light's ray climbs, as `[x, z]`. */
+    uCloudSlant: { value: THREE.Vector2 }
+
+    /** How much of the light a cloud takes from what is under it. */
+    uCloudShade: { value: number }
+  }
+
+  /** Lay the shadows where a light from `toward`, this strong, throws them. */
+  cast (toward: THREE.Vector3, intensity: number): void
 }
 
-/** A round thing in the sky that blocks the sun: where it is before the wind has moved it, and how wide. */
+/** A round thing in the sky that blocks the light: where it is before the wind has moved it, and how wide. */
 export interface Blot {
   x:      number
-  y:      number
   z:      number
   radius: number
 }
@@ -77,16 +97,34 @@ interface Air {
 }
 
 export function createCloudShadow (): CloudShadow {
-  return { uniforms: { uCloudShadow: { value: null }}}
+  const uniforms = {
+    uCloudShadow: { value: null },
+    uCloudSlant:  { value: new THREE.Vector2() },
+    uCloudShade:  { value: SHADE },
+  }
+
+  return {
+    uniforms,
+
+    cast (toward, intensity) {
+      const flat  = Math.hypot(toward.x, toward.z)
+      const slant = Math.min(flat / Math.max(toward.y, 0.0001), REACH) / Math.max(flat, 0.0001)
+
+      uniforms.uCloudSlant.value.set(toward.x * slant, toward.z * slant)
+      uniforms.uCloudShade.value = SHADE * Math.min(1, intensity / FULL)
+    },
+  }
 }
 
 /**
  * Paint the blots onto a square of `side` texels covering the weather's span:
  * 255 deep inside one, 0 in the open, and half way at a blot's rim.
  *
- * Each blot lands where its shadow would fall if the ground were at
- * `CLOUD_BASE`, which is the plane `cloudShadowUv` looks things up on, and
- * runs over the edge onto the far side, because the weather repeats.
+ * Each blot lands straight under itself, on the plane at `CLOUD_BASE` that
+ * `cloudShadowUv` looks things up on: the light moves through the day, so
+ * the slant is the lookup's to add and a puff's height over its cloud's flat
+ * base is let go. It runs over the edge onto the far side, because the
+ * weather repeats.
  */
 export function bakeCloudShadow (blots: readonly Blot[], side: number): Uint8Array<ArrayBuffer> {
   const data  = new Uint8Array(side * side)
@@ -94,11 +132,10 @@ export function bakeCloudShadow (blots: readonly Blot[], side: number): Uint8Arr
   const half  = WEATHER_SPAN / 2
 
   for (const blot of blots) {
-    const x     = blot.x + SLANT[0] * (CLOUD_BASE - blot.y)
-    const z     = blot.z + SLANT[1] * (CLOUD_BASE - blot.y)
-    const reach = Math.ceil(blot.radius * EDGE / texel)
-    const cx    = Math.floor((x + half) / texel)
-    const cz    = Math.floor((z + half) / texel)
+    const { x, z } = blot
+    const reach    = Math.ceil(blot.radius * EDGE / texel)
+    const cx       = Math.floor((x + half) / texel)
+    const cz       = Math.floor((z + half) / texel)
 
     for (let row = cz - reach; row <= cz + reach; row += 1)
       for (let column = cx - reach; column <= cx + reach; column += 1) {
@@ -130,7 +167,7 @@ export function createCloudShadowTexture (blots: readonly Blot[], side: number):
 /**
  * Let the clouds shade a built-in lit material.
  *
- * The sun's own light is dimmed after three has added it up, and a little of
+ * The light's own share is dimmed after three has added it up, and a little of
  * the sky's with it, or a shadow on a slope already turned from the sun would
  * not show. What the shadow map says is left as it was.
  */
@@ -168,4 +205,5 @@ export function shadeUnderClouds (material: THREE.Material, { wind, clouds }: Ai
 
 // perf: cheap — one single-channel texture (64 KB on the mobile tier, 256 KB
 // above it), painted once, and one lookup a fragment in each material that
-// reads it. Nothing per frame: the wind's drift moves it.
+// reads it. Two uniforms a step: the wind's drift moves it and the light's
+// slant leans it.

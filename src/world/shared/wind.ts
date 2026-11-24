@@ -23,10 +23,10 @@ const SPEED = 7
  *
  * The weather is a fixed pattern, so this picks which part of it the visit
  * opens on, and it was picked by looking: ten seconds in, when the postcards
- * are taken, the cairn stands in the sun against open sky and a cloud's
- * shadow lies down the island's eastern shoulder.
+ * are taken, the low sun stands clear over the island's western shoulder
+ * with two thin bars of cloud under it, and the cairn against open sky.
  */
-const HEAD_START = 1470
+const HEAD_START = 1500
 
 const TAU = Math.PI * 2
 

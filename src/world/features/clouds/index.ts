@@ -6,8 +6,6 @@ import { createNoise3D } from 'threejs-scenes/primitives'
 import { createCloudShadowTexture } from '../../shared/cloud-shadow.ts'
 import type { Blot } from '../../shared/cloud-shadow.ts'
 import { disposeInstances } from '../../shared/instances.ts'
-import { PALETTE } from '../../shared/palette.ts'
-import { SUN } from '../../shared/sun.ts'
 import type { Feature, World } from '../../world.ts'
 import { PUFF_FLOOR, layOutClouds } from './layout.ts'
 import { createCloudMaterial } from './material.ts'
@@ -74,15 +72,10 @@ export function createClouds (world: World): Feature {
       const geometry = createPuffGeometry(rng.fork('clouds:puff').int(1, 1_000_000))
       const homes    = new Float32Array(puffs * 3)
 
-      // The lit face is the sun's cream, since that is light itself. The far
-      // side is the sky's own colours, so a cloud belongs to the sky it is in.
-      const material = createCloudMaterial({
-        lit:          PALETTE.sun,
-        shade:        new THREE.Color(PALETTE.skyFill).lerp(new THREE.Color(PALETTE.horizon), 0.3),
-        haze:         PALETTE.horizon,
-        sunDirection: SUN,
-        wind:         world.wind.uniforms,
-      })
+      // The lit face is the light's own colour and the far side the sky's,
+      // whatever the hour makes of either, so a cloud belongs to the sky it
+      // is in (`shared/daylight.ts`).
+      const material = createCloudMaterial(world.wind.uniforms, world.day.uniforms)
 
       mesh      = new THREE.InstancedMesh(geometry, material, puffs)
       mesh.name = 'clouds'
@@ -108,7 +101,6 @@ export function createClouds (world: World): Feature {
 
           blots.push({
             x:      cloud.x + puff.offset[0],
-            y:      cloud.y + puff.offset[1],
             z:      cloud.z + puff.offset[2],
             radius: (puff.scale[0] + puff.scale[2]) / 2,
           })

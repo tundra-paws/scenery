@@ -1,6 +1,12 @@
 // src/world/features/environment/sky.ts
 import * as THREE from 'three'
 
+import { SKY_GLOW_GLSL } from '../../shared/daylight.ts'
+import type { DaylightUniforms } from '../../shared/daylight.ts'
+
+
+/** Half the moon's width, in degrees. Three times the real one, as a low moon looks. */
+const MOON = 1.4
 
 const VERTEX = /* glsl */ `
   varying vec3 vDirection;
@@ -16,10 +22,12 @@ const VERTEX = /* glsl */ `
 `
 
 const FRAGMENT = /* glsl */ `
+  ${SKY_GLOW_GLSL}
+
   uniform vec3 uZenith;
   uniform vec3 uHorizon;
-  uniform vec3 uSun;
-  uniform vec3 uSunDirection;
+  uniform vec3 uSunDisc;
+  uniform vec3 uMoonDisc;
 
   varying vec3 vDirection;
 
@@ -29,11 +37,19 @@ const FRAGMENT = /* glsl */ `
     // Below the horizon the dome keeps the horizon colour, so the fog over the
     // water blends into it instead of meeting a darker band.
     float height = clamp(direction.y, 0.0, 1.0);
-    vec3  colour = mix(uHorizon, uZenith, pow(height, 0.55));
+    vec3  colour = mix(uHorizon, uZenith, pow(height, 0.55)) + skyGlow(direction);
 
-    float toward = max(dot(direction, uSunDirection), 0.0);
+    // A disc is cut off at the horizon: from high up the sea's far edge lies
+    // a little under it, and a sun that has set would show in the gap.
+    float risen = smoothstep(-0.012, 0.0, direction.y);
+    float sun   = max(dot(direction, uSunDirection), 0.0);
+    float moon  = max(-dot(direction, uSunDirection), 0.0);
 
-    colour += uSun * (pow(toward, 420.0) * 1.6 + pow(toward, 10.0) * 0.16);
+    colour += uSunDisc * (pow(sun, 420.0) * 1.6 * risen + pow(sun, 16.0) * 0.16);
+
+    // The moon stands opposite the sun, so it is always full: a flat disc
+    // with a clean edge, and a little of its light in the air around it.
+    colour += uMoonDisc * (smoothstep(${Math.cos(THREE.MathUtils.degToRad(MOON * 1.07))}, ${Math.cos(THREE.MathUtils.degToRad(MOON))}, moon) * 0.9 + pow(moon, 90.0) * 0.07) * risen;
 
     gl_FragColor = vec4(colour, 1.0);
 
@@ -44,15 +60,14 @@ const FRAGMENT = /* glsl */ `
   }
 `
 
-interface SkyOptions {
-  zenith:       THREE.ColorRepresentation
-  horizon:      THREE.ColorRepresentation
-  sun:          THREE.ColorRepresentation
-  sunDirection: THREE.Vector3
-}
+/**
+ * A gradient sky with the sun's disc and glow and the moon's, drawn on the
+ * inside of a dome. Every colour and both directions are the hour's own
+ * uniforms, so the dome is told nothing: it turns with the day.
+ */
+export function createSkyMaterial (day: DaylightUniforms): THREE.ShaderMaterial {
+  const { uZenith, uHorizon, uSunDisc, uMoonDisc, uSunDirection, uGlow } = day
 
-/** A gradient sky with a sun disc and its glow, drawn on the inside of a dome. */
-export function createSkyMaterial ({ zenith, horizon, sun, sunDirection }: SkyOptions): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     name:           'sky',
     vertexShader:   VERTEX,
@@ -60,12 +75,6 @@ export function createSkyMaterial ({ zenith, horizon, sun, sunDirection }: SkyOp
     side:           THREE.BackSide,
     depthWrite:     false,
     fog:            false,
-
-    uniforms: {
-      uZenith:       { value: new THREE.Color(zenith) },
-      uHorizon:      { value: new THREE.Color(horizon) },
-      uSun:          { value: new THREE.Color(sun) },
-      uSunDirection: { value: sunDirection.clone() },
-    },
+    uniforms:       { uZenith, uHorizon, uSunDisc, uMoonDisc, uSunDirection, uGlow },
   })
 }

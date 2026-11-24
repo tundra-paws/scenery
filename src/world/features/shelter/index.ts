@@ -7,7 +7,7 @@ import { createStoneGeometry } from '../../shared/stone.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { createBodyGeometry } from './body.ts'
-import { createLamp, createLightGeometry, lampGlow } from './light.ts'
+import { createLamp, createLightGeometry, lampGlow, lampReach } from './light.ts'
 import { CHIMNEY, HALF_DEEP, HALF_LONG, RIDGE } from './plan.ts'
 import { createSmoke } from './smoke.ts'
 import type { Smoke } from './smoke.ts'
@@ -88,6 +88,7 @@ export function createShelterFeature (world: World): Feature {
         seed: rng.fork('shelter:smoke').int(1, 1_000_000),
         wind: world.wind,
         from: new THREE.Vector3(top.x, shelter.floor + RIDGE + CHIMNEY.over, top.z),
+        haze: world.day.haze,
       })
 
       shadeUnderClouds(smoke.mesh.material as THREE.Material, world)
@@ -101,8 +102,10 @@ export function createShelterFeature (world: World): Feature {
 
       smoke?.drift(time)
 
-      if (lamp)
-        lamp.intensity = lampGlow(time)
+      if (lamp) {
+        lamp.intensity = lampGlow(time, world.day.night)
+        lamp.distance  = lampReach(world.day.night)
+      }
     },
 
     dispose () {
@@ -125,5 +128,5 @@ export function createShelterFeature (world: World): Feature {
 
 // perf: cheap — four draw calls and two shadow passes: the stones (17k
 // triangles), the body, the unlit openings and the smoke. One point light
-// without a shadow. A step moves the smoke's puffs (`smoke.ts`) and sets one
-// number on the lamp.
+// without a shadow. A step moves the smoke's puffs (`smoke.ts`) and sets two
+// numbers on the lamp.

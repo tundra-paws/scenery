@@ -2,10 +2,10 @@
 import * as THREE from 'three'
 
 import { CLOUD_SHADOW_GLSL } from '../../shared/cloud-shadow.ts'
+import { SKY_GLOW_GLSL } from '../../shared/daylight.ts'
 import { DEEP_WATER } from '../../shared/ground.ts'
 import { createHeightMap } from '../../shared/height-map.ts'
 import { PALETTE } from '../../shared/palette.ts'
-import { SUN } from '../../shared/sun.ts'
 import { WIND_GLSL } from '../../shared/wind.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
@@ -38,14 +38,17 @@ const VERTEX = /* glsl */ `
 const FRAGMENT = /* glsl */ `
   ${WIND_GLSL}
   ${CLOUD_SHADOW_GLSL}
+  ${SKY_GLOW_GLSL}
 
   uniform float     uTime;
   uniform vec3      uDeep;
   uniform vec3      uShallow;
-  uniform vec3      uSky;
   uniform vec3      uFoam;
-  uniform vec3      uSun;
-  uniform vec3      uSunDirection;
+  uniform vec3      uSeaTint;
+  uniform vec3      uSeaSky;
+  uniform vec3      uSeaGlint;
+  uniform vec3      uLightDirection;
+  uniform vec3      uHorizon;
   uniform sampler2D uGround;
   uniform float     uGroundScale;
 
@@ -125,15 +128,18 @@ const FRAGMENT = /* glsl */ `
     // drop. On top of that the surface gives back some sky, most at a glance.
     float murk    = smoothstep(PALE, DEEP, depth);
     float fresnel = pow(1.0 - max(dot(normal, view), 0.0), 3.0);
+    // Its own colours are what the day shows of it: the hour leaves less of
+    // them, and what the surface gives back is the sky of that hour.
     vec3  body    = mix(uShallow, uDeep, murk);
-    vec3  colour  = mix(mix(body, uDeep, RUFFLE * gust), uSky, fresnel * SHEEN);
+    vec3  colour  = mix(mix(body, uDeep, RUFFLE * gust) * uSeaTint, uSeaSky, fresnel * SHEEN);
 
-    // Under a cloud the sea is duller and the sun has nothing to glint off.
+    // Under a cloud the sea is duller and the light has nothing to glint off.
+    // The glint is the sun's by day and the moon's at night.
     float light   = cloudLight(vCloudUv);
-    vec3  halfway = normalize(uSunDirection + view);
+    vec3  halfway = normalize(uLightDirection + view);
 
     colour *= mix(1.0 - GLOOM, 1.0, light);
-    colour += uSun * pow(max(dot(normal, halfway), 0.0), 220.0) * 0.9 * light * light;
+    colour += uSeaGlint * pow(max(dot(normal, halfway), 0.0), 220.0) * 0.9 * light * light;
 
     // The sea has no edge of its own: it thins over the last of the sand until
     // the sand is all there is. Over a couple of pixels at least, so the edge
@@ -165,11 +171,19 @@ const FRAGMENT = /* glsl */ `
 
     foam = max(foam, wavelet * mix(0.25, 0.75, windward));
 
-    gl_FragColor = vec4(mix(colour, uFoam, foam), mix(alpha, 1.0, foam));
+    gl_FragColor = vec4(mix(colour, uFoam * uSeaTint, foam), mix(alpha, 1.0, foam));
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
-    #include <fog_fragment>
+
+    // The haze by hand: the same fog as the land's, but into the sky's colour
+    // in the direction looked in, so toward a low sun the far sea takes the
+    // glow that is on the horizon over it and the two still meet as one.
+    #ifdef USE_FOG
+      float fogged = 1.0 - exp(-fogDensity * fogDensity * vFogDepth * vFogDepth);
+
+      gl_FragColor.rgb = mix(gl_FragColor.rgb, linearToOutputTexel(vec4(uHorizon + skyGlow(-view), 1.0)).rgb, fogged);
+    #endif
   }
 `
 
@@ -177,7 +191,9 @@ const FRAGMENT = /* glsl */ `
  * The sea: one plane at the water level, pale over the shelf and dark past it,
  * thinning to foam where the land comes up through it. Its ripples run before
  * the wind, gusts cross it as darker patches, the foam is widest on the shore
- * the wind blows onto, and the clouds lay their shadows on it.
+ * the wind blows onto, and the clouds lay their shadows on it. It keeps the
+ * hour: darker as the light goes, glinting under the sun and then the moon,
+ * and fading far out into whatever the sky is doing on that side.
  */
 export function createWater (world: World): Feature {
   let mesh: THREE.Mesh | null               = null
@@ -190,6 +206,8 @@ export function createWater (world: World): Feature {
     build ({ scene }) {
       const heights = createHeightMap(world.ground, world.grid)
 
+      const { uSeaTint, uSeaSky, uSeaGlint, uLightDirection, uHorizon, uSunDirection, uGlow } = world.day.uniforms
+
       ground   = heights.texture
       material = new THREE.ShaderMaterial({
         name:           'water',
@@ -198,21 +216,26 @@ export function createWater (world: World): Feature {
         transparent:    true,
         fog:            true,
 
-        // The wind's drift and the clouds' shadow are the world's own uniform
-        // objects, shared by reference, so they are spread in and not cloned.
+        // The wind's drift, the clouds' shadow and the hour are the world's
+        // own uniform objects, shared by reference, so they are spread in
+        // and not cloned.
         uniforms: {
           ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
           ...world.wind.uniforms,
           ...world.clouds.uniforms,
-          uTime:         { value: 0 },
-          uDeep:         { value: new THREE.Color(PALETTE.waterDeep) },
-          uShallow:      { value: new THREE.Color(PALETTE.waterShallow) },
-          uSky:          { value: new THREE.Color(PALETTE.skyFill) },
-          uFoam:         { value: new THREE.Color(PALETTE.foam) },
-          uSun:          { value: new THREE.Color(PALETTE.sun) },
-          uSunDirection: { value: SUN.clone() },
-          uGround:       { value: ground },
-          uGroundScale:  { value: heights.scale },
+          uSeaTint,
+          uSeaSky,
+          uSeaGlint,
+          uLightDirection,
+          uHorizon,
+          uSunDirection,
+          uGlow,
+          uTime:        { value: 0 },
+          uDeep:        { value: new THREE.Color(PALETTE.waterDeep) },
+          uShallow:     { value: new THREE.Color(PALETTE.waterShallow) },
+          uFoam:        { value: new THREE.Color(PALETTE.foam) },
+          uGround:      { value: ground },
+          uGroundScale: { value: heights.scale },
         },
       })
 

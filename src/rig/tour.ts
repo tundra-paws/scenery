@@ -35,8 +35,11 @@ export interface Tour {
   /** Seconds the camera rests at each view. */
   dwell: number
 
-  /** Seconds it takes to move from one view to the next. */
+  /** Seconds it takes to move from one view to the next, unless the leg says otherwise. */
   travel: number
+
+  /** Seconds each leg takes, by the view it leaves: its own time if it was given one or is walked, and `travel` if not. */
+  travels: readonly number[]
 
   /**
    * How far each leg lifts the camera at its middle, so the way from one view
@@ -70,6 +73,9 @@ interface TourOptions {
 
   /** A walk for each leg that has one, by the index of the view it leaves. */
   walks?: readonly (WalkOptions | null)[]
+
+  /** Seconds for each flown leg that wants its own time, by the index of the view it leaves: a long way round is not hurried. */
+  travels?: readonly (number | undefined)[]
 }
 
 /** Catmull-Rom through `b` and `c`, shaped by their neighbours. */
@@ -124,7 +130,7 @@ function riseOver (poses: readonly Pose[], index: number, floor: Floor): number 
   return rise
 }
 
-export function createTour (poses: readonly Pose[], { dwell = 5, travel = 15, floor, walks = []}: TourOptions = {}): Tour {
+export function createTour (poses: readonly Pose[], { dwell = 5, travel = 15, floor, walks = [], travels = []}: TourOptions = {}): Tour {
   if (poses.length === 0)
     throw new Error('a tour needs at least one view')
 
@@ -135,17 +141,19 @@ export function createTour (poses: readonly Pose[], { dwell = 5, travel = 15, fl
     return walk ? createWalk(from.position, to.position, to.target, walk) : null
   })
 
+  const times  = afoot.map((walk, index) => walk?.travel ?? travels[index] ?? travel)
   const starts = [ 0 ]
 
-  for (const walk of afoot)
-    starts.push(starts.at(-1)! + dwell + (walk?.travel ?? travel))
+  for (const time of times)
+    starts.push(starts.at(-1)! + dwell + time)
 
   return {
     poses,
     dwell,
     travel,
     starts,
-    walks: afoot,
+    travels: times,
+    walks:   afoot,
 
     // A walk keeps to the ground by being laid on it: it needs no lift.
     rise: poses.map((_, index) => floor && !afoot[index] ? riseOver(poses, index, floor) : 0),
@@ -206,7 +214,7 @@ export function tourPose (tour: Tour, t: number, out: Pose): Pose {
     index += 1
 
   const walk = tour.walks[index]
-  const part = (time - tour.starts[index]! - tour.dwell) / (walk?.travel ?? tour.travel)
+  const part = (time - tour.starts[index]! - tour.dwell) / tour.travels[index]!
 
   if (walk)
     walkPose(tour, index, walk, Math.min(1, Math.max(0, part)), out)

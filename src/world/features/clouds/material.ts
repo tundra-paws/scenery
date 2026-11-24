@@ -1,6 +1,7 @@
 // src/world/features/clouds/material.ts
 import * as THREE from 'three'
 
+import type { DaylightUniforms } from '../../shared/daylight.ts'
 import { WIND_GLSL } from '../../shared/wind.ts'
 import type { WindUniforms } from '../../shared/wind.ts'
 
@@ -40,10 +41,10 @@ const VERTEX = /* glsl */ `
 `
 
 const FRAGMENT = /* glsl */ `
-  uniform vec3 uLit;
-  uniform vec3 uShade;
-  uniform vec3 uHaze;
-  uniform vec3 uSunDirection;
+  uniform vec3 uCloudLit;
+  uniform vec3 uCloudShade;
+  uniform vec3 uHorizon;
+  uniform vec3 uBodyDirection;
 
   varying vec3 vNormal;
   varying vec3 vWorld;
@@ -51,47 +52,38 @@ const FRAGMENT = /* glsl */ `
   void main () {
     vec3 normal = normalize(vNormal);
 
-    // Two colours and the facets do the rest: cream where a face is turned to
-    // the sun, the sky's own blue where it is turned away, and the flat
-    // underside a little deeper still.
-    float toward = smoothstep(-0.35, 0.55, dot(normal, uSunDirection));
+    // Two colours and the facets do the rest: the light's where a face is
+    // turned to the sun or the moon, the sky's own where it is turned away,
+    // and the flat underside a little deeper still. The light is taken from
+    // where it truly is, so a sun going down lights a cloud from below.
+    float toward = smoothstep(-0.35, 0.55, dot(normal, uBodyDirection));
     float under  = smoothstep(0.5, 0.95, -normal.y);
-    vec3  colour = mix(uShade, uLit, toward) * (1.0 - 0.1 * under);
+    vec3  colour = mix(uCloudShade, uCloudLit, toward) * (1.0 - 0.1 * under);
 
     // Haze by hand, and no tone mapping, for the reason the sky has none: a
     // far cloud has to arrive at the horizon in the horizon's exact colour.
     float far  = distance(cameraPosition, vWorld) * ${HAZE};
     float haze = 1.0 - exp(-far * far);
 
-    gl_FragColor = vec4(mix(colour, uHaze, haze), 1.0);
+    gl_FragColor = vec4(mix(colour, uHorizon, haze), 1.0);
 
     #include <colorspace_fragment>
   }
 `
 
-interface CloudOptions {
-  lit:          THREE.ColorRepresentation
-  shade:        THREE.ColorRepresentation
-  haze:         THREE.ColorRepresentation
-  sunDirection: THREE.Vector3
-  wind:         WindUniforms
-}
+/**
+ * Flat-shaded cloud stuff that drifts on the wind in its vertex shader, in
+ * the colours the hour gives it.
+ */
+export function createCloudMaterial (wind: WindUniforms, day: DaylightUniforms): THREE.ShaderMaterial {
+  const { uCloudLit, uCloudShade, uHorizon, uBodyDirection } = day
 
-/** Flat-shaded cloud stuff that drifts on the wind in its vertex shader. */
-export function createCloudMaterial ({ lit, shade, haze, sunDirection, wind }: CloudOptions): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     name:           'cloud',
     vertexShader:   VERTEX,
     fragmentShader: FRAGMENT,
     fog:            false,
-
-    uniforms: {
-      ...wind,
-      uLit:          { value: new THREE.Color(lit) },
-      uShade:        { value: new THREE.Color(shade) },
-      uHaze:         { value: new THREE.Color(haze) },
-      uSunDirection: { value: sunDirection.clone() },
-    },
+    uniforms:       { ...wind, uCloudLit, uCloudShade, uHorizon, uBodyDirection },
   })
 }
 

@@ -53,7 +53,7 @@ export function createWorldTour (ground: Ground, path: Path): Tour {
   const poses   = VIEWS.map(view => resolveView(view, ground))
   const walks   = VIEWS.map((view, index) => view.walk ? walkBetween(ground, path, poses[index]!, poses[(index + 1) % poses.length]!) : null)
 
-  return createTour(poses, { floor: { surface, clearance: TOUR_CLEARANCE }, walks })
+  return createTour(poses, { floor: { surface, clearance: TOUR_CLEARANCE }, walks, travels: VIEWS.map(view => view.travel) })
 }
 
 // perf: trivial — built once: a few hundred ground samples.

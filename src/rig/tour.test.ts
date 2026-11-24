@@ -1,6 +1,7 @@
 // src/rig/tour.test.ts
 import { describe, expect, test } from 'bun:test'
 
+import { DAY, elevationAt } from '../world/shared/daylight.ts'
 import { createGround } from '../world/shared/ground.ts'
 import { createPath } from '../world/shared/path.ts'
 import { VIEWS } from '../world/views.ts'
@@ -271,6 +272,32 @@ describe('the world\'s own tour', () => {
     }
 
     expect(ashore).toBeGreaterThan(400)
+  })
+
+  test('takes one day, so every stop keeps its hour', () => {
+    // The light is a function of the time alone (`shared/daylight.ts`), and
+    // the walk up is timed for dusk. A loop of any other length would drift
+    // from it, a little more each time round. Change `DAY` with the tour.
+    expect(Math.abs(tourDuration(tour) - DAY)).toBeLessThan(0.5)
+
+    const at = (name: string): number => elevationAt(tour.starts[VIEWS.findIndex(view => view.name === name)]! + tour.dwell / 2)
+
+    // The sun is up and low over the landing, and well down behind the
+    // night's three stops, where the moon is up as high as the sun is down.
+    expect(at('landing')).toBeGreaterThan(0)
+    expect(at('landing')).toBeLessThan(9)
+    expect(at('climb')).toBeLessThan(-12)
+    expect(at('seaward')).toBeLessThan(-15)
+    expect(at('island')).toBeLessThan(-15)
+    expect(at('ridge')).toBeGreaterThan(0)
+    expect(at('shelter')).toBeGreaterThan(24)
+  })
+
+  test('gives a leg its own time where a view asks for it', () => {
+    VIEWS.forEach((view, index) => {
+      if (!view.walk)
+        expect(tour.travels[index]).toBe(view.travel ?? tour.travel)
+    })
   })
 
   test('never hurries and never whips the camera round', () => {

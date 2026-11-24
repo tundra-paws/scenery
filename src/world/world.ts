@@ -4,6 +4,8 @@ import type { AppModule } from 'threejs-scenes/core'
 
 import { createCloudShadow } from './shared/cloud-shadow.ts'
 import type { CloudShadow } from './shared/cloud-shadow.ts'
+import { createDaylight } from './shared/daylight.ts'
+import type { Daylight } from './shared/daylight.ts'
 import { createGround } from './shared/ground.ts'
 import type { Ground } from './shared/ground.ts'
 import { GRID_SEGMENTS, createHeightGrid } from './shared/height-grid.ts'
@@ -45,7 +47,8 @@ export type Feature = AppModule<WorldState>
  * part that has to exist before any of that: the shape of the land, which the
  * terrain meshes, the scatterers place on, the water meets and the camera walks
  * over, and which must therefore be one function they all share. The same goes
- * for the air over it: one wind, and one shadow from the clouds it carries.
+ * for the air over it: one wind, one shadow from the clouds it carries, and
+ * one hour of the day that the sky, the light and the sea all keep.
  * And for what was made on it: the summit the cairn stands on, the one path
  * up to it, and the shelter beside that path.
  */
@@ -58,6 +61,7 @@ export interface World {
   grid:   HeightGrid
   wind:   Wind
   clouds: CloudShadow
+  day:    Daylight
 
   /** The highest point of the land. */
   summit:  Waypoint
@@ -84,6 +88,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     grid:    createHeightGrid(ground, GRID_SEGMENTS[quality.tier]),
     wind:    createWind(),
     clouds:  createCloudShadow(),
+    day:     createDaylight(),
     shelter: createShelter(ground, path),
   }
 }

@@ -9,6 +9,7 @@ import { createSmoke } from './smoke.ts'
 describe('the smoke', () => {
   const wind = createWind()
   const from = new THREE.Vector3(56, 14, 55)
+  const haze = new THREE.Color()
 
   /** Where every puff is and how big, after `drift`. */
   function puffs (mesh: THREE.InstancedMesh): { at: THREE.Vector3, size: number }[] {
@@ -22,7 +23,7 @@ describe('the smoke', () => {
   }
 
   test('is a pure function of time', () => {
-    const smoke = createSmoke({ tier: 'desktop', seed: 7, wind, from })
+    const smoke = createSmoke({ tier: 'desktop', seed: 7, wind, from, haze })
 
     smoke.drift(10)
 
@@ -37,7 +38,7 @@ describe('the smoke', () => {
   })
 
   test('rises from the chimney and goes with the wind, never against it', () => {
-    const smoke = createSmoke({ tier: 'desktop', seed: 7, wind, from })
+    const smoke = createSmoke({ tier: 'desktop', seed: 7, wind, from, haze })
 
     for (const time of [ 0, 10, 37.3, 600 ]) {
       smoke.drift(time)
@@ -56,7 +57,7 @@ describe('the smoke', () => {
 
   test('stays inside the sphere it is culled by, whatever the wind does', () => {
     for (const tier of [ 'mobile', 'desktop', 'highEnd' ] as const) {
-      const smoke  = createSmoke({ tier, seed: 7, wind, from })
+      const smoke  = createSmoke({ tier, seed: 7, wind, from, haze })
       const sphere = smoke.mesh.boundingSphere!
 
       for (let time = 0; time < 120; time += 0.37) {
@@ -69,7 +70,7 @@ describe('the smoke', () => {
   })
 
   test('comes from nothing and thins to nothing: no puff ever blinks', () => {
-    const smoke = createSmoke({ tier: 'mobile', seed: 7, wind, from })
+    const smoke = createSmoke({ tier: 'mobile', seed: 7, wind, from, haze })
 
     smoke.drift(0)
 
