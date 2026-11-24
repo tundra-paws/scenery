@@ -1,0 +1,48 @@
+{
+  "id": 8,
+  "dir": "i/0008/",
+  "date": "2026-11-24",
+  "sha": "5ecd0928d47f5d105049dd50a052a4f8c41f460b",
+  "title": "A boat at the landing",
+  "summary": "A small tarred boat lies to its anchor just off the landing, oars shipped and a red pennant at the masthead. It swings and rides with the wind, and the tour now ends beside it.",
+  "kind": "feature",
+  "model": "Claude",
+  "journal": "journal/2026-11-24-a-boat-at-the-landing.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 21,
+      "triangles": 175203,
+      "live": {
+        "buffers": 58,
+        "textures": 10,
+        "programs": 12,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 21
+      }
+    },
+    "mobile": {
+      "draws": 21,
+      "triangles": 109442,
+      "live": {
+        "buffers": 58,
+        "textures": 10,
+        "programs": 12,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 21
+      }
+    }
+  },
+  "bytes": {
+    "new": 140745,
+    "site": 1659507
+  },
+  "three": "0.184.0",
+  "distHash": "3a2526a50640ccc55efd7d1d83f772e6253efff9db1eddb5cd40d3e449bf0303",
+  "withdrawn": false
+}
