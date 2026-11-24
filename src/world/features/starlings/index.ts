@@ -13,13 +13,14 @@ import type { Feature, World } from '../../world.ts'
 /**
  * One wing, in the bird's own frame (forward along x, up along y, its left
  * along z): a long narrow triangle from the shoulder back to a pointed tip,
- * swept as a starling's is. Faced both ways, since it is seen from under and
+ * swept as a starling's is, and half as big again, so a bird far off still
+ * covers a pixel. Faced both ways, since it is seen from under and
  * over, and drawn for the right wing too, mirrored.
  */
 const WING = [
-  [ 0.1, 0, 0 ],
-  [ -0.13, 0, 0 ],
-  [ -0.09, 0, 0.42 ],
+  [ 0.14, 0, 0 ],
+  [ -0.17, 0, 0 ],
+  [ -0.12, 0, 0.56 ],
 ] as const
 
 /** How much darker or paler a bird may be than the rest, as lightness. */
