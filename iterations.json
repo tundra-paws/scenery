@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repo": "tundra-paws/scenery",
-  "updated": "2026-11-24T13:22:11.715Z",
+  "updated": "2026-11-24T14:03:53.978Z",
   "iterations": [
     {
       "id": 1,
@@ -817,6 +817,54 @@
       },
       "three": "0.184.0",
       "distHash": "6c357b8a6e40dd50ef58362aa4c39f4db63a690c6dbbd76c53e437083a1514e6",
+      "withdrawn": false
+    },
+    {
+      "id": 18,
+      "dir": "i/0018/",
+      "date": "2026-11-24",
+      "sha": "77e5daf405ac4e52ab6a8dd86026790cbf71bd34",
+      "title": "The skerry",
+      "summary": "A reef stands out of the sea off the east shore, the swell breaking white round it. Someone stacked a small mark on its highest rock, and seals are hauled out on its slabs.",
+      "kind": "feature",
+      "model": "claude",
+      "journal": "journal/2026-11-24-the-skerry.md",
+      "shots": {
+        "hero": "shot.webp",
+        "thumb": "thumb.webp"
+      },
+      "stats": {
+        "desktop": {
+          "draws": 67,
+          "triangles": 630416,
+          "live": {
+            "buffers": 125,
+            "textures": 12,
+            "programs": 31,
+            "framebuffers": 5,
+            "renderbuffers": 1,
+            "vertexArrays": 67
+          }
+        },
+        "mobile": {
+          "draws": 59,
+          "triangles": 228522,
+          "live": {
+            "buffers": 125,
+            "textures": 12,
+            "programs": 30,
+            "framebuffers": 5,
+            "renderbuffers": 1,
+            "vertexArrays": 59
+          }
+        }
+      },
+      "bytes": {
+        "new": 266312,
+        "site": 3619293
+      },
+      "three": "0.184.0",
+      "distHash": "d9e87c058340a71fb346b10a11e23fadcf28603d1fb803a944906c1fc5e4c908",
       "withdrawn": false
     }
   ]
