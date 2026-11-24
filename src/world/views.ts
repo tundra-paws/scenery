@@ -60,7 +60,8 @@ export const VIEWS: readonly View[] = [
   { name: 'shelter', at: [ 64, 73 ], height: 7, look: [ 50, 58 ], lookHeight: 4, travel: 10 },
   { name: 'boat', at: [ 75, 92 ], height: 2.4, look: [ 48, 86.5 ], lookHeight: 6, travel: 5 },
   { name: 'infield', at: [ 70, 87 ], height: 4, look: [ 53, 69 ], lookHeight: 4, travel: 5 },
-  { name: 'flock', at: [ 27, 99 ], height: 3, look: [ 17, 72 ], lookHeight: 3.5, travel: 7 },
+  { name: 'flock', at: [ 27, 99 ], height: 3, look: [ 17, 72 ], lookHeight: 3.5, travel: 4 },
+  { name: 'starlings', at: [ 40, 112 ], height: 2.5, look: [ -11, 62 ], lookHeight: 22, travel: 6 },
 ]
 
 /**
