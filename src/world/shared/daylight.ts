@@ -16,7 +16,7 @@ import type { HourName } from './palette.ts'
  * `rig/tour.test.ts` holds the two together: add a view, or change how long
  * a leg takes, and this is the number to change with it.
  */
-export const DAY = 277.5
+export const DAY = 289.5
 
 /** How far north the island lies, and how far north of the equator the sun is: a summer's day, with a low sun and a short night. */
 const LATITUDE    = THREE.MathUtils.degToRad(58)
@@ -37,8 +37,10 @@ export const POLE = new THREE.Vector3(Math.sin(NORTH) * Math.cos(LATITUDE), Math
  *
  * Picked by looking, like the wind's head start: at second ten, when the
  * postcards are taken, the sun stands ten degrees over the sea to the west.
+ * When `DAY` grows, this grows with it, so that second ten keeps its sun:
+ * it was 0.742 in a day of 277.5 seconds.
  */
-const OPENING = 0.742
+const OPENING = 0.742 + Math.PI * 2 * 10 * (1 / 277.5 - 1 / DAY)
 
 /**
  * The day's pace, as multiples of an even turn. `EDGE` is how far from noon,

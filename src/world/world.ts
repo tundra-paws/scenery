@@ -5,6 +5,8 @@ import type { AppModule } from 'threejs-scenes/core'
 import { createLands, createSkyline } from './shared/beyond.ts'
 import type { Land } from './shared/beyond.ts'
 import { createCloudShadow } from './shared/cloud-shadow.ts'
+import { createClutter } from './shared/clutter.ts'
+import type { Clutter } from './shared/clutter.ts'
 import type { CloudShadow } from './shared/cloud-shadow.ts'
 import { createDaylight } from './shared/daylight.ts'
 import type { Daylight } from './shared/daylight.ts'
@@ -61,7 +63,8 @@ export type Feature = AppModule<WorldState>
  * And for what was made on it: the summit the cairn stands on, the one path
  * up to it, the shelter beside that path, and the walls round the ground
  * worked from it. And for what grows on it: the wood beside the shelter.
- * And for what stands in the sea, which the sea breaks round.
+ * And for what stands in the sea, which the sea breaks round, and what lies
+ * loose on the land, which the flock grazes round.
  */
 export interface World {
   seed:    number
@@ -88,6 +91,9 @@ export interface World {
 
   /** What stands in the sea and what floats on it, for the sea to break round. Filled in as the features are built. */
   wash: Wash
+
+  /** What lies loose on the land (the boulders), for what is built after it to keep off. Filled in as the features are built. */
+  clutter: Clutter
 }
 
 interface WorldOptions {
@@ -117,5 +123,6 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     infield: createInfield(shelter),
     wood:    createWood({ ground, summit, path, shelter }, seed),
     wash:    createWash(),
+    clutter: createClutter(),
   }
 }
