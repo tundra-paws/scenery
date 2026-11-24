@@ -35,7 +35,9 @@ foot, each keeping to its own heft and its own trods worn along the level of the
 are penned in the fold. They keep themselves. The only other thing that comes and goes of its
 own accord is the starlings: of an evening they come in over the sea from the land beyond,
 wheel over the brae in one cloud through the gold, and pour down into the head-dyke to roost
-as the sun goes; at first light they rise out of the stones and go back over the water. It lies off a mountain coast: a high fell and a long range in the
+as the sun goes; at first light they rise out of the stones and go back over the water. Off
+the east shore is a skerry the tide never covers: someone stacked a small mark on it, and seals
+haul out on its slabs, nobody's, and never nearer than that. It lies off a mountain coast: a high fell and a long range in the
 haze to the north-west, which nobody goes to, and which the sun goes down behind.
 
 **Mood and light.** One summer's day in the north, turning once in the time the tour takes, so
@@ -107,6 +109,10 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
   darkens in bands where they bunch, against the brightest of the sky. It keeps to the hour:
   in after noon, over the brae through the evening, down into the walls at sunset in a coiling
   stream, out and away at first light. Nowhere by day, nowhere by night.
+- *The seals.* The flock's opposite number on the sea: pale lumps on dark rock, flat out,
+  breathing; one lifts its head and looks round, or curls up at both ends; one more shows its
+  head in the water and is gone. Asleep at night. A seal is a faceted lump with a smaller one
+  for a head, never a model of a seal, and wears the stone's greys: no colour of its own.
 - *Low-poly, flat-shaded, few colours.* Facets are the style, not a shortcut to hide.
 
 **What it is not.** Not a game: no score, no quest, no characters. Not tropical, not fantasy, no
@@ -122,8 +128,8 @@ once round in a visit), the land beyond, which the sun goes down behind, the bir
 beside the shelter, with its outliers on the open island, the infield: the field of rigs,
 its dyke and gate, the fold and the head-dyke, a sea that answers (its mirror, its swell,
 its foam round what stands in it, the wet sand), the flock on its hefts and its trods, and
-late summer: the heather out on the moor and high cloud over everything, and the starlings
-that roost in the head-dyke. Next: the inside of
+late summer: the heather out on the moor and high cloud over everything, the starlings
+that roost in the head-dyke, and the skerry with its seals. Next: the inside of
 the shelter, and a night worth staying up for.
 
 ## Where it starts

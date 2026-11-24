@@ -33,9 +33,11 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   landing, in `hero`, `landing` and `boat`, where the pennant flies across its crown. Tests
   keep every tree off every postcard's camera and out of the tour's way: move a view or a
   rule and they say so.
-- Stops on borrowed time: `wood` (from `east`, `wood`, `shelter`: 8, 7, 10), `mirror` and
-  `moor` (`ridge` 5 + `moor` 5 + a dwell = the 15 s leg they split). Change one and the day
-  test fails until they sum to what they did.
+- Stops on borrowed time: `skerry` and `wood` (the afternoon's legs were cut to pay for them:
+  `east` 5, `skerry` 5, `wood` 5, `shelter` 7, `boat` 4, `starlings` 5), `mirror` and `moor`
+  (`ridge` 5 + `moor` 5 + a dwell = the 15 s leg they split). Change one and the day test
+  fails until they sum to what they did. The next view needs `DAY` to grow, and then `ridge`
+  falls before sunrise: retune `EDGE` and `SLOW`, or take the time from the night's legs.
 - Nothing knows a tree is there but the boulders: an exploring visitor walks through a trunk,
   tufts grow against it, and the lamp lights the far side of it. The crowns are lit as if
   half turned to the sky (`SKYWARD` in `wood/timber.ts`), so under the moon they are a little
@@ -156,8 +158,20 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - The trods are worn only where the path's picture reaches (`terrain/wear.ts`, its second
   channel): the brae and the inbye. The far hefts have sheep and no trods; a picture of the
   whole island would cost the path its texels. The sheep do not walk on their trods.
-- Triangles are at 78% (desktop) and 74% (mobile) since `starlings`. The walling stones are still 80
-  triangles on desktop, drawn three times; the cope is 20 since `heather`.
+- Triangles are at 79% (desktop) and 76% (mobile) since `skerry`: the next chapter must make
+  room. The walling stones are still 80 triangles on desktop, drawn three times.
+
+- **The skerry is typed in to fit `hero`** (`REEF` in `shared/skerry.ts`): bottom right,
+  broadside, in the one patch of water that `shelter`, `wood`, `infield`, `boat` and the legs
+  between them leave free. A test holds it in the frame at 16:10 and 16:9, off every camera
+  and under the tour. Move one of those views and look at `hero`, `skerry` and `east` again.
+- Its rocks are not land. `ground` does not know them: an exploring visitor walks through,
+  the sand and the shallows do not gather round them, and they are footed on the bed only
+  by being stretched down to it. At second ten the hill's shadow lies on the reef: it is a
+  dark shape, and the seals are what is seen. By day it wants looking at again.
+- A seal is one lump three times (body, head, flippers) and never leaves its slab. The one
+  in the water comes up at three typed places (`RISES`) and makes no ring on the sea. They
+  sleep by the sun's height, as the flock does; nothing startles them, not even the tour.
 
 - **The heather is a rule, not a map** (`shared/moor.ts`): above a fifth of the relief, off
   slopes over 0.3, in noise patches. The land's colour and the bushes read it; the grass
@@ -194,8 +208,8 @@ Parts for a chapter, never a day by themselves.
 - A kailyard against the house's gable. Peat banks cut into the moor, a peat stack by the door.
 - An axe left in a stump by the stack. Leaves torn off the wood by a gust and carried
   downwind. A few of the birches turned yellow, for a day late in the summer.
-- Something that lives here and is never near: terns over the stacks, a seal's head off the
-  landing. Small, far, and gone when looked for. Sheep on the shore at low water, for the weed.
+- Terns over the stacks. Sheep on the shore at low water, for the weed. A seal pup, white,
+  on the skerry in its season. Weed on the reef's rocks below the tide line.
 - The flock gathered: on one day of the year, all of it in the fold and its pen full.
 - The boat's sail, furled on its yard along the thwarts, and a creel or a net on the beach.
 - Grass growing on the shelter's roof: the meadow's own tufts. The tuft's shape and material
