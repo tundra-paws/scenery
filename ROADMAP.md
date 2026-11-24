@@ -161,17 +161,13 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - Triangles are at 79% (desktop) and 76% (mobile) since `skerry`: the next chapter must make
   room. The walling stones are still 80 triangles on desktop, drawn three times.
 
-- **The skerry is typed in to fit `hero`** (`REEF` in `shared/skerry.ts`): bottom right,
-  broadside, in the one patch of water that `shelter`, `wood`, `infield`, `boat` and the legs
-  between them leave free. A test holds it in the frame at 16:10 and 16:9, off every camera
-  and under the tour. Move one of those views and look at `hero`, `skerry` and `east` again.
-- Its rocks are not land. `ground` does not know them: an exploring visitor walks through,
-  the sand and the shallows do not gather round them, and they are footed on the bed only
-  by being stretched down to it. At second ten the hill's shadow lies on the reef: it is a
-  dark shape, and the seals are what is seen. By day it wants looking at again.
-- A seal is one lump three times (body, head, flippers) and never leaves its slab. The one
-  in the water comes up at three typed places (`RISES`) and makes no ring on the sea. They
-  sleep by the sun's height, as the flock does; nothing startles them, not even the tour.
+- **The skerry is typed in to fit `hero`** (`REEF` in `shared/skerry.ts`): bottom right, in
+  the one patch of water `shelter`, `wood`, `infield`, `boat` and their legs leave free. A
+  test holds it in the frame, off every camera and under the tour. Move a view, look again.
+- Its rocks are not land: `ground` does not know them, a visitor walks through, no shallows
+  gather round them. At second ten the hill's shadow is on the reef: a dark shape, pale seals.
+- A seal never leaves its slab. The one in the water comes up at three typed places
+  (`RISES`) and makes no ring. Nothing startles them, not even the tour.
 
 - **The heather is a rule, not a map** (`shared/moor.ts`): above a fifth of the relief, off
   slopes over 0.3, in noise patches. The land's colour and the bushes read it; the grass
@@ -198,20 +194,13 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 
 Parts for a chapter, never a day by themselves.
 
-- Flat stones set as steps into the steepest stretch of the path.
 - A second colour of dawn: the stops are by the sun's height alone, so morning and evening
   are the same sky. A cooler, pinker east would need the hour as well as the height.
-- The moon always full, because it stands opposite the sun. A phase would need it to be its
-  own body, and then some nights would have none.
-- Whitecaps far out where a gust crosses deep water. The heather paling as a gust crosses it.
+- Whitecaps far out where a gust crosses deep water.
 - Stooks, a peat stack, a scythe left on the dyke: late summer on the infield, a later day.
 - A kailyard against the house's gable. Peat banks cut into the moor, a peat stack by the door.
-- An axe left in a stump by the stack. Leaves torn off the wood by a gust and carried
-  downwind. A few of the birches turned yellow, for a day late in the summer.
-- Terns over the stacks. Sheep on the shore at low water, for the weed. A seal pup, white,
-  on the skerry in its season. Weed on the reef's rocks below the tide line.
-- The flock gathered: on one day of the year, all of it in the fold and its pen full.
-- The boat's sail, furled on its yard along the thwarts, and a creel or a net on the beach.
+- Leaves torn off the wood by a gust. A few birches turned yellow, late in the summer.
+- Terns over the stacks. Sheep on the shore at low water. Weed on the reef below the tide.
+- The boat's sail furled on its yard, and a creel or a net on the beach.
 - Grass growing on the shelter's roof: the meadow's own tufts. The tuft's shape and material
   would move out of `features/tufts` into `shared/` so both are drawn with one program.
-- Stones stood on end for the shelter's door jambs, the way the landing's two are.
