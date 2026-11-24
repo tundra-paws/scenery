@@ -6,6 +6,8 @@ import { createCloudShadow } from './shared/cloud-shadow.ts'
 import type { CloudShadow } from './shared/cloud-shadow.ts'
 import { createGround } from './shared/ground.ts'
 import type { Ground } from './shared/ground.ts'
+import { createPath, findSummit } from './shared/path.ts'
+import type { Path, Waypoint } from './shared/path.ts'
 import { createWind } from './shared/wind.ts'
 import type { Wind } from './shared/wind.ts'
 
@@ -40,6 +42,8 @@ export type Feature = AppModule<WorldState>
  * terrain meshes, the scatterers place on, the water meets and the camera walks
  * over, and which must therefore be one function they all share. The same goes
  * for the air over it: one wind, and one shadow from the clouds it carries.
+ * And for what was made on it: the summit the cairn stands on, and the one
+ * path up to it.
  */
 export interface World {
   seed:    number
@@ -47,6 +51,10 @@ export interface World {
   ground:  Ground
   wind:    Wind
   clouds:  CloudShadow
+
+  /** The highest point of the land. */
+  summit: Waypoint
+  path:   Path
 }
 
 interface WorldOptions {
@@ -55,5 +63,8 @@ interface WorldOptions {
 }
 
 export function createWorld ({ seed, quality }: WorldOptions): World {
-  return { seed, quality, ground: createGround({ seed }), wind: createWind(), clouds: createCloudShadow() }
+  const ground = createGround({ seed })
+  const summit = findSummit(ground)
+
+  return { seed, quality, ground, wind: createWind(), clouds: createCloudShadow(), summit, path: createPath(ground, summit) }
 }

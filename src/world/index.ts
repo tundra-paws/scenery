@@ -5,6 +5,7 @@ import { createEnvironment } from './features/environment/index.ts'
 import { createRocks } from './features/rocks/index.ts'
 import { createTerrain } from './features/terrain/index.ts'
 import { createTufts } from './features/tufts/index.ts'
+import { createWaymarks } from './features/waymarks/index.ts'
 import { createWater } from './features/water/index.ts'
 import type { Feature, World } from './world.ts'
 
@@ -29,5 +30,6 @@ export function createFeatures (world: World): Feature[] {
     createRocks(world),
     createTufts(world),
     createCairn(world),
+    createWaymarks(world),
   ]
 }

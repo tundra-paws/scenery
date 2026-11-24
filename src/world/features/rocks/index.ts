@@ -12,6 +12,9 @@ import type { Feature, World } from '../../world.ts'
 
 const COUNT: Record<QualityTier, number> = { mobile: 60, desktop: 140, highEnd: 220 }
 
+/** Clear ground kept between a boulder and the middle of the path, on top of the boulder's own size. */
+const OFF_PATH = 1.6
+
 /** Module-scope scratch, so placing an instance allocates nothing. */
 const dummy = new THREE.Object3D()
 const tint  = new THREE.Color()
@@ -45,7 +48,9 @@ export function createRocks (world: World): Feature {
       mesh.castShadow    = true
       mesh.receiveShadow = true
 
-      spots.forEach((spot, index) => {
+      let kept = 0
+
+      for (const spot of spots) {
         const size = place.range(0.5, 2.6)
 
         // Sunk a little, so a boulder on a slope does not hover on its high side.
@@ -53,10 +58,19 @@ export function createRocks (world: World): Feature {
         dummy.rotation.set(place.range(-0.3, 0.3), place.range(0, Math.PI * 2), place.range(-0.3, 0.3))
         dummy.scale.set(size, size * place.range(0.7, 1.1), size * place.range(0.8, 1.2))
         dummy.updateMatrix()
+        tint.set(PALETTE.rock).offsetHSL(0, 0, place.range(-0.07, 0.07))
 
-        mesh!.setMatrixAt(index, dummy.matrix)
-        mesh!.setColorAt(index, tint.set(PALETTE.rock).offsetHSL(0, 0, place.range(-0.07, 0.07)))
-      })
+        // A boulder lying on the path was rolled off it long ago. Left out
+        // after its draws are taken, so every other boulder stays where it was.
+        if (world.path.distanceTo(spot.x, spot.z) < size + OFF_PATH)
+          continue
+
+        mesh.setMatrixAt(kept, dummy.matrix)
+        mesh.setColorAt(kept, tint)
+        kept += 1
+      }
+
+      mesh.count = kept
 
       commitInstances(mesh)
       scene.add(mesh)

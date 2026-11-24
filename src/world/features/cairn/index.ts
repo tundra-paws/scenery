@@ -2,7 +2,6 @@
 import * as THREE from 'three'
 
 import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
-import type { Ground } from '../../shared/ground.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { createStoneGeometry } from '../../shared/stone.ts'
@@ -19,30 +18,9 @@ const SPILL = 6
 const BASE_RADIUS = 2.9
 const TOP_RADIUS  = 1
 
-/** Grid step of the search for the summit. */
-const SEARCH_STEP = 2
-
 /** Module-scope scratch, so placing an instance allocates nothing. */
 const dummy = new THREE.Object3D()
 const tint  = new THREE.Color()
-
-/** The highest point of the land, so the cairn follows the summit if the land is reshaped. */
-type FindSummitReturnType = { x: number, z: number }
-
-function findSummit (ground: Ground): FindSummitReturnType {
-  const half = ground.size / 2
-  const best = { x: 0, z: 0, height: -Infinity }
-
-  for (let x = -half; x <= half; x += SEARCH_STEP)
-    for (let z = -half; z <= half; z += SEARCH_STEP) {
-      const height = ground.heightAt(x, z)
-
-      if (height > best.height)
-        Object.assign(best, { x, z, height })
-    }
-
-  return best
-}
 
 /**
  * The cairn: flat stones stacked on the island's highest point, a tall one on top.
@@ -57,9 +35,8 @@ export function createCairn (world: World): Feature {
     name: 'cairn',
 
     build ({ scene, rng }) {
-      const { ground } = world
-      const lay        = rng.fork('cairn:lay')
-      const summit     = findSummit(ground)
+      const { ground, summit } = world
+      const lay                = rng.fork('cairn:lay')
 
       const geometry = createStoneGeometry(rng.fork('cairn:shape').int(1, 1_000_000))
       const material = new THREE.MeshStandardMaterial({ name: 'cairn', flatShading: true, roughness: 1, metalness: 0 })
@@ -127,5 +104,4 @@ export function createCairn (world: World): Feature {
 }
 
 // perf: cheap — one draw call (two with its shadow pass), 16 stones of 80
-// triangles: 1.3k on every tier. Built once, after a 17k-sample search for the
-// summit; nothing per frame.
+// triangles: 1.3k on every tier. Built once; nothing per frame.

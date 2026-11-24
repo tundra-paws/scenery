@@ -16,6 +16,7 @@ export const PALETTE = {
   sand:         '#cdbf9a',
   grass:        '#6f8f4e',
   grassDry:     '#8f9a5a',
+  path:         '#c0ad86',
   rock:         '#7d7a74',
   cairn:        '#a8a193',
   waterDeep:    '#1d4d68',

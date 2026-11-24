@@ -16,6 +16,9 @@ import type { Feature, World } from '../../world.ts'
 
 const COUNT: Record<QualityTier, number> = { mobile: 900, desktop: 2600, highEnd: 4200 }
 
+/** How far from the middle of the path the grass is trodden out. */
+const OFF_PATH = 1.9
+
 /** Length of a blade before it is leant and scaled. */
 const BLADE = 0.8
 
@@ -147,17 +150,28 @@ export function createTufts (world: World): Feature {
       mesh.name          = 'tufts'
       mesh.receiveShadow = true
 
-      spots.forEach((spot, index) => {
+      let kept = 0
+
+      for (const spot of spots) {
         const size = place.range(0.7, 1.7)
 
         dummy.position.set(spot.x, spot.height - 0.05, spot.z)
         dummy.rotation.set(0, place.range(0, Math.PI * 2), 0)
         dummy.scale.set(size, size * place.range(0.8, 1.4), size)
         dummy.updateMatrix()
+        tint.set(place.next() < 0.3 ? PALETTE.grassDry : PALETTE.grass).offsetHSL(0, 0, place.range(-0.05, 0.08))
 
-        mesh!.setMatrixAt(index, dummy.matrix)
-        mesh!.setColorAt(index, tint.set(place.next() < 0.3 ? PALETTE.grassDry : PALETTE.grass).offsetHSL(0, 0, place.range(-0.05, 0.08)))
-      })
+        // Nothing grows where feet go. Left out after its draws are taken, so
+        // every other tuft stays where it was.
+        if (world.path.distanceTo(spot.x, spot.z) < OFF_PATH)
+          continue
+
+        mesh.setMatrixAt(kept, dummy.matrix)
+        mesh.setColorAt(kept, tint)
+        kept += 1
+      }
+
+      mesh.count = kept
 
       commitInstances(mesh)
       scene.add(mesh)

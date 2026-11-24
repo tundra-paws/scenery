@@ -7,6 +7,8 @@ import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
 import { DEEP_WATER } from '../../shared/ground.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import type { Feature, World } from '../../world.ts'
+import { createPathWear, wearPath } from './wear.ts'
+import type { PathWear } from './wear.ts'
 
 
 /** Grid cells per side. Triangles are twice the square of this, less the cells under deep water. */
@@ -61,9 +63,10 @@ function cellsAbove (geometry: THREE.BufferGeometry, floor: number): number[] {
   return kept
 }
 
-/** The land: one heightfield mesh, coloured per vertex, shaded flat. */
+/** The land: one heightfield mesh, coloured per vertex, shaded flat, with the path worn into it. */
 export function createTerrain (world: World): Feature {
   let mesh: THREE.Mesh | null = null
+  let wear: PathWear | null   = null
 
   return {
     name: 'terrain',
@@ -101,6 +104,9 @@ export function createTerrain (world: World): Feature {
         metalness:    0,
       })
 
+      wear = createPathWear(world.path, world.quality.tier)
+
+      wearPath(material, wear)
       shadeUnderClouds(material, world)
 
       mesh               = new THREE.Mesh(geometry, material)
@@ -117,12 +123,15 @@ export function createTerrain (world: World): Feature {
       if (mesh?.material instanceof THREE.Material)
         mesh.material.dispose()
 
+      wear?.texture.dispose()
       mesh?.removeFromParent()
       mesh = null
+      wear = null
     },
   }
 }
 
 // perf: medium — one draw call (two with its shadow pass). 11k triangles on the
 // mobile tier, 30k on desktop, 58k on highEnd: the grid less the two fifths of
-// it under deep water. Built once; nothing per frame.
+// it under deep water. The path is one small texture and one lookup a fragment
+// (`wear.ts`). Built once; nothing per frame.
