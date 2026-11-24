@@ -7,6 +7,9 @@ import type { DaylightUniforms } from '../../shared/daylight.ts'
 import type { WindUniforms } from '../../shared/wind.ts'
 
 
+/** How much of the high cloud's veil the night takes: it is seen by the light it catches. */
+export const NIGHT_THINS = 0.45
+
 /** Half the moon's width, in degrees. Three times the real one, as a low moon looks. */
 const MOON = 1.4
 
@@ -34,6 +37,7 @@ const FRAGMENT = /* glsl */ `
   uniform vec3 uCloudLit;
   uniform vec3 uCloudShade;
   uniform vec3 uBodyDirection;
+  uniform float uNight;
 
   varying vec3 vDirection;
 
@@ -52,8 +56,9 @@ const FRAGMENT = /* glsl */ `
     float moon  = max(-dot(direction, uSunDirection), 0.0);
 
     // The high cloud lies over the dome's colours, and the sun and the moon
-    // shine through it, a little dimmed where it is thickest.
-    float veil = cirrusCover(direction);
+    // shine through it, a little dimmed where it is thickest. At night it
+    // has only the moon to catch, and is fainter.
+    float veil = cirrusCover(direction) * (1.0 - ${NIGHT_THINS} * uNight);
 
     colour  = mix(colour, cirrusColour(direction, uCloudLit, uCloudShade, uBodyDirection), veil);
     colour += uSunDisc * (pow(sun, 420.0) * 1.6 * risen + pow(sun, 16.0) * 0.16) * (1.0 - 0.5 * veil);
@@ -78,7 +83,7 @@ const FRAGMENT = /* glsl */ `
  * wind's, so the dome is told nothing: it turns with the day.
  */
 export function createSkyMaterial (day: DaylightUniforms, wind: WindUniforms): THREE.ShaderMaterial {
-  const { uZenith, uHorizon, uSunDisc, uMoonDisc, uSunDirection, uGlow, uCloudLit, uCloudShade, uBodyDirection } = day
+  const { uZenith, uHorizon, uSunDisc, uMoonDisc, uSunDirection, uGlow, uCloudLit, uCloudShade, uBodyDirection, uNight } = day
 
   return new THREE.ShaderMaterial({
     name:           'sky',
@@ -87,6 +92,6 @@ export function createSkyMaterial (day: DaylightUniforms, wind: WindUniforms): T
     side:           THREE.BackSide,
     depthWrite:     false,
     fog:            false,
-    uniforms:       { uZenith, uHorizon, uSunDisc, uMoonDisc, uSunDirection, uGlow, uCloudLit, uCloudShade, uBodyDirection, uWindAloft: wind.uWindAloft },
+    uniforms:       { uZenith, uHorizon, uSunDisc, uMoonDisc, uSunDirection, uGlow, uCloudLit, uCloudShade, uBodyDirection, uNight, uWindAloft: wind.uWindAloft },
   })
 }

@@ -4,6 +4,7 @@ import type { SeededRng } from 'threejs-scenes'
 
 import { CIRRUS_GLSL } from '../../shared/cirrus.ts'
 import type { DaylightUniforms } from '../../shared/daylight.ts'
+import { NIGHT_THINS } from './sky.ts'
 import type { WindUniforms } from '../../shared/wind.ts'
 
 
@@ -33,7 +34,7 @@ const VERTEX = /* glsl */ `
     float flicker   = 0.82 + 0.18 * sin(uTime * (1.3 + aStar.z) + aStar.z * 40.0);
 
     // The high cloud hides them as it passes, all but the brightest.
-    vLight = uNight * clear * aStar.y * flicker * (1.0 - 1.4 * cirrusCover(direction));
+    vLight = uNight * clear * aStar.y * flicker * max(1.0 - 1.4 * cirrusCover(direction) * ${1 - NIGHT_THINS}, 0.0);
 
     // Around the camera, like the dome. A star with no light is put outside
     // the picture, so by day they cost nothing to fill.

@@ -13,8 +13,8 @@ const RIPPLE = 90
 const STREAK = 1100
 
 /** How much of the sky it covers, and how thick it is where it does: never more than a veil. */
-const COVER   = -0.06
-const OPACITY = 0.62
+const COVER   = 0.06
+const OPACITY = 0.75
 
 /**
  * The high cloud: a thin layer combed into streaks by the wind aloft, and
@@ -82,7 +82,7 @@ export const CIRRUS_GLSL = /* glsl */ `
   vec3 cirrusColour (vec3 direction, vec3 lit, vec3 shade, vec3 body) {
     float toward = pow(max(dot(direction, body), 0.0), 3.0);
 
-    return mix(shade, lit, 0.55 + 0.45 * toward);
+    return mix(shade, lit, 0.7 + 0.3 * toward);
   }
 
   #endif
