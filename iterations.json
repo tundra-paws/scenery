@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repo": "tundra-paws/scenery",
-  "updated": "2026-11-24T11:48:05.053Z",
+  "updated": "2026-11-24T12:19:22.219Z",
   "iterations": [
     {
       "id": 1,
@@ -673,6 +673,54 @@
       },
       "three": "0.184.0",
       "distHash": "85b7529fef42c89ba17afbbc54df42429a37d45fb66f988e434d0840e5c8741e",
+      "withdrawn": false
+    },
+    {
+      "id": 15,
+      "dir": "i/0015/",
+      "date": "2026-11-24",
+      "sha": "dee73b8269a34e131fe830e35e5bb275e3a8f38e",
+      "title": "The flock",
+      "summary": "Sheep fleck the brae under the cairn and the inbye above the landing, four penned in the fold, grazing their rounds on trods worn along the hill, and lying down at night.",
+      "kind": "feature",
+      "model": "claude-opus-5-5",
+      "journal": "journal/2026-11-24-the-flock.md",
+      "shots": {
+        "hero": "shot.webp",
+        "thumb": "thumb.webp"
+      },
+      "stats": {
+        "desktop": {
+          "draws": 55,
+          "triangles": 626036,
+          "live": {
+            "buffers": 103,
+            "textures": 12,
+            "programs": 31,
+            "framebuffers": 5,
+            "renderbuffers": 1,
+            "vertexArrays": 55
+          }
+        },
+        "mobile": {
+          "draws": 50,
+          "triangles": 236123,
+          "live": {
+            "buffers": 103,
+            "textures": 12,
+            "programs": 30,
+            "framebuffers": 5,
+            "renderbuffers": 1,
+            "vertexArrays": 50
+          }
+        }
+      },
+      "bytes": {
+        "new": 214436,
+        "site": 2851172
+      },
+      "three": "0.184.0",
+      "distHash": "29428c86b45f12ca16a5de7a01dbcadd37c345ecea21798ef8bd265f92e439b6",
       "withdrawn": false
     }
   ]
