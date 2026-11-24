@@ -58,7 +58,8 @@ keeps the water out. One pale thing that grows: birch `bark`, near white, scarre
 rock's grey taken almost to black; its leaves are the meadow's own two greens, and its cut
 wood the bark's colour warmed. One thing sown, `barley`, a pale green-gold, only on the rigs; the
 potatoes beside it are the meadow's green gone darker, the furrows bare earth turned darker still.
-The flock's wool is its own: a dull cream white (`fleece`), a brown (`moorit`) for a few, and
+The hill above the head-dyke wears one colour the meadow does not: `heather`, a dusky mauve,
+in bloom on the moor and only there. The flock's wool is its own: a dull cream white (`fleece`), a brown (`moorit`) for a few, and
 the near black of their faces and legs (`face`), which a black sheep is all over. And one dyed
 thing, a worn red (`pennant`): cloth made only to be seen
 from the water, and never more than a scrap of it. A new colour needs a job none of these does.
@@ -79,6 +80,11 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
 - *What grows.* Grass, and birch. One wood, where the ground is low and gentle, thinning to
   scrub at its edge; a few trees alone beyond it; none on the cairn's hill. A tree is a pale
   trunk and a few faceted lumps of leaves, never a model of a tree.
+- *The high air.* Over the low clouds a thin mackerel sky, combed into streaks by a wind
+  aloft that turns from the one below and creeps; it lies on the dome, takes the clouds'
+  colours from the hour, and thins at night so the stars show between its bands.
+- *The moor.* Above the worked ground the hill is heather, in patches with grass between,
+  thickest on the tops, bare only on the cliffs: low faceted bushes on a mauve ground.
 - *The hour.* The other shared signal (`world.day`): where the sun is, and from that the sky,
   the one light and its shadows, the fill, the haze, the sea's colours and the clouds'. Nothing
   keeps a colour of the sky for itself. Sun and moon are one light that is out as it changes
@@ -108,8 +114,9 @@ anchor off the landing, the day itself (evening, night with a moon and stars, an
 once round in a visit), the land beyond, which the sun goes down behind, the birch wood
 beside the shelter, with its outliers on the open island, the infield: the field of rigs,
 its dyke and gate, the fold and the head-dyke, a sea that answers (its mirror, its swell,
-its foam round what stands in it, the wet sand), and the flock on its hefts and its trods. Next: the inside of the shelter, and a night
-worth staying up for.
+its foam round what stands in it, the wet sand), the flock on its hefts and its trods, and
+late summer: the heather out on the moor and high cloud over everything. Next: the inside of
+the shelter, and a night worth staying up for.
 
 ## Where it starts
 
