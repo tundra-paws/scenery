@@ -1,0 +1,48 @@
+{
+  "id": 12,
+  "dir": "i/0012/",
+  "date": "2026-11-24",
+  "sha": "1cb08327aa4c79a9a868e13674be794e17e16b85",
+  "title": "The birch wood",
+  "summary": "A wood of wind-bent birch now stands beside the shelter, with stumps and a stack of logs by the wall, and lone birches lean on the open island. Trees sway with the gusts.",
+  "kind": "feature",
+  "model": "Claude",
+  "journal": "journal/2026-11-24-the-birch-wood.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 25,
+      "triangles": 268923,
+      "live": {
+        "buffers": 68,
+        "textures": 10,
+        "programs": 16,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 25
+      }
+    },
+    "mobile": {
+      "draws": 25,
+      "triangles": 167454,
+      "live": {
+        "buffers": 68,
+        "textures": 10,
+        "programs": 16,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 25
+      }
+    }
+  },
+  "bytes": {
+    "new": 165325,
+    "site": 2249294
+  },
+  "three": "0.184.0",
+  "distHash": "e041fea2e37c9c6da284151e56d7a457a361ca8e3c4245921ec39599935fbbd3",
+  "withdrawn": false
+}
