@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repo": "tundra-paws/scenery",
-  "updated": "2026-11-23T23:18:32.593Z",
+  "updated": "2026-11-24T00:20:28.521Z",
   "iterations": [
     {
       "id": 1,
@@ -241,6 +241,54 @@
       },
       "three": "0.184.0",
       "distHash": "457e264fec3eaab80fff7ef714817bbc8b95b09532a65aa7a5acabb026f4390a",
+      "withdrawn": false
+    },
+    {
+      "id": 6,
+      "dir": "i/0006/",
+      "date": "2026-11-24",
+      "sha": "851fd21a33d392d3b392d4811ecf15a463b094e6",
+      "title": "The way up",
+      "summary": "A landing on the near shore, a worn path zigzagging from it up to the cairn, and small waymark cairns beside it. The tour now comes ashore there and walks the path to the top.",
+      "kind": "feature",
+      "model": "Claude",
+      "journal": "journal/2026-11-24-the-way-up.md",
+      "shots": {
+        "hero": "shot.webp",
+        "thumb": "thumb.webp"
+      },
+      "stats": {
+        "desktop": {
+          "draws": 12,
+          "triangles": 138153,
+          "live": {
+            "buffers": 39,
+            "textures": 10,
+            "programs": 8,
+            "framebuffers": 4,
+            "renderbuffers": 0,
+            "vertexArrays": 12
+          }
+        },
+        "mobile": {
+          "draws": 12,
+          "triangles": 73192,
+          "live": {
+            "buffers": 39,
+            "textures": 10,
+            "programs": 8,
+            "framebuffers": 4,
+            "renderbuffers": 0,
+            "vertexArrays": 12
+          }
+        }
+      },
+      "bytes": {
+        "new": 121202,
+        "site": 1385492
+      },
+      "three": "0.184.0",
+      "distHash": "8d2b40d55387926c73a37fdcabfb49efe7753d1379b83fa8e8aa8eff5ce8970c",
       "withdrawn": false
     }
   ]
