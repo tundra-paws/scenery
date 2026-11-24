@@ -23,6 +23,16 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   house, clear of the cairn's hill. Which trees stand is a rule (dry, gentle ground, off the
   path, nothing before the door). Reshape the land or move the shelter and look at `hero`,
   `wood`, `shelter` and `east` again; `east` is now mostly wood, with the house hidden in it.
+- **The infield is typed in to fit `hero`** (`FIELD`, `HEAD`, `FOLD` in `shared/infield.ts`),
+  like the shelter's site. What it holds is read from the land: the rigs lie down its fall
+  and stop short of the dyke, draped on the drawn grid (`grid.heightAt`). Its tests keep the
+  walls off the path, the house, the way to its door, every tree and every low camera, and
+  the field dyke on dry ground. The wood does not know about the walls: the test does.
+  Move the shelter, the path or the land and look at `hero`, `landing`, `boat`, `infield`.
+- The walls are solid only to the eye: the explore walk goes through them, and the flown
+  legs clear them only because they keep five units up. Nothing grazes in the fold.
+- The barley's ripple and the potato rigs are seen at second ten in gold light; at night the
+  field is one dark shape. The rigs cast no shadow of their own (receive only).
 - The lone birches are strewn by rule over the whole island (`strew`). One stands by the
   landing, in `hero`, `landing` and `boat`, where the pennant flies across its crown. Tests
   keep every tree off every postcard's camera and out of the tour's way: move a view or a
@@ -135,8 +145,8 @@ Parts for a chapter, never a day by themselves.
 - The moon always full, because it stands opposite the sun. A phase would need it to be its
   own body, and then some nights would have none.
 - Whitecaps far out where a gust crosses deep water; today a gust only darkens it.
-- A low wall running off from the shelter's gable, or a fold beside it: `shelter/walls.ts` lays
-  any course from a line and the land under it.
+- Stooks, a peat stack, a scythe left on the dyke: late summer on the infield, a later day.
+- A kailyard: a small round walled garden against the house's gable, from `infield/dyke.ts`.
 - An axe left in a stump by the stack. Leaves torn off the wood by a gust and carried
   downwind. A few of the birches turned yellow, for a day late in the summer.
 - Something that lives here and is never near: terns over the stacks, a seal's head off the

@@ -26,8 +26,11 @@ seen on it, only what they left: stones stacked on the summit, later a path, a s
 A stranger should know it as "the island with the cairn", and now there is a house under it
 with the lamp lit and the fire in, a boat at anchor off the landing, and still nobody. Beside
 the house is the only wood on the island, birch, bent by the wind; the trees nearest the door
-are stumps, and their logs are stacked under the eave. It lies off a mountain coast: a high fell and a long range in the haze to the north-west, which nobody
-goes to, and which the sun goes down behind.
+are stumps, and their logs are stacked under the eave. Below the house is the ground they
+worked: a field of rigs, barley and potatoes, walled round with the stones that came out of it,
+its gate left open; a fold across the path; and the head-dyke that keeps both from the hill,
+running down into the sea. It lies off a mountain coast: a high fell and a long range in the
+haze to the north-west, which nobody goes to, and which the sun goes down behind.
 
 **Mood and light.** One summer's day in the north, turning once in the time the tour takes, so
 every stop has its hour. The visit opens on the last of a clear, cool afternoon: a low sun over
@@ -49,17 +52,22 @@ lit, the sky's blues where they are not. Smoke is the same. Weathered wood (`tim
 came by sea and did not grow here: the boat, its oars, its mast; tarred near black where it
 keeps the water out. One pale thing that grows: birch `bark`, near white, scarred with the
 rock's grey taken almost to black; its leaves are the meadow's own two greens, and its cut
-wood the bark's colour warmed. And one dyed thing, a worn red (`pennant`): cloth made only to be seen
+wood the bark's colour warmed. One thing sown, `barley`, a pale green-gold, only on the rigs; the
+potatoes beside it are the meadow's green gone darker, the furrows bare earth turned darker still.
+And one dyed thing, a worn red (`pennant`): cloth made only to be seen
 from the water, and never more than a scrap of it. A new colour needs a job none of these does.
 The sky and its light are the exception that is not one: the same few roles (zenith, horizon,
 light, fill, ground) at five hours, day, gold, sunset, dusk and night (`HOURS`), blended by how
 high the sun stands. At night the light is the moon's cold blue-white, which the stars share.
 
 **Motifs.**
-- *Placed stone.* Cairns, markers, walls: the same boulder shape, stacked on purpose. A wall is
-  laid in level courses with its corners locked; a roof is the hill's own turf.
+- *Placed stone.* Cairns, markers, walls: the same boulder shape, stacked on purpose. A house
+  wall is laid in level courses with its corners locked; a roof is the hill's own turf. A field
+  dyke rides the land, three courses and a cope set on edge, a long stone stood up at every
+  gap; some of its stones are the rock's darker grey, picked off the field it walls.
 - *Wind.* One shared signal that grass, water, clouds, smoke, a pennant, a boat at its
-  anchor and every birch all read. Steady and gentle; what shows it is that everything answers
+  anchor, every birch and the barley all read; on the barley it is seen as ripples of paler
+  ears running up the field. Steady and gentle; what shows it is that everything answers
   to it together. The trees show it standing still: each grew leaning the way it blows, the
   ones alone in the open hardest.
 - *What grows.* Grass, and birch. One wood, where the ground is low and gentle, thinning to
@@ -83,9 +91,10 @@ shoreline that reads as one, water with depth, wind (in the grass, on the sea, a
 clouds whose shadows cross the island), the way up (a landing, a worn and waymarked path to the
 cairn, which the tour walks), the shelter with its lamp, its fire and its smoke, the boat at
 anchor off the landing, the day itself (evening, night with a moon and stars, and morning,
-once round in a visit), the land beyond, which the sun goes down behind, and the birch wood
-beside the shelter, with its outliers on the open island. Next: the inside of the shelter,
-and a sea that answers to what stands in it.
+once round in a visit), the land beyond, which the sun goes down behind, the birch wood
+beside the shelter, with its outliers on the open island, and the infield: the field of rigs,
+its dyke and gate, the fold and the head-dyke. Next: the inside of the shelter, and a sea
+that answers to what stands in it.
 
 ## Where it starts
 
