@@ -1,0 +1,48 @@
+{
+  "id": 14,
+  "dir": "i/0014/",
+  "date": "2026-11-24",
+  "sha": "3eeaa5622f1d27946e5d40f138d199020332b389",
+  "title": "The sea answers",
+  "summary": "The sea gives the world back now. The island, its cairn, the boat and the sky lie mirrored in it. It breaks white round the stones in it, runs a low swell the boat rides, and wets the sand.",
+  "kind": "feature",
+  "model": "claude-opus-5-5",
+  "journal": "journal/2026-11-24-the-sea-answers.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 47,
+      "triangles": 604148,
+      "live": {
+        "buffers": 86,
+        "textures": 12,
+        "programs": 31,
+        "framebuffers": 5,
+        "renderbuffers": 1,
+        "vertexArrays": 47
+      }
+    },
+    "mobile": {
+      "draws": 45,
+      "triangles": 229243,
+      "live": {
+        "buffers": 86,
+        "textures": 12,
+        "programs": 30,
+        "framebuffers": 5,
+        "renderbuffers": 1,
+        "vertexArrays": 45
+      }
+    }
+  },
+  "bytes": {
+    "new": 202222,
+    "site": 2636714
+  },
+  "three": "0.184.0",
+  "distHash": "85b7529fef42c89ba17afbbc54df42429a37d45fb66f988e434d0840e5c8741e",
+  "withdrawn": false
+}
