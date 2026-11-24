@@ -35,18 +35,39 @@ const TREELINE = 20
 /** The steepest ground a tree stands on (`ground.slopeAt`). */
 const STEEP = 0.2
 
+/** How far from the shelter the ground before its door is kept clear of trees. */
+const DOORYARD = 30
+
 /** Clear ground kept from the middle of the path, from the shelter's walls and from the way to its door. */
 const OFF_PATH    = 5
 const OFF_SHELTER = 5
 const OFF_SPUR    = 4
 
 /** How tall a birch grows on the low ground in the thick of the wood, and at the treeline or the wood's edge. */
-const TALL  = 10.5
+const TALL  = 11.5
 const SCRUB = 4.6
 
 /** How far a tree's top stands downwind of its foot, as a part of its height: in shelter, and what exposure adds. */
 const LEAN    = 0.1
 const FLAGGED = 0.2
+
+/**
+ * The birches that stand alone, out on the open island: how many are looked
+ * for, the spots tried for them, and the least ground between one and any
+ * other tree. Seed blown out of the wood, and every one of them small and
+ * hard bent, since nothing stands between it and the wind.
+ */
+const LONE       = 20
+const LONE_TRIES = 1200
+const LONELY     = 17
+
+/** How tall a lone birch grows, from and to, how far it leans, and the highest ground one is found on. */
+const WAIF      = [ 4.6, 7.4 ] as const
+const WAIF_LEAN = [ 0.24, 0.34 ] as const
+const WAIF_LINE = 15
+
+/** How far from the summit a lone birch keeps: the cairn's hill is the cairn's. */
+const OFF_SUMMIT = 21
 
 /** Trees nearest the door that were cut for the fire, and how near the door one has to be for that. */
 const FELLED  = 3
@@ -80,6 +101,9 @@ export interface Wood extends Waypoint {
   /** The standing trees, thickest of the wood first. */
   readonly trees: readonly Tree[]
 
+  /** The birches that stand alone, beyond the wood's reach. */
+  readonly outliers: readonly Tree[]
+
   /** What is left of the ones nearest the door, which went on the fire. */
   readonly stumps: readonly Tree[]
 
@@ -90,6 +114,7 @@ export interface Wood extends Waypoint {
 /** What the rule for a spot reads. */
 interface Site {
   ground:  Ground
+  summit:  Waypoint
   path:    Path
   shelter: Shelter
 }
@@ -103,12 +128,40 @@ function roots ({ ground, path, shelter }: Site, x: number, z: number): boolean 
 
   // Nothing is let grow before the door: the house looks down to the landing.
   const along = (x - shelter.x) * shelter.door[0] + (z - shelter.z) * shelter.door[1]
+  const near  = Math.hypot(x - shelter.x, z - shelter.z) < DOORYARD
 
-  return along < SHELTER_LONG / 2 - 1 &&
+  return !(near && along > SHELTER_LONG / 2 - 1) &&
     shelter.distanceTo(x, z) > OFF_SHELTER &&
     path.distanceTo(x, z) > OFF_PATH &&
     shelter.distanceToSpur(x, z) > OFF_SPUR &&
     ground.slopeAt(x, z) < STEEP
+}
+
+/** The lone birches: spots drawn over the whole island, kept where one could root far from every other tree and off the cairn's hill. */
+function strew (site: Site, seed: number, stand: readonly Tree[]): Tree[] {
+  const { ground, summit } = site
+  const rng                = createSeededRng(seed).fork('wood:lone')
+  const lone: Tree[]       = []
+
+  for (let tries = 0; tries < LONE_TRIES && lone.length < LONE; tries += 1) {
+    const away   = Math.sqrt(rng.next()) * ground.size * 0.42
+    const angle  = rng.range(0, Math.PI * 2)
+    const height = rng.range(WAIF[0], WAIF[1])
+    const lean   = rng.range(WAIF_LEAN[0], WAIF_LEAN[1])
+    const x      = Math.cos(angle) * away
+    const z      = Math.sin(angle) * away
+    const far    = (tree: Tree): boolean => Math.hypot(tree.x - x, tree.z - z) > LONELY
+
+    const alone = Math.hypot(x - HEART.x, z - HEART.z) > REACH &&
+      Math.hypot(x - summit.x, z - summit.z) > OFF_SUMMIT &&
+      stand.every(far) &&
+      lone.every(far)
+
+    if (alone && roots(site, x, z) && ground.heightAt(x, z) - ground.waterLevel < WAIF_LINE)
+      lone.push({ x, z, height, lean, foot: ground.heightAt(x, z) })
+  }
+
+  return lone
 }
 
 export function createWood (site: Site, seed: number): Wood {
@@ -150,18 +203,21 @@ export function createWood (site: Site, seed: number): Wood {
   const near   = (tree: Tree): number => Math.hypot(tree.x - door.x, tree.z - door.z)
   const stumps = stand.filter(tree => near(tree) < CARRIED).sort((a, b) => near(a) - near(b))
     .slice(0, FELLED)
-  const trees  = stand.filter(tree => !stumps.includes(tree))
+  const trees    = stand.filter(tree => !stumps.includes(tree))
+  const outliers = strew(site, seed, stand)
+  const rooted   = [ ...stand, ...outliers ]
 
   return {
     ...HEART,
     trees,
+    outliers,
     stumps,
     reach: REACH,
 
     distanceTo (x, z) {
       let nearest = Infinity
 
-      for (const tree of stand)
+      for (const tree of rooted)
         nearest = Math.min(nearest, Math.hypot(tree.x - x, tree.z - z))
 
       return nearest
@@ -169,6 +225,7 @@ export function createWood (site: Site, seed: number): Wood {
   }
 }
 
-// perf: cheap — up to 1400 spots tried once, each one ground sample and, for
-// the few that pass everything else, the four of its slope. `distanceTo` is a
-// pass over 78 trunks: ask it at build time, not per frame.
+// perf: cheap — up to 2700 spots tried once, each one ground sample at most
+// and, for the few that pass everything else, the four of its slope.
+// `distanceTo` is a pass over some seventy trunks: ask it at build time, not
+// per frame.

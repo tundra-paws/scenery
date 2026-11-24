@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test'
 
 import { DAY, elevationAt } from '../world/shared/daylight.ts'
 import { createGround } from '../world/shared/ground.ts'
-import { createPath } from '../world/shared/path.ts'
+import { createPath, findSummit } from '../world/shared/path.ts'
 import { createShelter } from '../world/shared/shelter.ts'
 import { createWood } from '../world/shared/wood.ts'
 import { VIEWS } from '../world/views.ts'
@@ -303,12 +303,12 @@ describe('the world\'s own tour', () => {
   })
 
   test('never flies through the wood', () => {
-    const wood = createWood({ ground, path, shelter: createShelter(ground, path) }, WORLD_SEED)
+    const wood = createWood({ ground, path, summit: findSummit(ground), shelter: createShelter(ground, path) }, WORLD_SEED)
 
     for (let t = 0; t < tourDuration(tour); t += 0.05) {
       const [ x, y, z ] = tourPose(tour, t, blank()).position
 
-      for (const tree of wood.trees) {
+      for (const tree of [ ...wood.trees, ...wood.outliers ]) {
         if (y > tree.foot + tree.height + 0.5)
           continue
 

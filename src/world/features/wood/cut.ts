@@ -96,4 +96,4 @@ export function stackLogs (timber: Timber, shelter: Shelter, ground: Ground, rng
 }
 
 // perf: trivial — a log is eighteen triangles, a stump the same: the stack
-// and the stumps together are under 700. Built once.
+// and the stumps together are 414. Built once.

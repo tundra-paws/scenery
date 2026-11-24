@@ -56,7 +56,8 @@ function swayInWind (material: THREE.Material, wind: Wind): void {
 
 /**
  * The wood: a stand of downy birch on the low ground east of the shelter,
- * every tree bent the way the wind has always blown.
+ * every tree bent the way the wind has always blown, and a few more alone
+ * out on the open island, bent harder.
  *
  * The first thing on the island taller than grass that nobody put there,
  * and what the fire in the shelter burns: the trees nearest the door are
@@ -82,7 +83,7 @@ export function createWoodFeature (world: World): Feature {
       const sphere = new THREE.IcosahedronGeometry(1, 1)
       const ball   = sphere.getAttribute('position').array
 
-      for (const tree of wood.trees)
+      for (const tree of [ ...wood.trees, ...wood.outliers ])
         growBirch(timber, tree, { tier: quality.tier, lee: wind.direction, rng: grow, ball })
 
       cutStumps(timber, wood.stumps, rng.fork('wood:stumps'))
@@ -121,7 +122,8 @@ export function createWoodFeature (world: World): Feature {
   }
 }
 
-// perf: medium — one draw call and one shadow pass for the whole wood: 75
-// trees, 28k triangles on the mobile tier and 42k on desktop, drawn twice.
-// The sway is five sines a vertex in the shader, from the wind's one
-// uniform; nothing per frame on the CPU.
+// perf: medium — one draw call and one shadow pass for all of it: 72 birches
+// (the wood's 52 and the island's 20) and the cut wood, 28k triangles on the
+// mobile tier and 43k on desktop, drawn twice. The sway is five sines a
+// vertex in the shader, from the wind's one uniform; nothing per frame on
+// the CPU.

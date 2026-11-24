@@ -103,6 +103,6 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     beyond,
     day:    createDaylight(createSkyline(beyond)),
     shelter,
-    wood:   createWood({ ground, path, shelter }, seed),
+    wood:   createWood({ ground, summit, path, shelter }, seed),
   }
 }

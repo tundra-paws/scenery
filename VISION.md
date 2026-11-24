@@ -24,8 +24,9 @@ The curator works within these and does not rewrite this section.
 **What this place is.** A small northern island that someone walked before you. Nobody is ever
 seen on it, only what they left: stones stacked on the summit, later a path, a shelter, a light.
 A stranger should know it as "the island with the cairn", and now there is a house under it
-with the lamp lit and the fire in, a boat at anchor off the landing, and still nobody. It lies
-off a mountain coast: a high fell and a long range in the haze to the north-west, which nobody
+with the lamp lit and the fire in, a boat at anchor off the landing, and still nobody. Beside
+the house is the only wood on the island, birch, bent by the wind; the trees nearest the door
+are stumps, and their logs are stacked under the eave. It lies off a mountain coast: a high fell and a long range in the haze to the north-west, which nobody
 goes to, and which the sun goes down behind.
 
 **Mood and light.** One summer's day in the north, turning once in the time the tour takes, so
@@ -46,7 +47,9 @@ sun's cream, and the deeper amber of a flame someone lit (`lamp`), which only th
 lamp and its window show. Clouds have no colour of their own: the sun's cream where they are
 lit, the sky's blues where they are not. Smoke is the same. Weathered wood (`timber`) for what
 came by sea and did not grow here: the boat, its oars, its mast; tarred near black where it
-keeps the water out. And one dyed thing, a worn red (`pennant`): cloth made only to be seen
+keeps the water out. One pale thing that grows: birch `bark`, near white, scarred with the
+rock's grey taken almost to black; its leaves are the meadow's own two greens, and its cut
+wood the bark's colour warmed. And one dyed thing, a worn red (`pennant`): cloth made only to be seen
 from the water, and never more than a scrap of it. A new colour needs a job none of these does.
 The sky and its light are the exception that is not one: the same few roles (zenith, horizon,
 light, fill, ground) at five hours, day, gold, sunset, dusk and night (`HOURS`), blended by how
@@ -55,8 +58,13 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
 **Motifs.**
 - *Placed stone.* Cairns, markers, walls: the same boulder shape, stacked on purpose. A wall is
   laid in level courses with its corners locked; a roof is the hill's own turf.
-- *Wind.* One shared signal that grass, water, clouds, smoke, a pennant and a boat at its
-  anchor all read. Steady and gentle; what shows it is that everything answers to it together.
+- *Wind.* One shared signal that grass, water, clouds, smoke, a pennant, a boat at its
+  anchor and every birch all read. Steady and gentle; what shows it is that everything answers
+  to it together. The trees show it standing still: each grew leaning the way it blows, the
+  ones alone in the open hardest.
+- *What grows.* Grass, and birch. One wood, where the ground is low and gentle, thinning to
+  scrub at its edge; a few trees alone beyond it; none on the cairn's hill. A tree is a pale
+  trunk and a few faceted lumps of leaves, never a model of a tree.
 - *The hour.* The other shared signal (`world.day`): where the sun is, and from that the sky,
   the one light and its shadows, the fill, the haze, the sea's colours and the clouds'. Nothing
   keeps a colour of the sky for itself. Sun and moon are one light that is out as it changes
@@ -75,8 +83,9 @@ shoreline that reads as one, water with depth, wind (in the grass, on the sea, a
 clouds whose shadows cross the island), the way up (a landing, a worn and waymarked path to the
 cairn, which the tour walks), the shelter with its lamp, its fire and its smoke, the boat at
 anchor off the landing, the day itself (evening, night with a moon and stars, and morning,
-once round in a visit), and the land beyond, which the sun goes down behind. Next: the inside
-of the shelter, and a sea that answers to what stands in it.
+once round in a visit), the land beyond, which the sun goes down behind, and the birch wood
+beside the shelter, with its outliers on the open island. Next: the inside of the shelter,
+and a sea that answers to what stands in it.
 
 ## Where it starts
 

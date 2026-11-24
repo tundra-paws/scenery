@@ -19,6 +19,24 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 
 ## Known problems
 
+- **The wood is typed in to fit `hero`** (`HEART`, `REACH` in `shared/wood.ts`): right of the
+  house, clear of the cairn's hill. Which trees stand is a rule (dry, gentle ground, off the
+  path, nothing before the door). Reshape the land or move the shelter and look at `hero`,
+  `wood`, `shelter` and `east` again; `east` is now mostly wood, with the house hidden in it.
+- The lone birches are strewn by rule over the whole island (`strew`). One stands by the
+  landing, in `hero`, `landing` and `boat`, where the pennant flies across its crown. Tests
+  keep every tree off every postcard's camera and out of the tour's way: move a view or a
+  rule and they say so.
+- `wood` stands in the tour on borrowed time: `east`, `wood` and `shelter` have short legs
+  (`travel` 8, 7 and 10) that together add nothing, so `DAY` did not move. Change one and the
+  day test fails until the three sum to what they did.
+- Nothing knows a tree is there but the boulders: an exploring visitor walks through a trunk,
+  tufts grow against it, and the lamp lights the far side of it. The crowns are lit as if
+  half turned to the sky (`SKYWARD` in `wood/timber.ts`), so under the moon they are a little
+  brighter than the grass.
+- A tree's shadow is in the sun's one shadow map, a few texels a trunk. The leaves are solid
+  lumps: no light comes through a crown and none falls dappled under it.
+
 - The first frame still waits for every shader program to link: 87 to 90 ms in Firefox, 35 ms
   in Chromium. Compiling after each feature did not help (`lib-stack/README.md`, "Tried and
   dropped"). Fewer programs would: the gate counts thirteen (the stars are one).
@@ -119,7 +137,10 @@ Parts for a chapter, never a day by themselves.
 - Whitecaps far out where a gust crosses deep water; today a gust only darkens it.
 - A low wall running off from the shelter's gable, or a fold beside it: `shelter/walls.ts` lays
   any course from a line and the land under it.
-- A stack of cut turf or driftwood by the door: `timber` is the colour for wood now.
+- An axe left in a stump by the stack. Leaves torn off the wood by a gust and carried
+  downwind. A few of the birches turned yellow, for a day late in the summer.
+- Something that lives here and is never near: terns over the stacks, a seal's head off the
+  landing. Small, far, and gone when looked for.
 - The boat's sail, furled on its yard along the thwarts, and a creel or a net on the beach.
 - Grass growing on the shelter's roof: the meadow's own tufts. The tuft's shape and material
   would move out of `features/tufts` into `shared/` so both are drawn with one program.
