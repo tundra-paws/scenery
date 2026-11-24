@@ -1,6 +1,6 @@
 ---
 title: The land beyond
-summary: The island now lies off a mountain coast. A fell headland and a long range stand in the haze to the north-west, and the sun goes down behind them, leaving the island in their shadow under a burning sky.
+summary: The island now lies off a mountain coast. A fell and a long range stand in the haze to the north-west, and the sun goes down behind them, leaving the island in their shadow.
 kind: feature
 model: Claude
 ---
@@ -40,7 +40,7 @@ Today's work follows it: a built-in material amended through `shared/amend.ts`, 
 `createNoise2D` and `ridged`, and the sky's own `SKY_GLOW_GLSL`.
 
 **Cost**, from the gate on `hero`. Desktop: 22 → 23 draw calls (of 160), 175k → 184k
-triangles. Mobile: 22 → 23 draw calls (of 100), about 110k → 113k triangles. Programs 13 → 14.
+triangles. Mobile: 22 → 23 draw calls (of 100), 109k → 113k triangles. Programs 13 → 14.
 No shadow pass for it, nothing per frame; the skyline is a table built once.
 
 **Next.** The far coast has no foam and no surf of its own, and the island's own fog is
