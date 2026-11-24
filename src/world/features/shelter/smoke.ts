@@ -105,6 +105,7 @@ export function createSmoke ({ tier, seed, wind, from }: SmokeOptions): Smoke {
   const reach = LIFE * (RISE + wind.speed * (CARRY + GUST))
 
   mesh.name = 'shelter-smoke'
+  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
   // The puffs move every step, so the sphere three culls by is given once,
   // wide enough for the plume wherever the wind lays it.

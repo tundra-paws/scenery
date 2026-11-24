@@ -123,7 +123,7 @@ export function createShelterFeature (world: World): Feature {
   }
 }
 
-// perf: cheap — four draw calls and two shadow passes: the stones (24k
+// perf: cheap — four draw calls and two shadow passes: the stones (17k
 // triangles), the body, the unlit openings and the smoke. One point light
 // without a shadow. A step moves the smoke's puffs (`smoke.ts`) and sets one
 // number on the lamp.

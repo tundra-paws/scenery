@@ -68,15 +68,16 @@ interface WorldOptions {
 export function createWorld ({ seed, quality }: WorldOptions): World {
   const ground = createGround({ seed })
   const summit = findSummit(ground)
+  const path   = createPath(ground, summit)
 
   return {
     seed,
     quality,
     ground,
     summit,
+    path,
     wind:    createWind(),
     clouds:  createCloudShadow(),
-    path:    createPath(ground, summit),
-    shelter: createShelter(ground),
+    shelter: createShelter(ground, path),
   }
 }

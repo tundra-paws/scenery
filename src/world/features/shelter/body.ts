@@ -135,4 +135,4 @@ export function createBodyGeometry (seed: number, foot: number): THREE.BufferGeo
   return body
 }
 
-// perf: cheap — some 250 triangles, built once.
+// perf: cheap — 300 triangles, built once.

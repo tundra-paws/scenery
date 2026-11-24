@@ -13,8 +13,8 @@ const STONE = 0.95
 /** How far a wall's stones stop short of a corner on the courses where the other wall turns it. */
 const QUOIN = 0.5
 
-/** Stones the mesh has room for. A hundred more than this plan lays. */
-const ROOM = 480
+/** Stones the mesh has room for. Half as many again as this plan lays on this land. */
+const ROOM = 320
 
 /** Module-scope scratch, so placing an instance allocates nothing. */
 const dummy = new THREE.Object3D()
@@ -50,6 +50,11 @@ interface Stone {
 /** Lay one stone, a little out of true, the way a hand leaves it. */
 function set (mason: Mason, { at, base, half, turn, thick = COURSE, depth = 0.4 }: Stone): void {
   const { lay } = mason
+
+  // On other land the hill may stand lower against the walls and ask for more
+  // courses than there is room for: the last stones are then left off.
+  if (mason.laid >= ROOM)
+    return
 
   dummy.position.set(at[0] + lay.range(-0.05, 0.05), base + thick * 0.55, at[1] + lay.range(-0.05, 0.05))
   dummy.rotation.set(lay.range(-0.07, 0.07), turn + lay.range(-0.1, 0.1), lay.range(-0.07, 0.07))
@@ -179,5 +184,5 @@ export function layWalls (geometry: THREE.BufferGeometry, material: THREE.Materi
   return mesh
 }
 
-// perf: cheap — one draw call (two with its shadow pass). About 300 stones of
-// 80 triangles: 24k on every tier. Laid once; nothing per frame.
+// perf: cheap — one draw call (two with its shadow pass). 209 stones of 80
+// triangles: 17k on every tier. Laid once; nothing per frame.

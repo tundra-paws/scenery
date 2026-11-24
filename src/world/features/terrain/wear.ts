@@ -5,7 +5,7 @@ import type { QualityTier } from 'threejs-scenes'
 import { amendShader, insertAfter } from '../../shared/amend.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { distanceToSpan } from '../../shared/path.ts'
-import type { Path } from '../../shared/path.ts'
+import type { Path, Waypoint } from '../../shared/path.ts'
 
 
 /** Texels along the longer side of the picture of the path. */
@@ -14,6 +14,9 @@ const SIDE: Record<QualityTier, number> = { mobile: 160, desktop: 256, highEnd: 
 /** Half the width of the bare ground, in world units, and how far that wanders along the way. */
 const HALF_WIDTH = 1.35
 const WANDER     = 0.28
+
+/** Half the width of a side way: one pair of feet, now and then. */
+const SPUR_HALF = 0.75
 
 /** How far from the path the picture still knows the distance, in half-widths. Past that it is plain ground. */
 const REACH = 4
@@ -60,51 +63,70 @@ export interface PathWear {
   frame: THREE.Vector4
 }
 
+/** The picture being painted: its texels, how many, how big, and where its corner is in the world. */
+interface Canvas {
+  data:    Uint8Array<ArrayBuffer>
+  columns: number
+  rows:    number
+  texel:   number
+  minX:    number
+  minZ:    number
+}
+
 /** How wide the bare ground is at a distance along the path: two slow waves, so no stretch is ruled. */
 function halfWidthAt (along: number): number {
   return HALF_WIDTH * (1 + WANDER * (0.6 * Math.sin(along * 0.31) + 0.4 * Math.sin(along * 0.113 + 1.7)))
 }
 
 /**
- * Paint distance from the path into a picture of the ground it crosses.
- *
- * Each span of the path is stamped into the texels around it, as the nearest
- * it comes in units of its own half-width there, so a wider stretch is simply
- * a stretch whose edge lies further out. The picture covers the path's own
- * bounds and a margin; everything outside reads as its edge, which is zero.
+ * Stamp one span of a way into the texels around it, as the nearest it comes
+ * in units of its own half-width there, so a wider stretch is simply a
+ * stretch whose edge lies further out.
  */
-export function createPathWear (path: Path, tier: QualityTier): PathWear {
+function stamp ({ data, columns, rows, texel, minX, minZ }: Canvas, from: Waypoint, to: Waypoint, half: number): void {
+  const reach = Math.ceil(REACH * half / texel) + 1
+  const left  = Math.max(0, Math.floor((Math.min(from.x, to.x) - minX) / texel) - reach)
+  const right = Math.min(columns - 1, Math.floor((Math.max(from.x, to.x) - minX) / texel) + reach)
+  const near  = Math.max(0, Math.floor((Math.min(from.z, to.z) - minZ) / texel) - reach)
+  const far   = Math.min(rows - 1, Math.floor((Math.max(from.z, to.z) - minZ) / texel) + reach)
+
+  for (let row = near; row <= far; row += 1)
+    for (let column = left; column <= right; column += 1) {
+      const away  = distanceToSpan(minX + (column + 0.5) * texel, minZ + (row + 0.5) * texel, from, to) / half
+      const value = Math.round(255 * (1 - away / REACH))
+
+      data[row * columns + column] = Math.max(data[row * columns + column]!, value)
+    }
+}
+
+/**
+ * Paint distance from the path into a picture of the ground it crosses, and
+ * from the side ways that leave it, which are narrower.
+ *
+ * The picture covers the bounds of all of them and a margin; everything
+ * outside reads as its edge, which is zero.
+ */
+export function createPathWear (path: Path, tier: QualityTier, spurs: readonly (readonly Waypoint[])[] = []): PathWear {
   const { points } = path
+  const all        = [ ...points, ...spurs.flat() ]
   const pad        = REACH * HALF_WIDTH * (1 + WANDER) + 2
-  const minX       = Math.min(...points.map(point => point.x)) - pad
-  const minZ       = Math.min(...points.map(point => point.z)) - pad
-  const spanX      = Math.max(...points.map(point => point.x)) + pad - minX
-  const spanZ      = Math.max(...points.map(point => point.z)) + pad - minZ
+  const minX       = Math.min(...all.map(point => point.x)) - pad
+  const minZ       = Math.min(...all.map(point => point.z)) - pad
+  const spanX      = Math.max(...all.map(point => point.x)) + pad - minX
+  const spanZ      = Math.max(...all.map(point => point.z)) + pad - minZ
   const texel      = Math.max(spanX, spanZ) / SIDE[tier]
   const columns    = Math.ceil(spanX / texel)
   const rows       = Math.ceil(spanZ / texel)
-  const data       = new Uint8Array(columns * rows)
+  const canvas     = { data: new Uint8Array(columns * rows), columns, rows, texel, minX, minZ }
 
-  for (let index = 1; index < points.length; index += 1) {
-    const from  = points[index - 1]!
-    const to    = points[index]!
-    const half  = halfWidthAt(index * path.spacing)
-    const reach = Math.ceil(REACH * half / texel) + 1
-    const left  = Math.max(0, Math.floor((Math.min(from.x, to.x) - minX) / texel) - reach)
-    const right = Math.min(columns - 1, Math.floor((Math.max(from.x, to.x) - minX) / texel) + reach)
-    const near  = Math.max(0, Math.floor((Math.min(from.z, to.z) - minZ) / texel) - reach)
-    const far   = Math.min(rows - 1, Math.floor((Math.max(from.z, to.z) - minZ) / texel) + reach)
+  for (let index = 1; index < points.length; index += 1)
+    stamp(canvas, points[index - 1]!, points[index]!, halfWidthAt(index * path.spacing))
 
-    for (let row = near; row <= far; row += 1)
-      for (let column = left; column <= right; column += 1) {
-        const away  = distanceToSpan(minX + (column + 0.5) * texel, minZ + (row + 0.5) * texel, from, to) / half
-        const value = Math.round(255 * (1 - away / REACH))
+  for (const spur of spurs)
+    for (let index = 1; index < spur.length; index += 1)
+      stamp(canvas, spur[index - 1]!, spur[index]!, SPUR_HALF)
 
-        data[row * columns + column] = Math.max(data[row * columns + column]!, value)
-      }
-  }
-
-  const texture = new THREE.DataTexture(data, columns, rows, THREE.RedFormat, THREE.UnsignedByteType)
+  const texture = new THREE.DataTexture(canvas.data, columns, rows, THREE.RedFormat, THREE.UnsignedByteType)
 
   texture.name        = 'path-wear'
   texture.magFilter   = THREE.LinearFilter

@@ -16,9 +16,10 @@ import type { Feature, World } from '../../world.ts'
 
 const COUNT: Record<QualityTier, number> = { mobile: 900, desktop: 2600, highEnd: 4200 }
 
-/** How far from the middle of the path the grass is trodden out, and how far from the shelter's walls. */
+/** How far from the middle of the path the grass is trodden out, from the shelter's walls, and from the way to its door. */
 const OFF_PATH    = 1.9
 const OFF_SHELTER = 0.9
+const OFF_SPUR    = 1.1
 
 /** Length of a blade before it is leant and scaled. */
 const BLADE = 0.8
@@ -164,7 +165,11 @@ export function createTufts (world: World): Feature {
 
         // Nothing grows where feet go, or under a wall. Left out after its
         // draws are taken, so every other tuft stays where it was.
-        if (world.path.distanceTo(spot.x, spot.z) < OFF_PATH || world.shelter.distanceTo(spot.x, spot.z) < OFF_SHELTER)
+        const trodden = world.path.distanceTo(spot.x, spot.z) < OFF_PATH ||
+          world.shelter.distanceTo(spot.x, spot.z) < OFF_SHELTER ||
+          world.shelter.distanceToSpur(spot.x, spot.z) < OFF_SPUR
+
+        if (trodden)
           continue
 
         mesh.setMatrixAt(kept, dummy.matrix)

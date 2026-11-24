@@ -15,7 +15,8 @@ const COUNT: Record<QualityTier, number> = { mobile: 60, desktop: 140, highEnd: 
 /**
  * Clear ground kept round a boulder, on top of its own size: from the middle of
  * the path, far enough that it never leans on a waymark, from the summit,
- * where the cairn and its spill stand, and from the shelter's walls.
+ * where the cairn and its spill stand, and from the shelter's walls and the
+ * way to its door.
  */
 const OFF_PATH    = 3
 const OFF_SUMMIT  = 4
@@ -73,7 +74,7 @@ export function createRocks (world: World): Feature {
         // boulder stays where it was.
         const taken = path.distanceTo(spot.x, spot.z) < size + OFF_PATH ||
           Math.hypot(spot.x - summit.x, spot.z - summit.z) < size + OFF_SUMMIT ||
-          shelter.distanceTo(spot.x, spot.z) < size + OFF_SHELTER
+          Math.min(shelter.distanceTo(spot.x, spot.z), shelter.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER
 
         if (taken)
           continue

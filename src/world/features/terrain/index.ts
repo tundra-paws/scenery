@@ -63,7 +63,7 @@ function cellsAbove (geometry: THREE.BufferGeometry, floor: number): number[] {
   return kept
 }
 
-/** The land: one heightfield mesh, coloured per vertex, shaded flat, with the path worn into it. */
+/** The land: one heightfield mesh, coloured per vertex, shaded flat, with the path and the way to the shelter's door worn into it. */
 export function createTerrain (world: World): Feature {
   let mesh: THREE.Mesh | null = null
   let wear: PathWear | null   = null
@@ -104,7 +104,7 @@ export function createTerrain (world: World): Feature {
         metalness:    0,
       })
 
-      wear = createPathWear(world.path, world.quality.tier)
+      wear = createPathWear(world.path, world.quality.tier, [ world.shelter.spur ])
 
       wearPath(material, wear)
       shadeUnderClouds(material, world)
