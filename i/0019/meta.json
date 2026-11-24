@@ -1,0 +1,48 @@
+{
+  "id": 19,
+  "dir": "i/0019/",
+  "date": "2026-11-24",
+  "sha": "e0759a5552a0320b87ee0d2cbd57a100d3cf39cb",
+  "title": "Grain, water and grass",
+  "summary": "Every surface has a texture made in the shader, with relief. A burn runs from a spring under the cairn down the brae to the sea. Grass grows by the blade wherever the visitor stands.",
+  "kind": "feature",
+  "model": "claude",
+  "journal": "journal/2026-11-24-grain-water-and-grass.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 72,
+      "triangles": 606235,
+      "live": {
+        "buffers": 396,
+        "textures": 10,
+        "programs": 29,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 83
+      }
+    },
+    "mobile": {
+      "draws": 63,
+      "triangles": 237821,
+      "live": {
+        "buffers": 328,
+        "textures": 10,
+        "programs": 29,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 67
+      }
+    }
+  },
+  "bytes": {
+    "new": 934892,
+    "site": 4554207
+  },
+  "three": "0.184.0",
+  "distHash": "cbb8006f9711d8a28f972f50dd11dd6e50a0bdb96ffc300220fb3c53decbdaab",
+  "withdrawn": false
+}
