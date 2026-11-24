@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repo": "tundra-paws/scenery",
-  "updated": "2026-11-24T12:49:11.016Z",
+  "updated": "2026-11-24T13:22:11.715Z",
   "iterations": [
     {
       "id": 1,
@@ -769,6 +769,54 @@
       },
       "three": "0.184.0",
       "distHash": "c8bb97da403ab6c02bef5cdd0171bcfe79d70047f8642fbffce141a9c36b8d2c",
+      "withdrawn": false
+    },
+    {
+      "id": 17,
+      "dir": "i/0017/",
+      "date": "2026-11-24",
+      "sha": "037e336a027be6f78401db4c9cc99b5d78833d92",
+      "title": "The starlings",
+      "summary": "Every evening a cloud of starlings comes in over the sea, wheels over the brae through the gold, and pours down into the head-dyke at sunset. At first light it rises out of the stones and goes.",
+      "kind": "feature",
+      "model": "claude-opus-5-5",
+      "journal": "journal/2026-11-24-the-starlings.md",
+      "shots": {
+        "hero": "shot.webp",
+        "thumb": "thumb.webp"
+      },
+      "stats": {
+        "desktop": {
+          "draws": 61,
+          "triangles": 620336,
+          "live": {
+            "buffers": 116,
+            "textures": 12,
+            "programs": 31,
+            "framebuffers": 5,
+            "renderbuffers": 1,
+            "vertexArrays": 61
+          }
+        },
+        "mobile": {
+          "draws": 54,
+          "triangles": 220922,
+          "live": {
+            "buffers": 116,
+            "textures": 12,
+            "programs": 30,
+            "framebuffers": 5,
+            "renderbuffers": 1,
+            "vertexArrays": 54
+          }
+        }
+      },
+      "bytes": {
+        "new": 258000,
+        "site": 3352959
+      },
+      "three": "0.184.0",
+      "distHash": "6c357b8a6e40dd50ef58362aa4c39f4db63a690c6dbbd76c53e437083a1514e6",
       "withdrawn": false
     }
   ]
