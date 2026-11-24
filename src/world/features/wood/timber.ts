@@ -10,7 +10,7 @@ const RAGGED = 0.3
  * is not a boulder: light comes through it, and its underside is never as
  * dark as a stone's. The same reason a tuft of grass is lit like the ground.
  */
-const SKYWARD = 0.85
+const SKYWARD = 0.7
 
 /** Module-scope scratch. */
 const UP    = new THREE.Vector3(0, 1, 0)
