@@ -147,6 +147,15 @@
     }
   }
 
+  /* last in main, so it lies over the frame and the stored picture */
+  main > progress {
+    position:          absolute;
+    inset-block-start: 0;
+    inset-inline:      0;
+    inline-size:       100%;
+    block-size:        3px;
+  }
+
   section[data-view='notice'] {
     position:      absolute;
     inset:         0;
@@ -456,9 +465,78 @@
     }
   }
 
+  /*
+   * How far the first picture has come: the list of iterations, then the world
+   * in the frame. The element is the bar; what a browser draws inside a
+   * <progress> is cleared. The stages are milestones, not bytes, so the world's
+   * stretch slows as it goes and only finishes when the world says it is ready.
+   */
+  main > progress {
+    appearance:       none;
+    border:           0;
+    background:       var(--accent);
+    box-shadow:       0 0 0.5rem var(--accent);
+    transform-origin: 0 50%;
+    scale:            0 1;
+    opacity:          0;
+    visibility:       hidden;
+    pointer-events:   none;
+
+    &::-webkit-progress-bar {
+      background: transparent;
+    }
+
+    &::-webkit-progress-value {
+      background: transparent;
+    }
+
+    &::-moz-progress-bar {
+      background: transparent;
+    }
+
+    :root[data-loading='gallery'] & {
+      scale:      0.25 1;
+      opacity:    1;
+      visibility: visible;
+    }
+
+    :root[data-loading='world'] & {
+      scale:      0.9 1;
+      opacity:    1;
+      visibility: visible;
+    }
+
+    :root[data-loading='done'] & {
+      scale: 1 1;
+    }
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     body > header > h1 {
       transition: opacity var(--dur) var(--ease);
+    }
+
+    /* Only scale and opacity move, so the compositor keeps the bar going while
+       the world is built on the thread this page shares with its frame. */
+    main > progress {
+      will-change: scale;
+
+      :root[data-loading='gallery'] & {
+        transition: scale 3s var(--ease);
+
+        @starting-style {
+          scale: 0 1;
+        }
+      }
+
+      /* as long as health.js waits for a world before it calls it late */
+      :root[data-loading='world'] & {
+        transition: scale 20s cubic-bezier(0.05, 0.7, 0.1, 1);
+      }
+
+      :root[data-loading='done'] & {
+        transition: scale 0.2s var(--ease), opacity 0.3s 0.2s, visibility 0s 0.5s;
+      }
     }
 
     button {

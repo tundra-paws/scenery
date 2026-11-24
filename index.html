@@ -18,6 +18,9 @@
   <script>
     window.sceneryManifest = fetch('iterations.json', { cache: 'no-cache' })
     window.sceneryManifest.catch(() => undefined)
+
+    // The bar across the top starts with the first paint, not when shell.js lands.
+    document.documentElement.dataset.loading = 'gallery'
   </script>
   <link rel="stylesheet" href="shell.css">
   <!-- What shell.js imports, fetched beside it instead of after it has arrived. -->
@@ -55,6 +58,8 @@
         <p>Scenery is a 3D world that runs in the browser, so there is nothing to show without scripts.</p>
       </section>
     </noscript>
+
+    <progress aria-label="Loading the world"></progress>
   </main>
 
   <aside id="chrome" aria-label="Iteration browser">
