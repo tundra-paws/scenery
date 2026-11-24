@@ -24,7 +24,7 @@ The curator works within these and does not rewrite this section.
 **What this place is.** A small northern island that someone walked before you. Nobody is ever
 seen on it, only what they left: stones stacked on the summit, later a path, a shelter, a light.
 A stranger should know it as "the island with the cairn", and now there is a house under it
-with the lamp lit and the fire in, and still nobody.
+with the lamp lit and the fire in, a boat at anchor off the landing, and still nobody.
 
 **Mood and light.** A clear, cool, late afternoon with a low sun that rakes the hills and throws
 long shadows. Thin haze at the horizon. The air is moving but gentle: things sway, nothing
@@ -37,14 +37,16 @@ white (`foam`), only where the sea runs out on the land. Bare earth (`path`), sa
 only where feet have worn the grass away. Two warm notes, both reserved for light itself: the
 sun's cream, and the deeper amber of a flame someone lit (`lamp`), which only the shelter's
 lamp and its window show. Clouds have no colour of their own: the sun's cream where they are
-lit, the sky's blues where they are not. Smoke is the same. A new colour needs a job none of
-these does.
+lit, the sky's blues where they are not. Smoke is the same. Weathered wood (`timber`) for what
+came by sea and did not grow here: the boat, its oars, its mast; tarred near black where it
+keeps the water out. And one dyed thing, a worn red (`pennant`): cloth made only to be seen
+from the water, and never more than a scrap of it. A new colour needs a job none of these does.
 
 **Motifs.**
 - *Placed stone.* Cairns, markers, walls: the same boulder shape, stacked on purpose. A wall is
   laid in level courses with its corners locked; a roof is the hill's own turf.
-- *Wind.* One shared signal that grass, water, clouds, smoke and anything hanging all read.
-  Steady and gentle; what shows it is that everything answers to it together.
+- *Wind.* One shared signal that grass, water, clouds, smoke, a pennant and a boat at its
+  anchor all read. Steady and gentle; what shows it is that everything answers to it together.
 - *The line between.* Shore, ridge and horizon: edges are where the detail goes.
 - *Low-poly, flat-shaded, few colours.* Facets are the style, not a shortcut to hide.
 
@@ -57,9 +59,10 @@ shoreline that reads as one, water with depth, wind (in the grass, on the sea, a
 clouds whose shadows cross the island), the way up: a landing on the near shore and a worn
 path from it to the cairn, waymarked, which the tour walks, and the shelter: a low house of
 placed stone under turf on the shoulder above the path's first bend, a lamp in its door, a
-fire in its hearth, its smoke on the wind. Next: a boat at the landing. Then the light turning
-toward evening over the tour, which the lamp is waiting for, and a second landmass on the
-horizon.
+fire in its hearth, its smoke on the wind, and the boat they came in, lying to its anchor off
+the landing with a pennant at the masthead. Next: the light turning toward evening over the
+tour, which the lamp is waiting for. Then a second landmass on the horizon, and the inside of
+the shelter.
 
 ## Where it starts
 

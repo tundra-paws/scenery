@@ -7,16 +7,17 @@ this short: a plan nobody can read in a minute is not a plan.
 
 Each item is one day: a whole chapter, built complete (both tiers, a postcard, the tour).
 
-1. **A boat at the landing.** The slip has two rows of stones and nothing between them. A small
-   boat drawn up there, or riding off it, says how whoever lit the lamp came. It needs a colour
-   with a job. A pennant on it could read the wind the way the smoke does (`shelter/smoke.ts`).
-2. **Evening.** The light turning over the tour, which the lamp and the window are waiting for:
+1. **Evening.** The light turning over the tour, which the lamp and the window are waiting for:
    by day they are two orange points. `SUN` is one constant that the light, the sky, the sea's
    glint and the clouds' shadow all read, and the shadow's slant is written into GLSL as a
    number (`cloud-shadow.ts`): moving the sun means making that a uniform first.
-3. **Beyond.** A second landmass on the horizon.
-4. **Inside.** The shelter is a shell. A floor, a hearth with the fire in it, a bench, and a rig
+2. **Beyond.** A second landmass on the horizon.
+3. **Inside.** The shelter is a shell. A floor, a hearth with the fire in it, a bench, and a rig
    that knows a wall from a door, for the visitor who walks in.
+4. **The sea answers.** The sea takes nothing from what stands in it: no shadow under the boat,
+   no foam at its waterline or round the landing's stones, no wake when it sheers. The water is
+   a shader of its own with one height map of the land (`water/index.ts`); a second small map
+   of what floats and stands in it would give all three.
 
 ## Known problems
 
@@ -46,6 +47,14 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - The shelter's site (`shared/shelter.ts`) and the `shelter` postcard are typed in. The floor,
   the facing and the way to the door are read from the land and the path, and the land is not
   benched for it: the walls simply start where the hill is. Reshape the land and look again.
+- The boat's place is a rule (`boat/mooring.ts`): off the landing, to the side the wind does
+  not blow it back across, in water its own test says is deep enough from end to end. Its anchor
+  lies under the `landing` view's feet, and that view does not show the boat. Move `HEADING`
+  in `shared/wind.ts` or the landing and look at `hero`, `boat` and `landing` again.
+- The boat rides by its own sines, not the sea's: the water is flat and only shaded as waves.
+  It throws no shadow on the water and an exploring visitor can walk through it.
+- Two runs built the shelter on the same day from the same roadmap line, and only one could
+  land. A run that finds `main` has gained its chapter sets its own aside and takes the next.
 - The smoke is opaque puffs that shade nothing. From `hero` at second ten the top of the plume
   stands against a cloud of the same colours.
 - The clouds' shadow and the sun's shadow map do not know about each other: a boulder's own
@@ -67,4 +76,8 @@ Parts for a chapter, never a day by themselves.
 - Whitecaps far out where a gust crosses deep water; today a gust only darkens it.
 - A low wall running off from the shelter's gable, or a fold beside it: `shelter/walls.ts` lays
   any course from a line and the land under it.
-- A stack of cut turf or driftwood by the door, which would want a colour for wood.
+- A stack of cut turf or driftwood by the door: `timber` is the colour for wood now.
+- The boat's sail, furled on its yard along the thwarts, and a creel or a net on the beach.
+- Grass growing on the shelter's roof: the meadow's own tufts. The tuft's shape and material
+  would move out of `features/tufts` into `shared/` so both are drawn with one program.
+- Stones stood on end for the shelter's door jambs, the way the landing's two are.
