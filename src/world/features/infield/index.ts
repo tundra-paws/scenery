@@ -91,12 +91,11 @@ export function createInfieldFeature (world: World): Feature {
       earth.finish(tilth(inItself(world.quality.tier)))
       wood.finish(timber(inItself(world.quality.tier)))
 
-      // A phone gets the same stones with fewer facets: there are hundreds of them.
-      const detail = world.quality.tier === 'mobile' ? 0 : 1
+      // Hundreds of stones, each a few pixels: twenty facets apiece on every
+      // tier since they have a grain, which carries them where eighty did.
+      const cut = createStoneGeometry(rng.fork('infield:shape').int(1, 1_000_000), 0)
 
-      const shape = rng.fork('infield:shape').int(1, 1_000_000)
-
-      dyke = layDyke(createStoneGeometry(shape, detail), createStoneGeometry(shape, 0), stone, rng.fork('infield:lay'), ground, infield)
+      dyke = layDyke(cut, cut, stone, rng.fork('infield:lay'), ground, infield)
 
       const field = ploughRigs(earth, rng.fork('infield:rigs'), ground, grid, infield, wind)
       const ears  = createLitMaterial(world, { name: 'infield-barley', flatShading: false, side: THREE.DoubleSide })

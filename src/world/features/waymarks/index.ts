@@ -144,7 +144,7 @@ function layLanding (mason: Mason, path: Path, wash: Wash): void {
  * cairns beside the path so it can be followed up to the big one.
  *
  * Placed stone, all of it: the boulders' own shape in the cairn's paler grey,
- * one instanced mesh, the same on every tier because each stone is a sign.
+ * one instanced mesh, the same stones on every tier because each is a sign.
  */
 export function createWaymarks (world: World): Feature {
   let mesh: THREE.InstancedMesh | null = null
@@ -159,7 +159,9 @@ export function createWaymarks (world: World): Feature {
       for (let distance = FIRST; distance < path.length - LAST; distance += GAP)
         marks.push(distance)
 
-      const geometry = createStoneGeometry(rng.fork('waymarks:shape').int(1, 1_000_000))
+      // A phone cuts them with a quarter of the facets, as it does every wall:
+      // the stone's grain carries them, and they are drawn three times.
+      const geometry = createStoneGeometry(rng.fork('waymarks:shape').int(1, 1_000_000), world.quality.tier === 'mobile' ? 0 : 1)
       const material = createLitMaterial(world, { name: 'waymark' })
 
       material.finish(stone(inWorld(world.quality.tier)))
@@ -190,5 +192,5 @@ export function createWaymarks (world: World): Feature {
 }
 
 // perf: cheap — one draw call (two with its shadow pass). Five waymarks of
-// five stones and a landing of twenty: 3.6k triangles on every tier. Built
+// five stones and a landing of twenty: 3.6k triangles, 0.9k on a phone. Built
 // once; nothing per frame.

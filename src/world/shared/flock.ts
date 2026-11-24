@@ -41,7 +41,7 @@ const OFF_SHELTER = 2.8
 const OFF_SPUR    = 1.8
 const OFF_SUMMIT  = 6
 const OFF_STONE   = 0.7
-const OFF_BURN    = 2.1
+const OFF_BURN    = 2.9
 
 /** How far a sheep keeps from where a postcard's camera stands, and from the fold's wall inside it. */
 const OFF_CAMERA = 5

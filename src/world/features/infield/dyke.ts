@@ -162,11 +162,10 @@ function build (laid: readonly Laid[], geometry: THREE.BufferGeometry, material:
  * fold, the head-dyke, and the posts at their gaps and ends; and the cope.
  *
  * Dry stone in the boulders' shape, the cairn's paler grey with some of the
- * rock's in it. The same stones on every tier. The walling stones are cut
- * with fewer facets on a phone (`stone`); the cope, half the stones and each
- * a thin slab on edge, is cut with fewer everywhere (`slab`): its facets
- * were a sixth of the island's triangles, drawn three times, and from any
- * view they are a few pixels across.
+ * rock's in it. The same stones on every tier, all cut with twenty facets:
+ * they were a sixth of the island's triangles, drawn three times, from any
+ * view they are a few pixels across, and the stone's grain (`shared/surface.ts`)
+ * now carries what the facets did.
  */
 export function layDyke (stone: THREE.BufferGeometry, slab: THREE.BufferGeometry, material: THREE.Material, lay: SeededRng, ground: Ground, { runs, posts }: Pick<Infield, 'runs' | 'posts'>): Dyke {
   const waller: Waller = { laid: [], cope: [], lay, ground }
@@ -184,6 +183,6 @@ export function layDyke (stone: THREE.BufferGeometry, slab: THREE.BufferGeometry
 }
 
 // perf: cheap — two draw calls (four with the shadow pass, six with the
-// sea's). Some five hundred stones: the 250 walling stones and posts at 80
-// triangles on desktop and 20 on the phone, the 280 slabs of the cope at 20.
+// sea's). Some five hundred stones, the 250 walling stones and posts and the
+// 280 slabs of the cope, at 20 triangles each: 11k.
 // Laid once; nothing per frame.

@@ -21,8 +21,10 @@ import type { Ground } from './shared/ground.ts'
  * the cairn over it, back down to the water beside the boat at its anchor,
  * off the beach below the field, looking up its rigs to the gate and the
  * house, along the shore to the inbye, low among the sheep, looking up over
- * the head-dyke to the brae and the cairn, and last out onto the water under
- * the brae, looking up at the starlings wheeling over it, until `hero` again.
+ * the head-dyke to the brae and the cairn, across to the foot of the burn,
+ * looking up its water past the birch and the dyke to the spring under the
+ * cairn, and last out onto the water under the brae, looking up at the
+ * starlings wheeling over it, until `hero` again.
  *
  * The loop is also a day (`shared/daylight.ts`), so the order is the hours
  * too. `hero` is the last of the afternoon, the landing is sunset, the walk
@@ -43,7 +45,8 @@ import type { Ground } from './shared/ground.ts'
  * every stop before them keeps its hour. `mirror` stands between `hero` and
  * `landing` the same way, on the one leg it splits, and `moor` between
  * `ridge` and `east`. `flock` was given time of its own: the day grew by
- * its stop and its leg, and kept second ten. So was `starlings`, after it.
+ * its stop and its leg, and kept second ten. So was `starlings`, after it,
+ * and `burn`, between the two.
  * `skerry` stands between `east` and `wood` on time taken from five legs of
  * the afternoon (`east`, `wood`, `shelter`, `boat`, `starlings`), so the day
  * is the length it was and no stop before it has moved from its hour.
@@ -57,7 +60,7 @@ export const VIEWS: readonly View[] = [
   { name: 'summit', at: [ 2, 86 ], height: 28, look: [ 28, -40 ], lookHeight: 4 },
   { name: 'island', at: [ 150, 150 ], height: 40, look: [ 10, 20 ], lookHeight: 10, travel: 22 },
   { name: 'shore', at: [ -86, 40 ], height: 2.6, look: [ -184, 14 ], lookHeight: 9 },
-  { name: 'cove', at: [ -38, -104 ], height: 4.5, look: [ 4, -12 ], lookHeight: 9 },
+  { name: 'cove', at: [ -38, -104 ], height: 4.5, look: [ 4, -12 ], lookHeight: 9, travel: 22 },
   { name: 'ridge', at: [ 8, -34 ], height: 13, look: [ 58, 62 ], lookHeight: 3, travel: 5 },
   { name: 'moor', at: [ 66, 0 ], height: 3, look: [ 30, 58 ], lookHeight: 8, travel: 5 },
   { name: 'east', at: [ 112, 52 ], height: 9, look: [ 18, 50 ], lookHeight: 8, travel: 5 },
@@ -67,6 +70,7 @@ export const VIEWS: readonly View[] = [
   { name: 'boat', at: [ 75, 92 ], height: 2.4, look: [ 48, 86.5 ], lookHeight: 6, travel: 4 },
   { name: 'infield', at: [ 70, 87 ], height: 4, look: [ 53, 69 ], lookHeight: 4, travel: 5 },
   { name: 'flock', at: [ 27, 99 ], height: 3, look: [ 17, 72 ], lookHeight: 3.5, travel: 4 },
+  { name: 'burn', at: [ 34, 100.5 ], height: 3, look: [ 29.5, 76 ], lookHeight: 4, travel: 4 },
   { name: 'starlings', at: [ 40, 112 ], height: 2.5, look: [ -11, 62 ], lookHeight: 22, travel: 5 },
 ]
 

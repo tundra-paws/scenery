@@ -1,0 +1,73 @@
+// src/world/features/grass/index.ts
+import * as THREE from 'three'
+
+import { createLitMaterial } from '../../shared/lit.ts'
+import { keepOutOfMirror } from '../../shared/mirror.ts'
+import type { Feature, World } from '../../world.ts'
+import { createBladeGeometry, growGrass, patchCentre } from './blades.ts'
+import { createSward } from './sward.ts'
+
+/** Module-scope scratch, so finding the patch allocates nothing. */
+const forward = new THREE.Vector3()
+
+/**
+ * The grass itself: tens of thousands of blades, standing in the turf
+ * wherever the camera is.
+ *
+ * The tufts are plants, a few thousand of them, placed once over the whole
+ * island. This is the sward they stand in: every blade a single triangle,
+ * rooted on the land, leaning and shivering in the island's one wind, thick
+ * in the meadow and thin on the dry tops, gone where there is heather, rock,
+ * sand, a way, a wall or the burn. It is not planted anywhere: the same
+ * blades are gathered in a patch of ground ahead of whoever is looking, and
+ * shrink to nothing at its rim, so close to there is always grass and far
+ * off there is the land's own texture, which is the same colours.
+ */
+export function createGrass (world: World): Feature {
+  const centre = new THREE.Vector2()
+
+  let mesh: THREE.Mesh | null         = null
+  let sward: THREE.DataTexture | null = null
+
+  return {
+    name: 'grass',
+
+    build ({ scene, rng }) {
+      const { tier } = world.quality
+      const map      = createSward(world)
+      const material = createLitMaterial(world, { name: 'grass', flatShading: false, side: THREE.DoubleSide })
+
+      growGrass(material, { sward: map, wind: world.wind, tier, centre })
+
+      sward              = map.texture
+      mesh               = new THREE.Mesh(createBladeGeometry(tier, rng.fork('grass:blades')), material)
+      mesh.name          = 'grass'
+      mesh.receiveShadow = true
+      mesh.frustumCulled = false
+
+      // The patch is gathered for the camera that is about to draw it.
+      mesh.onBeforeRender = (_renderer, _scene, camera) => {
+        patchCentre(camera, tier, forward, centre)
+      }
+
+      // The sea gives back the meadow's colour from the land under the blades.
+      keepOutOfMirror(mesh)
+      scene.add(mesh)
+    },
+
+    dispose () {
+      mesh?.geometry.dispose()
+
+      if (mesh?.material instanceof THREE.Material)
+        mesh.material.dispose()
+
+      sward?.dispose()
+      mesh?.removeFromParent()
+      mesh  = null
+      sward = null
+    },
+  }
+}
+
+// perf: one draw call and one texture (`sward.ts`, `blades.ts`): a triangle a
+// blade, the same number every frame whatever is in view.
