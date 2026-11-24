@@ -38,7 +38,7 @@ export const VIEWS: readonly View[] = [
   { name: 'seaward', at: [ 28, 42 ], height: 4, look: [ 60, 92 ], lookHeight: 25, travel: 18 },
   { name: 'summit', at: [ 2, 86 ], height: 28, look: [ 28, -40 ], lookHeight: 4 },
   { name: 'island', at: [ 150, 150 ], height: 40, look: [ 10, 20 ], lookHeight: 10, travel: 22 },
-  { name: 'shore', at: [ -96, 44 ], height: 2.6, look: [ -24, -6 ], lookHeight: 7 },
+  { name: 'shore', at: [ -86, 40 ], height: 2.6, look: [ -184, 14 ], lookHeight: 9 },
   { name: 'cove', at: [ -38, -104 ], height: 4.5, look: [ 4, -12 ], lookHeight: 9 },
   { name: 'ridge', at: [ 8, -34 ], height: 13, look: [ 58, 62 ], lookHeight: 3 },
   { name: 'east', at: [ 112, 52 ], height: 9, look: [ 18, 50 ], lookHeight: 8 },
