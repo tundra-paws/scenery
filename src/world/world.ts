@@ -18,6 +18,8 @@ import { createShelter } from './shared/shelter.ts'
 import type { Shelter } from './shared/shelter.ts'
 import { createWind } from './shared/wind.ts'
 import type { Wind } from './shared/wind.ts'
+import { createWood } from './shared/wood.ts'
+import type { Wood } from './shared/wood.ts'
 
 
 /**
@@ -53,7 +55,8 @@ export type Feature = AppModule<WorldState>
  * one hour of the day that the sky, the light and the sea all keep, under a
  * horizon with land on it.
  * And for what was made on it: the summit the cairn stands on, the one path
- * up to it, and the shelter beside that path.
+ * up to it, and the shelter beside that path. And for what grows on it: the
+ * wood beside the shelter.
  */
 export interface World {
   seed:    number
@@ -73,6 +76,7 @@ export interface World {
   summit:  Waypoint
   path:    Path
   shelter: Shelter
+  wood:    Wood
 }
 
 interface WorldOptions {
@@ -81,10 +85,11 @@ interface WorldOptions {
 }
 
 export function createWorld ({ seed, quality }: WorldOptions): World {
-  const ground = createGround({ seed })
-  const summit = findSummit(ground)
-  const path   = createPath(ground, summit)
-  const beyond = createLands(seed)
+  const ground  = createGround({ seed })
+  const summit  = findSummit(ground)
+  const path    = createPath(ground, summit)
+  const beyond  = createLands(seed)
+  const shelter = createShelter(ground, path)
 
   return {
     seed,
@@ -92,11 +97,12 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     ground,
     summit,
     path,
-    grid:    createHeightGrid(ground, GRID_SEGMENTS[quality.tier]),
-    wind:    createWind(),
-    clouds:  createCloudShadow(),
+    grid:   createHeightGrid(ground, GRID_SEGMENTS[quality.tier]),
+    wind:   createWind(),
+    clouds: createCloudShadow(),
     beyond,
-    day:     createDaylight(createSkyline(beyond)),
-    shelter: createShelter(ground, path),
+    day:    createDaylight(createSkyline(beyond)),
+    shelter,
+    wood:   createWood({ ground, path, shelter }, seed),
   }
 }

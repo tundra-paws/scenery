@@ -21,6 +21,7 @@ export const PALETTE = {
   rock:         '#7d7a74',
   cairn:        '#a8a193',
   timber:       '#8f7a5c',
+  bark:         '#d9d3c3',
   pennant:      '#a8483a',
   waterDeep:    '#1d4d68',
   waterShallow: '#8fc2cc',

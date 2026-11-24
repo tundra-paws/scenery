@@ -4,6 +4,8 @@ import { describe, expect, test } from 'bun:test'
 import { DAY, elevationAt } from '../world/shared/daylight.ts'
 import { createGround } from '../world/shared/ground.ts'
 import { createPath } from '../world/shared/path.ts'
+import { createShelter } from '../world/shared/shelter.ts'
+import { createWood } from '../world/shared/wood.ts'
 import { VIEWS } from '../world/views.ts'
 import type { Pose } from '../world/views.ts'
 import { WORLD_SEED } from '../world/world.ts'
@@ -298,6 +300,24 @@ describe('the world\'s own tour', () => {
       if (!view.walk)
         expect(tour.travels[index]).toBe(view.travel ?? tour.travel)
     })
+  })
+
+  test('never flies through the wood', () => {
+    const wood = createWood({ ground, path, shelter: createShelter(ground, path) }, WORLD_SEED)
+
+    for (let t = 0; t < tourDuration(tour); t += 0.05) {
+      const [ x, y, z ] = tourPose(tour, t, blank()).position
+
+      for (const tree of wood.trees) {
+        if (y > tree.foot + tree.height + 0.5)
+          continue
+
+        // Clear of the crown where the camera is as high as one, and of the trunk under it.
+        const crown = y > tree.foot + tree.height * 0.4
+
+        expect(Math.hypot(tree.x - x, tree.z - z)).toBeGreaterThan(crown ? tree.height * 0.33 + 1 : 1.5)
+      }
+    }
   })
 
   test('never hurries and never whips the camera round', () => {
