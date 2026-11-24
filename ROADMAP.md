@@ -80,7 +80,6 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   in `shared/wind.ts` or the landing and look at `hero`, `boat` and `landing` again.
 - The boat rides the sea's swell (`shared/swell.ts`) and lays its shadow on the water, but an
   exploring visitor can walk through it. It makes no wake: at anchor it hardly moves.
-- A run that finds `main` has gained its chapter sets its own aside and takes the next.
 - The smoke is opaque puffs that shade nothing. From `hero` at second ten the top of the plume
   stands against a cloud of the same colours.
 - The clouds' shadow and the sun's shadow map do not know about each other: a boulder's own
@@ -94,7 +93,7 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   decides the gusts the smoke at second ten left the chimney in, and so its bend.
 
 - **The day is typed in to fit the tour.** `DAY` in `shared/daylight.ts` is the loop's length
-  (289.5 s since `flock`) and `OPENING`, `EDGE` and `SLOW` put each stop at its hour. Add a view,
+  (297.5 s since `starlings`) and `OPENING`, `EDGE` and `SLOW` put each stop at its hour. Add a view,
   or give a leg its own `travel`, and a test in `rig/tour.test.ts` fails until `DAY` follows;
   `OPENING` follows `DAY` by itself so second ten keeps its sun. Then print the sun's height at
   every stop and look at the night ones again (`flock` moved sunrise from `cove` toward `ridge`). A visitor who takes the
@@ -157,7 +156,7 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - The trods are worn only where the path's picture reaches (`terrain/wear.ts`, its second
   channel): the brae and the inbye. The far hefts have sheep and no trods; a picture of the
   whole island would cost the path its texels. The sheep do not walk on their trods.
-- Triangles are at 75% (desktop) and 72% (mobile). The walling stones are still 80
+- Triangles are at 78% (desktop) and 74% (mobile) since `starlings`. The walling stones are still 80
   triangles on desktop, drawn three times; the cope is 20 since `heather`.
 
 - **The heather is a rule, not a map** (`shared/moor.ts`): above a fifth of the relief, off
@@ -169,7 +168,17 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - **The high cloud lies on the dome** (`shared/cirrus.ts`): it never parallaxes, casts no
   shadow, and the low clouds' shadow map does not know it. Its layer moves 700 units in a
   day, so a visitor sees the same sky at the same bearing each round. `COVER` and `OPACITY`
-  were tuned on `hero` at second ten; the night thins it (`NIGHT_THINS` in `sky.ts`).
+  were tuned on `hero` at second ten; the night thins it (`NIGHT_THINS` in `sky.ts`, 0.75 since
+  `starlings`: it was busy over the moon from `seaward`).
+
+- **The starlings are typed in to fit `hero`** (`OVER`, `LIE`, `ROOST_AT` in `shared/starlings.ts`):
+  the cloud wheels over the summit's western shoulder and lies broadside to `hero` at second
+  ten; a test fails when a bird is out of that frame then. Its round is its own (`LAP`), not the
+  day's, so the next loop finds it elsewhere on it. Times are the sun's height (`COME`, `ROOST`,
+  `LEAVE`). They roost in the head-dyke under the brae; the walls do not know they are in them.
+- The birds fly through anything in their way but the land: the smoke, the clouds, the tour's
+  camera on the `flock` to `hero` legs. A wing is two triangles, under a pixel from `hero`:
+  the cloud is what reads.
 
 ## Ideas
 

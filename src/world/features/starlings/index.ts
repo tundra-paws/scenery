@@ -159,6 +159,6 @@ export function createStarlingsFeature (world: World): Feature {
 
 // perf: cheap on the GPU — one draw call, and one more in the sea's
 // reflection (none there on a phone), none at all while every bird is in the
-// walls or away: 1700 birds on desktop and 900 on a phone, at two triangles a
-// wing, 7k a pass. A step is the birds' flight (`shared/starlings.ts`) and two
-// matrices a bird; nothing while none is up.
+// walls or away: 2400 birds on desktop and 1200 on a phone, at two triangles a
+// wing, 9.6k a pass. A step is the birds' flight (`shared/starlings.ts`) and
+// two matrices a bird; nothing while none is up.

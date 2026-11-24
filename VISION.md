@@ -32,8 +32,10 @@ its gate left open; a fold across the path; and the head-dyke that keeps both fr
 running down into the sea. Its sheep are out on the hill: the brae under the cairn and the
 inbye above the landing are flecked with them, white, a few brown or black, some with a lamb at
 foot, each keeping to its own heft and its own trods worn along the level of the slope; four
-are penned in the fold. They are the only thing on the island that moves of its own accord,
-and they keep themselves. It lies off a mountain coast: a high fell and a long range in the
+are penned in the fold. They keep themselves. The only other thing that comes and goes of its
+own accord is the starlings: of an evening they come in over the sea from the land beyond,
+wheel over the brae in one cloud through the gold, and pour down into the head-dyke to roost
+as the sun goes; at first light they rise out of the stones and go back over the water. It lies off a mountain coast: a high fell and a long range in the
 haze to the north-west, which nobody goes to, and which the sun goes down behind.
 
 **Mood and light.** One summer's day in the north, turning once in the time the tour takes, so
@@ -60,7 +62,8 @@ wood the bark's colour warmed. One thing sown, `barley`, a pale green-gold, only
 potatoes beside it are the meadow's green gone darker, the furrows bare earth turned darker still.
 The hill above the head-dyke wears one colour the meadow does not: `heather`, a dusky mauve,
 in bloom on the moor and only there. The flock's wool is its own: a dull cream white (`fleece`), a brown (`moorit`) for a few, and
-the near black of their faces and legs (`face`), which a black sheep is all over. And one dyed
+the near black of their faces and legs (`face`), which a black sheep is all over, and the
+starlings are too. And one dyed
 thing, a worn red (`pennant`): cloth made only to be seen
 from the water, and never more than a scrap of it. A new colour needs a job none of these does.
 The sky and its light are the exception that is not one: the same few roles (zenith, horizon,
@@ -100,6 +103,10 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
   round, walking a few strides to the next bite, round and round their heft; lying down as the
   sun goes and up again at first light. A sheep is a faceted woolsack, a dark head and four
   sticks, never a model of a sheep. Their trods are worn into the turf as the path is, fainter.
+- *The starlings.* One cloud of them, never a bird you can pick out: it folds, stretches and
+  darkens in bands where they bunch, against the brightest of the sky. It keeps to the hour:
+  in after noon, over the brae through the evening, down into the walls at sunset in a coiling
+  stream, out and away at first light. Nowhere by day, nowhere by night.
 - *Low-poly, flat-shaded, few colours.* Facets are the style, not a shortcut to hide.
 
 **What it is not.** Not a game: no score, no quest, no characters. Not tropical, not fantasy, no
@@ -115,7 +122,8 @@ once round in a visit), the land beyond, which the sun goes down behind, the bir
 beside the shelter, with its outliers on the open island, the infield: the field of rigs,
 its dyke and gate, the fold and the head-dyke, a sea that answers (its mirror, its swell,
 its foam round what stands in it, the wet sand), the flock on its hefts and its trods, and
-late summer: the heather out on the moor and high cloud over everything. Next: the inside of
+late summer: the heather out on the moor and high cloud over everything, and the starlings
+that roost in the head-dyke. Next: the inside of
 the shelter, and a night worth staying up for.
 
 ## Where it starts

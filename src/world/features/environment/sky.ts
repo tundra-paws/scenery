@@ -8,7 +8,7 @@ import type { WindUniforms } from '../../shared/wind.ts'
 
 
 /** How much of the high cloud's veil the night takes: it is seen by the light it catches. */
-export const NIGHT_THINS = 0.45
+export const NIGHT_THINS = 0.75
 
 /** Half the moon's width, in degrees. Three times the real one, as a low moon looks. */
 const MOON = 1.4

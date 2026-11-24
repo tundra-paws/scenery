@@ -19,8 +19,9 @@ import type { Ground } from './shared/ground.ts'
  * stacked logs are, close under the shelter with
  * the cairn over it, back down to the water beside the boat at its anchor,
  * off the beach below the field, looking up its rigs to the gate and the
- * house, and last along the shore to the inbye, low among the sheep, looking
- * up over the head-dyke to the brae and the cairn, until `hero` again.
+ * house, along the shore to the inbye, low among the sheep, looking up over
+ * the head-dyke to the brae and the cairn, and last out onto the water under
+ * the brae, looking up at the starlings wheeling over it, until `hero` again.
  *
  * The loop is also a day (`shared/daylight.ts`), so the order is the hours
  * too. `hero` is the last of the afternoon, the landing is sunset, the walk
@@ -41,7 +42,7 @@ import type { Ground } from './shared/ground.ts'
  * every stop before them keeps its hour. `mirror` stands between `hero` and
  * `landing` the same way, on the one leg it splits, and `moor` between
  * `ridge` and `east`. `flock` was given time of its own: the day grew by
- * its stop and its leg, and kept second ten.
+ * its stop and its leg, and kept second ten. So was `starlings`, after it.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },

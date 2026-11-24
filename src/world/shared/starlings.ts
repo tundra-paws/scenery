@@ -366,6 +366,6 @@ export function createStarlings (site: Site, seed: number, tier: QualityTier): S
   }
 }
 
-// perf: build draws a dozen numbers a bird and walks the walls once for each
-// roost. A step is the sun's height once, and for each bird three places in
-// the cloud (a dozen sines) and three arctangents: some 5k on desktop.
+// perf: build draws a dozen numbers a bird and reads the walls once. A step
+// is the sun's height once, and for each bird up three places in the cloud (a
+// dozen sines each) and three arctangents: some 7k places on desktop.
