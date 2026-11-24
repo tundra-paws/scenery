@@ -1,0 +1,48 @@
+{
+  "id": 16,
+  "dir": "i/0016/",
+  "date": "2026-11-24",
+  "sha": "42ee79d792b241b93635a096d0631111c15593b4",
+  "title": "Heather and high cloud",
+  "summary": "The hill above the head-dyke is a moor of heather in bloom, in bushes and patches, and a mackerel sky combed by the wind aloft lies over the whole island, gold at evening and silver under the moon.",
+  "kind": "feature",
+  "model": "claude-opus-5-5",
+  "journal": "journal/2026-11-24-heather-and-high-cloud.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 59,
+      "triangles": 601136,
+      "live": {
+        "buffers": 112,
+        "textures": 12,
+        "programs": 31,
+        "framebuffers": 5,
+        "renderbuffers": 1,
+        "vertexArrays": 59
+      }
+    },
+    "mobile": {
+      "draws": 53,
+      "triangles": 216122,
+      "live": {
+        "buffers": 112,
+        "textures": 12,
+        "programs": 30,
+        "framebuffers": 5,
+        "renderbuffers": 1,
+        "vertexArrays": 53
+      }
+    }
+  },
+  "bytes": {
+    "new": 243743,
+    "site": 3094937
+  },
+  "three": "0.184.0",
+  "distHash": "c8bb97da403ab6c02bef5cdd0171bcfe79d70047f8642fbffce141a9c36b8d2c",
+  "withdrawn": false
+}
