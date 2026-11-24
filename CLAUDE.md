@@ -104,7 +104,8 @@ redo it on the new `main`. `infra-error` means the pipeline broke, not the chang
 - A one-line path comment opens every file. Kebab-case filenames. Named exports. No barrels.
 - A feature is a factory `createX(world): Feature` returning `{ name, build, update?, dispose }`.
   It owns what it creates and disposes it. One draw call where one will do.
-- Import three only as `'three'` and `'three/addons/…'`. A second copy of three fails the gate.
+- Import three only as `'three'`, `'three/webgpu'`, `'three/tsl'` and `'three/addons/…'`. A
+  second copy of three fails the gate.
 - Non-trivial modules end with a `// perf:` note: draw calls, triangles, per-frame work.
 - DOM chrome uses landmarks, tag selectors, tokens in `:root`, `@layer`, pointer events only.
 - Commits are conventional (`feat(world): …`, `perf(world): …`, `fix(rig): …`).

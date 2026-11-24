@@ -10,8 +10,19 @@ import { join, relative, resolve, sep } from 'node:path'
 /** The only things a build may have at its top level. */
 const TOP_LEVEL = [ 'index.html', 'a', 'v' ]
 
-/** three's own build files, any of which may sit in the vendor directory. */
-const VENDOR_FILES = [ 'three.module.min.js', 'three.core.min.js', 'three.module.js', 'three.core.js' ]
+/**
+ * three's own build files, any of which may sit in the vendor directory: the
+ * core, the WebGL renderer over it (`three`), and the renderer that draws
+ * node materials with the language they are written in (`three/webgpu`,
+ * `three/tsl`). All of them import the one core, so it is still one three.
+ */
+const VENDOR_FILES = [
+  'three.module.min.js', 'three.core.min.js', 'three.module.js', 'three.core.js',
+  'three.webgpu.min.js', 'three.tsl.min.js', 'three.webgpu.js', 'three.tsl.js',
+]
+
+/** The names a chunk may leave to the import map. Each must be sent to one of three's own files. */
+const SHARED = [ 'three', 'three/webgpu', 'three/tsl' ]
 
 /** A string every copy of three carries: the global it registers itself under. */
 const THREE_MARKER = '__THREE__'
@@ -166,7 +177,8 @@ function checkVendor (dist: string, files: readonly string[], trustedThree: stri
   return version
 }
 
-function checkPage (dist: string, version: string, failures: string[]): void {
+/** Checks the page, and returns the names its import map resolves to three's own files. */
+function checkPage (dist: string, version: string, failures: string[]): string[] {
   const html = readFileSync(join(dist, 'index.html'), 'utf8')
 
   for (const [ , , url ] of html.matchAll(ATTRIBUTE))
@@ -178,7 +190,7 @@ function checkPage (dist: string, version: string, failures: string[]): void {
   if (!map) {
     failures.push('index.html has no import map, so the page cannot find three')
 
-    return
+    return []
   }
 
   const imports = (JSON.parse(map[2]!) as { imports?: Record<string, string> }).imports ?? {}
@@ -187,22 +199,29 @@ function checkPage (dist: string, version: string, failures: string[]): void {
   if (!imports.three?.startsWith(expects))
     failures.push(`the import map must send "three" to ${expects}…, found ${imports.three ?? 'nothing'}`)
 
-  for (const [ name, target ] of Object.entries(imports))
+  for (const [ name, target ] of Object.entries(imports)) {
     if (!isLocal(target))
       failures.push(`the import map sends "${name}" outside the build: ${target}`)
+
+    // Whatever else is shared is three too, and comes from the same place.
+    if (SHARED.includes(name) && !(target.startsWith(expects) && VENDOR_FILES.includes(target.slice(expects.length))))
+      failures.push(`the import map must send "${name}" to one of three's build files under ${expects}, found ${target}`)
+  }
+
+  return Object.keys(imports).filter(name => SHARED.includes(name))
 }
 
-function checkChunks (dist: string, files: readonly string[], failures: string[]): void {
+function checkChunks (dist: string, files: readonly string[], shared: readonly string[], failures: string[]): void {
   for (const file of files.filter(name => name.startsWith('a/'))) {
     const text = readFileSync(join(dist, file), 'utf8')
 
     if (file.endsWith('.js')) {
       for (const [ , , specifier ] of text.matchAll(IMPORT))
-        if (!specifier!.startsWith('.') && specifier !== 'three')
-          failures.push(`${file} imports "${specifier!.slice(0, 80)}", which nothing on the published site can resolve (only "three" is shared)`)
+        if (!specifier!.startsWith('.') && !shared.includes(specifier!))
+          failures.push(`${file} imports "${specifier!.slice(0, 80)}", which nothing on the published site can resolve (the import map shares only ${shared.map(name => `"${name}"`).join(', ') || 'nothing'})`)
 
       if (text.includes(THREE_MARKER))
-        failures.push(`${file} carries its own copy of three (import only 'three' and 'three/addons/…', never 'three/src/…')`)
+        failures.push(`${file} carries its own copy of three (import only 'three', 'three/webgpu', 'three/tsl' and 'three/addons/…', never 'three/src/…')`)
 
       if (REACT_MARKERS.some(marker => text.includes(marker)))
         failures.push(`${file} carries React, which this project does not use`)
@@ -236,8 +255,7 @@ export function checkContract ({ dist, trustedThree }: ContractOptions): Contrac
   const files   = walk(root, failures)
   const version = checkVendor(root, files, trustedThree, failures)
 
-  checkPage(root, version, failures)
-  checkChunks(root, files, failures)
+  checkChunks(root, files, checkPage(root, version, failures), failures)
 
   const own    = files.filter(file => !file.startsWith('v/'))
   const size   = (list: readonly string[]): number => list.reduce((sum, file) => sum + lstatSync(join(root, file)).size, 0)
