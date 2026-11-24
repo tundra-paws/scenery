@@ -34,7 +34,7 @@ sets behind the mainland, and at second ten it still stands clear of everything 
 beach looking out past a boulder and the foam to the stacks, the headland, the range and the
 sun. The tour's turn test passes; `DAY` is unchanged.
 
-**The skill.** At the owner's request, the three.js skill now opens with *Reach for what exists
+**The skill.** At the owner's request, the three.js skill now has a section, *Reach for what exists
 first*: three, its add-ons, the scene library and `shared/` before anything hand-written.
 Today's work follows it: a built-in material amended through `shared/amend.ts`, the library's
 `createNoise2D` and `ridged`, and the sky's own `SKY_GLOW_GLSL`.
