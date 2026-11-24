@@ -10,7 +10,13 @@ export interface Spot {
   x:      number
   z:      number
   height: number
-  slope:  number
+
+  /**
+   * Worked out when it is first read, and kept. It is four more samples of the
+   * ground, and most candidates are turned away on their height before anyone
+   * asks how steep they are: put the cheap tests first in `accept`.
+   */
+  readonly slope: number
 }
 
 interface ScatterOptions {
@@ -42,7 +48,7 @@ export function scatterOnGround ({ ground, rng, count, reach = 0.9, accept }: Sc
     const angle    = rng.range(0, Math.PI * 2)
     const x        = Math.cos(angle) * distance
     const z        = Math.sin(angle) * distance
-    const spot     = { x, z, height: ground.heightAt(x, z), slope: ground.slopeAt(x, z) }
+    const spot     = spotAt(ground, x, z)
 
     if (accept(spot))
       spots.push(spot)
@@ -50,3 +56,23 @@ export function scatterOnGround ({ ground, rng, count, reach = 0.9, accept }: Sc
 
   return spots
 }
+
+function spotAt (ground: Ground, x: number, z: number): Spot {
+  let slope: number | null = null
+
+  return {
+    x,
+    z,
+    height: ground.heightAt(x, z),
+
+    get slope () {
+      slope ??= ground.slopeAt(x, z)
+
+      return slope
+    },
+  }
+}
+
+// perf: one ground sample a candidate, and four more only for those whose
+// slope is read. No draw of the stream depends on either, so what is placed
+// does not depend on what was asked.

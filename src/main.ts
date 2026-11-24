@@ -1,6 +1,7 @@
 // src/main.ts
 import './ui/style.css'
 import { createApp, createClock } from 'threejs-scenes'
+import type { QualityTier } from 'threejs-scenes'
 import { detectTier, getQualitySettings } from 'threejs-scenes/core'
 import { installHarness } from './harness/index.ts'
 import type { HarnessHandle, Painter } from './harness/index.ts'
@@ -13,6 +14,17 @@ import { PALETTE } from './world/shared/palette.ts'
 import { STEP, createWorld } from './world/world.ts'
 import type { WorldState } from './world/world.ts'
 
+
+/**
+ * The most device pixels the canvas may hold, by tier.
+ *
+ * The pixel ratio alone does not bound what a frame costs to fill: at a ratio
+ * of 2 a large desktop window is eight million pixels, antialiased. Past its
+ * budget a canvas is drawn at a lower ratio instead: a large tablet on the
+ * mobile tier, a window bigger than a 2560 x 1440 monitor on desktop, bigger
+ * than a 4K one on highEnd. Inside its budget it is drawn exactly as before.
+ */
+const MAX_PIXELS: Record<QualityTier, number> = { mobile: 2_500_000, desktop: 3_686_400, highEnd: 8_294_400 }
 
 const session: SessionType = { harness: null }
 
@@ -63,9 +75,14 @@ function boot (): void {
     seed:  overrides.seed,
     clock: createClock({ mode: 'fixed', step: STEP }),
 
+    // The world moves in steps of a sixtieth of a second. On a faster display
+    // some frames fall between two steps, and drawing them would be drawing
+    // the same picture twice.
+    renderOn: 'step',
+
     // Shadows are switched on by the environment feature, with a shadow map
     // type this three version still supports.
-    renderer:   { shadows: false, pixelRatioMax: overrides.harness ? 1 : quality.pixelRatio },
+    renderer:   { shadows: false, pixelRatioMax: overrides.harness ? 1 : quality.pixelRatio, maxPixels: MAX_PIXELS[tier] },
     camera:     { fov: 55, near: 0.5, far: 3000 },
     background: PALETTE.horizon,
     lighting:   false,

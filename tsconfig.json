@@ -14,5 +14,5 @@
     "erasableSyntaxOnly": true,
     "skipLibCheck": true
   },
-  "include": ["scripts", "src", "vite.config.ts"]
+  "include": ["scripts", "src", "lib-stack", "vite.config.ts"]
 }

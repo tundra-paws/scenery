@@ -21,6 +21,14 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 
 ## Known problems
 
+- The first frame still waits for every shader program to link: 87 to 90 ms in Firefox, 35 ms
+  in Chromium. Compiling after each feature did not help (`lib-stack/README.md`, "Tried and
+  dropped"). Fewer programs would: the gate counts twelve.
+- Nothing guards how long the world takes to start: `budgets.json` holds counts, not times.
+  Ground samples per boot is a count, and tracks it. It would need a counter in the harness.
+- The terrain's slope is read from `world.grid`, so it is measured across grid points, which
+  are further apart on the smaller tiers. A rule keyed to slope (the rock line) lands a little
+  differently on each tier.
 - A boulder standing in the sea gets no foam: the height map holds the land, not the rocks.
   The landing's stones in the water are the same.
 - `bun run diff` and the gate's policy check trust the local `origin/main`, which is behind in a

@@ -18,8 +18,8 @@ repository.
 bun run setup
 ```
 
-It checks for a browser, writes the scene library's API digest to `.scenery/api.md`, starts the
-reference build for `diff`, and prints the brief. If dependencies are missing, run
+It checks for a browser, applies `lib-stack/`, writes the scene library's API digest to
+`.scenery/api.md`, starts the reference build for `diff`, and prints the brief. If dependencies are missing, run
 `bun install --frozen-lockfile` first.
 
 If setup says the browser is **NOT FOUND**, you cannot take pictures. Do a day you can verify
@@ -101,6 +101,9 @@ signature; the type declarations are in `node_modules`.
 - Tiers: `world.quality.tier` is `mobile`, `desktop` or `highEnd`. Scale counts by it, and make
   sure the phone still gets the idea of the thing.
 - Leave the code no worse: what you pass that can be smaller, cheaper or clearer, make so.
+- The library is yours to improve. If `threejs-scenes` is slow, wrong, or lacks what any scene
+  would want, write an entry in `lib-stack/` (its README says how), run `bun run stack`, use
+  it today, and name it in the journal. Never work around it in silence or edit `node_modules`.
 
 Run `bunx eslint --fix` on what you touch and `bun test` when you change `src/rig` or `shared/`.
 

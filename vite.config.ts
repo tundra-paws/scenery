@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import type { HtmlTagDescriptor, Plugin } from 'vite'
 
+import { ensureStack } from './scripts/stack/install.ts'
+
 
 const THREE_VERSION = (JSON.parse(readFileSync(at('node_modules/three/package.json'), 'utf8')) as { version: string }).version
 
@@ -67,6 +69,27 @@ function vendorThree (): Plugin {
   }
 }
 
+/**
+ * Build on the library as the stack leaves it, never on a stale one.
+ *
+ * `lib-stack/` holds improvements to the scene library that upstream has not
+ * shipped yet. They are applied to the installed package after every install;
+ * this applies them again before every build and every dev server, which costs
+ * a fingerprint when nothing changed and catches an entry edited since.
+ */
+function libraryStack (): Plugin {
+  return {
+    name: 'scenery:library-stack',
+
+    async config () {
+      const report = await ensureStack(at('.'))
+
+      if (report.status === 'failed')
+        throw new Error(`the library stack does not apply:\n  ${report.problems.join('\n  ')}\nfix the entry in lib-stack/ and run \`bun run stack\``)
+    },
+  }
+}
+
 export default defineConfig({
   base: './',
 
@@ -84,7 +107,7 @@ export default defineConfig({
     rolldownOptions: { external: [ 'three' ]},
   },
 
-  plugins: [ vendorThree() ],
+  plugins: [ libraryStack(), vendorThree() ],
 
   server:  { port: 4180, strictPort: true },
   preview: { port: 4180, strictPort: true },

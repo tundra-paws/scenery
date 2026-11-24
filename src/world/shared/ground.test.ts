@@ -6,6 +6,7 @@ import { createSeededRng } from 'threejs-scenes/primitives'
 import { VIEWS, resolveView } from '../views.ts'
 import { WORLD_SEED } from '../world.ts'
 import { DEEP_WATER, createGround } from './ground.ts'
+import { createHeightGrid } from './height-grid.ts'
 import { createHeightMap } from './height-map.ts'
 import { scatterOnGround } from './scatter.ts'
 
@@ -59,7 +60,7 @@ describe('createHeightMap', () => {
     const ground             = createGround({ seed: WORLD_SEED })
     const segments           = 16
     const side               = segments + 1
-    const { texture, scale } = createHeightMap(ground, segments)
+    const { texture, scale } = createHeightMap(ground, createHeightGrid(ground, segments))
     const { data }           = texture.image
 
     for (let row = 0; row < side; row += 3)
@@ -111,6 +112,31 @@ describe('scatterOnGround', () => {
     const spots = scatterOnGround({ ground, rng: createSeededRng(9), count: 20, accept: () => false })
 
     expect(spots).toEqual([])
+  })
+
+  test('a slope nobody reads is never worked out, and one that is read is the ground\'s', () => {
+    let asked = 0
+
+    const counted = {
+      ...ground,
+
+      slopeAt (x: number, z: number): number {
+        asked += 1
+
+        return ground.slopeAt(x, z)
+      },
+    }
+
+    scatterOnGround({ ground: counted, rng: createSeededRng(9), count: 30, accept: spot => spot.height > ground.waterLevel })
+    expect(asked).toBe(0)
+
+    const spots = scatterOnGround({ ground: counted, rng: createSeededRng(9), count: 30, accept: spot => spot.slope < 0.9 && spot.slope >= 0 })
+
+    expect(asked).toBeGreaterThan(0)
+    expect(asked).toBeLessThanOrEqual(30 * 30)
+
+    for (const spot of spots)
+      expect(spot.slope).toBe(ground.slopeAt(spot.x, spot.z))
   })
 
   test('only returns what the rule allows', () => {

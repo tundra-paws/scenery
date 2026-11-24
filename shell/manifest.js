@@ -25,8 +25,9 @@
  * @property {Iteration[]} iterations  ascending by id, withdrawn ones removed
  */
 
-const REPO = /^[\w.-]+\/[\w.-]+$/
-const SHA  = /^[0-9a-f]{7,40}$/i
+const MANIFEST = 'iterations.json'
+const REPO     = /^[\w.-]+\/[\w.-]+$/
+const SHA      = /^[0-9a-f]{7,40}$/i
 
 /**
  * @param {unknown} value
@@ -120,11 +121,27 @@ export function parseManifest (raw) {
 }
 
 /**
+ * The request for the manifest: the one the page's head made before this
+ * module had arrived (`index.html`), or a new one. The early one is taken
+ * once, so asking again later asks the server again.
+ *
+ * @param {string} url
+ * @returns {Promise<Response>}
+ */
+function request (url) {
+  const page  = /** @type {{ sceneryManifest?: Promise<Response> }} */ /** @type {unknown} */ window
+  const early = url === MANIFEST ? page.sceneryManifest : undefined
+
+  delete page.sceneryManifest
+  return early ?? fetch(url, { cache: 'no-cache' })
+}
+
+/**
  * @param {string} [url]
  * @returns {Promise<Manifest>}
  */
-export async function loadManifest (url = 'iterations.json') {
-  const response = await fetch(url, { cache: 'no-cache' })
+export async function loadManifest (url = MANIFEST) {
+  const response = await request(url)
   if (!response.ok)
     throw new Error(`The manifest answered ${response.status}`)
   return parseManifest(await response.json())

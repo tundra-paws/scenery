@@ -1,6 +1,5 @@
 // src/world/features/terrain/index.ts
 import * as THREE from 'three'
-import type { QualityTier } from 'threejs-scenes'
 import { smoothstep } from 'threejs-scenes/primitives'
 
 import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
@@ -10,9 +9,6 @@ import type { Feature, World } from '../../world.ts'
 import { createPathWear, wearPath } from './wear.ts'
 import type { PathWear } from './wear.ts'
 
-
-/** Grid cells per side. Triangles are twice the square of this, less the cells under deep water. */
-export const TERRAIN_SEGMENTS: Record<QualityTier, number> = { mobile: 96, desktop: 160, highEnd: 224 }
 
 const SAND  = new THREE.Color(PALETTE.sand)
 const GRASS = new THREE.Color(PALETTE.grass)
@@ -27,10 +23,9 @@ const scratch = new THREE.Color()
  * Height picks the band (sand at the water, grass above it, straw toward the
  * tops) and steepness overrides it with rock, because nothing grows on a cliff.
  */
-function colourAt (world: World, x: number, z: number, height: number, out: THREE.Color): THREE.Color {
+function colourAt (world: World, slope: number, height: number, out: THREE.Color): THREE.Color {
   const { ground } = world
   const above      = height - ground.waterLevel
-  const slope      = ground.slopeAt(x, z)
 
   out.copy(SAND)
   out.lerp(GRASS, smoothstep(0.7, 2.4, above))
@@ -72,22 +67,22 @@ export function createTerrain (world: World): Feature {
     name: 'terrain',
 
     build ({ scene }) {
-      const { ground } = world
-      const segments   = TERRAIN_SEGMENTS[world.quality.tier]
-      const geometry   = new THREE.PlaneGeometry(ground.size, ground.size, segments, segments)
+      const { ground, grid } = world
+      const geometry         = new THREE.PlaneGeometry(ground.size, ground.size, grid.segments, grid.segments)
 
       geometry.rotateX(-Math.PI / 2)
 
       const position = geometry.getAttribute('position')
       const colours  = new Float32Array(position.count * 3)
 
+      // The plane's vertices are the grid's corners, in the grid's order, so
+      // each takes its height by index and its slope from its neighbours.
       for (let index = 0; index < position.count; index += 1) {
-        const x      = position.getX(index)
-        const z      = position.getZ(index)
-        const height = ground.heightAt(x, z)
+        const column = index % grid.side
+        const height = grid.heights[index]!
 
         position.setY(index, height)
-        colourAt(world, x, z, height, scratch).toArray(colours, index * 3)
+        colourAt(world, grid.slopeAt(column, (index - column) / grid.side), height, scratch).toArray(colours, index * 3)
       }
 
       geometry.setAttribute('color', new THREE.BufferAttribute(colours, 3))

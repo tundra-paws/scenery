@@ -11,8 +11,9 @@ import { findChromium } from './browser.ts'
  *   bun run setup
  *
  * Checks the one thing a run cannot do without (a browser to take pictures
- * with), writes the library's API digest, starts building the reference that
- * `bun run diff` will compare against, and prints the brief.
+ * with), applies the library stack, writes the library's API digest, starts
+ * building the reference that `bun run diff` will compare against, and prints
+ * the brief.
  */
 
 const ROOT = resolve(import.meta.dir, '..')
@@ -44,6 +45,11 @@ async function main (): Promise<void> {
   console.log(`  bun        ${Bun.version}`)
   console.log(`  node       ${tool('node', '--version')}`)
   console.log(`  chromium   ${browser()}`)
+
+  // Before the digest: the digest is read from the package as the stack leaves it.
+  const stack = Bun.spawn([ 'bun', 'scripts/stack/index.ts' ], { cwd: ROOT, stdout: 'pipe', stderr: 'ignore' })
+
+  console.log(`  ${(await new Response(stack.stdout).text()).trim().replaceAll('\n', '\n  ')}`)
 
   const digest = Bun.spawn([ 'bun', 'scripts/api-digest.ts' ], { cwd: ROOT, stdout: 'pipe', stderr: 'ignore' })
 

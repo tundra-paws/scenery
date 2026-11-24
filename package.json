@@ -18,7 +18,9 @@
     "shot": "bun scripts/shot.ts",
     "diff": "bun scripts/diff.ts",
     "gate": "bun scripts/gate/index.ts",
-    "site": "bun scripts/site/preview.ts"
+    "site": "bun scripts/site/preview.ts",
+    "stack": "bun scripts/stack/index.ts",
+    "postinstall": "bun scripts/stack/index.ts"
   },
   "dependencies": {
     "three": "0.184.0",

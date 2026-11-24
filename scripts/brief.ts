@@ -5,6 +5,7 @@ import { join, relative, resolve } from 'node:path'
 import { parseFrontMatter } from './gate/policy.ts'
 import { readLedger } from './site/ledger.ts'
 import type { LedgerLine } from './site/ledger.ts'
+import { PACKAGE, isCurrent, readStack } from './stack/install.ts'
 
 /**
  * Where things stand, in one screen.
@@ -166,6 +167,21 @@ function world (): string[] {
   ]
 }
 
+/** What this repository has changed in the scene library and upstream has not shipped yet. */
+function stack (): string[] {
+  try {
+    const entries = readStack(ROOT)
+
+    return [
+      `${entries.length} improvements to ${PACKAGE} waiting for upstream${isCurrent(ROOT) ? '' : ' · NOT applied to node_modules: bun run stack'}`,
+      ...entries.map(entry => `${entry.id.padEnd(30)} ${entry.kind.padEnd(5)} ${entry.title}`),
+    ]
+  }
+  catch (error) {
+    return [ `unreadable: ${error instanceof Error ? error.message : String(error)}` ]
+  }
+}
+
 /** How long until the site is full, at the pace of the last iterations. */
 function storage (): string[] {
   const manifest = git('show', 'origin/site-store:iterations.json')
@@ -196,6 +212,7 @@ function main (): void {
   section('journal (newest first)', journal())
   section('budgets (last local gate)', budgets())
   section('world', world())
+  section('library stack (lib-stack/, how in its README)', stack())
   section('storage', storage())
   console.log('')
 }

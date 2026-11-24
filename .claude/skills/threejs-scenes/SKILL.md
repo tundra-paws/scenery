@@ -16,6 +16,12 @@ corrected against `threejs-scenes@3.0.0` on 2026-11-23. When this skill and
 `node_modules/threejs-scenes/dist/**/*.d.ts` disagree, the d.ts wins; `bun run api:digest`
 prints the current API.
 
+The library installed here is 3.0.0 plus this repository's own improvements in `lib-stack/`
+(`bun run stack --list`), so the digest holds things the published 3.0.0 does not:
+`createNoise2D`, `pixelRatioFor`, and `renderOn` / `fps` / `invalidate()` on `createApp`.
+When the library is slow, wrong, or missing something any scene would want, add an entry
+there (`lib-stack/README.md`) instead of working around it. Never edit `node_modules`.
+
 Vanilla three.js (WebGL2), procedural-first. Load only the references the task needs.
 
 ## Scenery rules (authoritative over everything else here)
@@ -24,7 +30,9 @@ Vanilla three.js (WebGL2), procedural-first. Load only the references the task n
   `World` services object and returns an `AppModule` (`{ name, build(ctx), update?(state, frame, ctx), dispose() }`,
   type from `threejs-scenes/core`). Register it in `src/world/index.ts`. `World`, `Feature`
   and `STEP` are in `src/world/world.ts`; the land is `world.ground` (`heightAt`, `slopeAt`),
-  placement is `scatterOnGround` in `shared/scatter.ts`, colours are `shared/palette.ts`.
+  already sampled on the terrain's lattice as `world.grid` (`shared/height-grid.ts`: use it
+  for anything per vertex or per texel instead of asking `ground` again), placement is
+  `scatterOnGround` in `shared/scatter.ts`, colours are `shared/palette.ts`.
   Read an existing feature first (`features/rocks` is the shortest complete one).
 - **Determinism** (lint-enforced in `src/world/**` and `src/rig/**`). No `Math.random`,
   `Date.now`, `new Date`, `performance.now`, `setTimeout` / `setInterval`,

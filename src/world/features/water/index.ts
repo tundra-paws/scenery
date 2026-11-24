@@ -9,7 +9,6 @@ import { SUN } from '../../shared/sun.ts'
 import { WIND_GLSL } from '../../shared/wind.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
-import { TERRAIN_SEGMENTS } from '../terrain/index.ts'
 
 
 /** Edge length of the water plane. Far wider than the land, so the fog hides its edge. */
@@ -189,7 +188,7 @@ export function createWater (world: World): Feature {
     name: 'water',
 
     build ({ scene }) {
-      const heights = createHeightMap(world.ground, TERRAIN_SEGMENTS[world.quality.tier])
+      const heights = createHeightMap(world.ground, world.grid)
 
       ground   = heights.texture
       material = new THREE.ShaderMaterial({

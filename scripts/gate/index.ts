@@ -14,7 +14,7 @@ import type { Budgets } from './verify.ts'
  * The gate, run locally.
  *
  *   bun run gate            everything CI will check, in the order CI checks it
- *   bun run gate --quick    no browser: policy, typecheck, lint, tests, build, contract
+ *   bun run gate --quick    no browser: policy, stack, typecheck, lint, tests, build, contract
  *   bun run gate --gpu      use a real GPU (faster; the picture checks stop being exact)
  *
  * CI runs the same stages from the copy of these scripts that is already on
@@ -108,6 +108,10 @@ async function main (): Promise<void> {
   }
 
   record(policy())
+
+  // Before anything that reads the library: CI applies the stack on install,
+  // so typecheck, tests and the build all have to see it applied here too.
+  record(await run('stack', [ 'bun', 'scripts/stack/index.ts' ]))
 
   // Two at a time and no more: five heavy processes at once is what gets a
   // gate killed for memory on a four-core cloud container.

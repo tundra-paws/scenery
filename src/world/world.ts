@@ -6,6 +6,8 @@ import { createCloudShadow } from './shared/cloud-shadow.ts'
 import type { CloudShadow } from './shared/cloud-shadow.ts'
 import { createGround } from './shared/ground.ts'
 import type { Ground } from './shared/ground.ts'
+import { GRID_SEGMENTS, createHeightGrid } from './shared/height-grid.ts'
+import type { HeightGrid } from './shared/height-grid.ts'
 import { createPath, findSummit } from './shared/path.ts'
 import type { Path, Waypoint } from './shared/path.ts'
 import { createShelter } from './shared/shelter.ts'
@@ -51,8 +53,11 @@ export interface World {
   seed:    number
   quality: QualitySettings
   ground:  Ground
-  wind:    Wind
-  clouds:  CloudShadow
+
+  /** `ground` sampled on the terrain's lattice, for what is drawn or looked up there. */
+  grid:   HeightGrid
+  wind:   Wind
+  clouds: CloudShadow
 
   /** The highest point of the land. */
   summit:  Waypoint
@@ -76,6 +81,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     ground,
     summit,
     path,
+    grid:    createHeightGrid(ground, GRID_SEGMENTS[quality.tier]),
     wind:    createWind(),
     clouds:  createCloudShadow(),
     shelter: createShelter(ground, path),

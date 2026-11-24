@@ -27,6 +27,7 @@ const NEVER = [ '.github/**', 'ci/**' ]
 const GUARDED = [
   'scripts/gate/**',
   'scripts/site/**',
+  'scripts/stack/**',
   'scripts/browser.ts',
   'scripts/capture.ts',
   'scripts/args.ts',
