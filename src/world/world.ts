@@ -18,6 +18,8 @@ import { createPath, findSummit } from './shared/path.ts'
 import type { Path, Waypoint } from './shared/path.ts'
 import { createShelter } from './shared/shelter.ts'
 import type { Shelter } from './shared/shelter.ts'
+import { createWash } from './shared/wash.ts'
+import type { Wash } from './shared/wash.ts'
 import { createWind } from './shared/wind.ts'
 import type { Wind } from './shared/wind.ts'
 import { createWood } from './shared/wood.ts'
@@ -59,6 +61,7 @@ export type Feature = AppModule<WorldState>
  * And for what was made on it: the summit the cairn stands on, the one path
  * up to it, the shelter beside that path, and the walls round the ground
  * worked from it. And for what grows on it: the wood beside the shelter.
+ * And for what stands in the sea, which the sea breaks round.
  */
 export interface World {
   seed:    number
@@ -82,6 +85,9 @@ export interface World {
   /** The field below the shelter, its dyke and gate, and the fold across the path. */
   infield: Infield
   wood:    Wood
+
+  /** What stands in the sea and what floats on it, for the sea to break round. Filled in as the features are built. */
+  wash: Wash
 }
 
 interface WorldOptions {
@@ -110,5 +116,6 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     shelter,
     infield: createInfield(shelter),
     wood:    createWood({ ground, summit, path, shelter }, seed),
+    wash:    createWash(),
   }
 }

@@ -7,7 +7,9 @@ import type { Ground } from '../../shared/ground.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import type { Path, Waypoint } from '../../shared/path.ts'
-import { createStoneGeometry } from '../../shared/stone.ts'
+import { SQUAT, createStoneGeometry } from '../../shared/stone.ts'
+import { waterline } from '../../shared/wash.ts'
+import type { Wash } from '../../shared/wash.ts'
 import type { Feature, World } from '../../world.ts'
 
 
@@ -102,9 +104,9 @@ function standBeside (path: Path, ground: Ground, distance: number): Waypoint {
 /**
  * The landing: two rows of stones from the top of the beach down into the
  * water, with the sand between them cleared for a keel, and a stone stood on
- * end at the head of each row.
+ * end at the head of each row. The sea is told which stand in it.
  */
-function layLanding (mason: Mason, path: Path): void {
+function layLanding (mason: Mason, path: Path, wash: Wash): void {
   const { ground, lay }               = mason
   const { x, z, seaward: [ dx, dz ] } = path.landing
 
@@ -121,6 +123,9 @@ function layLanding (mason: Mason, path: Path): void {
       dummy.rotation.set(lay.range(-0.25, 0.25), lay.range(0, Math.PI * 2), lay.range(-0.25, 0.25))
       dummy.scale.set(size, size * lay.range(0.7, 0.95), size * lay.range(0.85, 1.15))
       set(mason, lay.range(-0.08, 0.03))
+
+      // Those out in the water break it.
+      wash.stand(sx, sz, waterline(dummy.position.y, size, dummy.scale.y * SQUAT, ground.waterLevel))
     }
 
     const hx = x - dx * (SLIP_UP + 1.4) - dz * side * SLIP
@@ -168,7 +173,7 @@ export function createWaymarks (world: World): Feature {
       for (const distance of marks)
         stack(mason, standBeside(path, ground, distance))
 
-      layLanding(mason, path)
+      layLanding(mason, path, world.wash)
 
       mesh.count = mason.laid
 

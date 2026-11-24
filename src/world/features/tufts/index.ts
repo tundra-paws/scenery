@@ -7,6 +7,7 @@ import { createNoise3D } from 'threejs-scenes/primitives'
 import { amendShader, insertAfter } from '../../shared/amend.ts'
 import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
+import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { scatterOnGround } from '../../shared/scatter.ts'
 import { WIND_GLSL } from '../../shared/wind.ts'
@@ -155,6 +156,10 @@ export function createTufts (world: World): Feature {
       mesh = new THREE.InstancedMesh(geometry, material, spots.length)
       mesh.name          = 'tufts'
       mesh.receiveShadow = true
+
+      // Thousands of blades, a hand high: the sea gives back the meadow's
+      // colour from the ground under them, and the ripples would lose them.
+      keepOutOfMirror(mesh)
 
       let kept = 0
 

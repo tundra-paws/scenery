@@ -21,7 +21,8 @@ import type { Feature, World } from './world.ts'
  * This is the composition root: a feature exists in the world when it is in
  * this list, and it is built, updated and disposed in this order. `environment`
  * stays first because it settles the renderer's shadow configuration before any
- * other feature creates a material.
+ * other feature creates a material. `water` comes last: it breaks round what
+ * the others stood in it (`world.wash`), so it is built once they have.
  *
  * Adding to the world is adding a folder under `features/` and one line here.
  * Removing from it is the reverse.
@@ -32,7 +33,6 @@ export function createFeatures (world: World): Feature[] {
     createClouds(world),
     createBeyond(world),
     createTerrain(world),
-    createWater(world),
     createRocks(world),
     createTufts(world),
     createCairn(world),
@@ -41,5 +41,6 @@ export function createFeatures (world: World): Feature[] {
     createInfieldFeature(world),
     createWoodFeature(world),
     createBoat(world),
+    createWater(world),
   ]
 }

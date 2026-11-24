@@ -5,9 +5,12 @@ import { smoothstep } from 'threejs-scenes/primitives'
 import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
 import { DEEP_WATER } from '../../shared/ground.ts'
 import { PALETTE } from '../../shared/palette.ts'
+import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { createPathWear, wearPath } from './wear.ts'
 import type { PathWear } from './wear.ts'
+import { wetTheShore } from './wet.ts'
+import type { WetShore } from './wet.ts'
 
 
 const SAND  = new THREE.Color(PALETTE.sand)
@@ -58,10 +61,11 @@ function cellsAbove (geometry: THREE.BufferGeometry, floor: number): number[] {
   return kept
 }
 
-/** The land: one heightfield mesh, coloured per vertex, shaded flat, with the path and the ways to the shelter's door and the field gate worn into it. */
+/** The land: one heightfield mesh, coloured per vertex, shaded flat, with the path and the ways to the shelter's door and the field gate worn into it, and its foot wet where the sea runs up it. */
 export function createTerrain (world: World): Feature {
   let mesh: THREE.Mesh | null = null
   let wear: PathWear | null   = null
+  let shore: WetShore | null  = null
 
   return {
     name: 'terrain',
@@ -103,6 +107,7 @@ export function createTerrain (world: World): Feature {
 
       wearPath(material, wear)
       shadeUnderClouds(material, world)
+      shore = wetTheShore(material, world.wind, ground.waterLevel)
 
       mesh               = new THREE.Mesh(geometry, material)
       mesh.name          = 'terrain'
@@ -110,6 +115,11 @@ export function createTerrain (world: World): Feature {
       mesh.receiveShadow = true
 
       scene.add(mesh)
+    },
+
+    update (_state, frame) {
+      if (shore)
+        shore.time.value = frame.frame * STEP
     },
 
     dispose () {
@@ -120,8 +130,9 @@ export function createTerrain (world: World): Feature {
 
       wear?.texture.dispose()
       mesh?.removeFromParent()
-      mesh = null
-      wear = null
+      mesh  = null
+      wear  = null
+      shore = null
     },
   }
 }
@@ -129,4 +140,5 @@ export function createTerrain (world: World): Feature {
 // perf: medium — one draw call (two with its shadow pass). 11k triangles on the
 // mobile tier, 30k on desktop, 58k on highEnd: the grid less the two fifths of
 // it under deep water. The path is one small texture and one lookup a fragment
-// (`wear.ts`). Built once; nothing per frame.
+// (`wear.ts`), the wet sand two sines (`wet.ts`). Built once; a step sets the
+// wash's clock.

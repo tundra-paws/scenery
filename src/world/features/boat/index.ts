@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
-import { MAST, createHullGeometry } from './hull.ts'
+import { MAST, WATERLINE, createHullGeometry } from './hull.ts'
 import { berthAt, findMooring } from './mooring.ts'
 import type { Berth, Mooring } from './mooring.ts'
 import { createPennant } from './pennant.ts'
@@ -14,6 +14,10 @@ import type { Pennant } from './pennant.ts'
 /** Module-scope scratch, so a step allocates nothing. */
 const berth: Berth = { x: 0, z: 0, heave: 0, yaw: 0, pitch: 0, roll: 0 }
 const masthead     = new THREE.Vector3()
+
+/** Mean height of the hull's side over the water, for how far along the light its shadow lies; and the furthest it is let lie. */
+const SIDE_HEIGHT = 0.5
+const SHADE_REACH = 2.5
 
 /**
  * The boat: a small tarred double-ender lying to its anchor just off the
@@ -43,6 +47,14 @@ export function createBoat (world: World): Feature {
     masthead.set(MAST.along, MAST.top - 0.3, 0).applyEuler(hull.rotation)
       .add(hull.position)
     pennant.fly(masthead.x, masthead.y, masthead.z, time)
+
+    // Tell the sea where it lies: the bow is the boat's own x, turned by its
+    // yaw, and its shadow falls away from the light, further the lower that is.
+    const { direction } = world.day.light
+    const along         = SIDE_HEIGHT / Math.max(direction.y, 0.2)
+    const reach         = Math.min(1, SHADE_REACH / (Math.hypot(direction.x, direction.z) * along || 1))
+
+    world.wash.ride(berth.x, berth.z, -berth.yaw, -direction.x * along * reach, -direction.z * along * reach)
   }
 
   return {
@@ -64,6 +76,8 @@ export function createBoat (world: World): Feature {
       hull.rotation.order = 'YXZ'
 
       pennant = createPennant(world)
+
+      world.wash.hull(WATERLINE.half, WATERLINE.beam)
 
       lie(0)
       scene.add(hull, pennant.mesh)

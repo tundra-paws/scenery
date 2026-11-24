@@ -38,7 +38,8 @@ import type { Ground } from './shared/ground.ts'
  * every stop before them keeps its hour.
  */
 export const VIEWS: readonly View[] = [
-  { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12 },
+  { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },
+  { name: 'mirror', at: [ 72, 128 ], height: 2.2, look: [ 14, 40 ], lookHeight: 8, travel: 5 },
   { name: 'landing', at: [ 56.3, 103.3 ], height: 2.4, look: [ 36, 74 ], lookHeight: 3, walk: true },
   { name: 'climb', at: [ 31.3, 45.5 ], height: 3, look: [ 14, 58 ], lookHeight: 5 },
   { name: 'seaward', at: [ 28, 42 ], height: 4, look: [ 60, 92 ], lookHeight: 25, travel: 18 },

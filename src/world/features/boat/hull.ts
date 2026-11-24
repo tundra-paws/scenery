@@ -32,6 +32,16 @@ const STATIONS = 10
  */
 const SECTION = [[ 0, 0 ], [ 0.52, 0.15 ], [ 0.88, 0.52 ], [ 1, 1 ]] as const
 
+/**
+ * The hull where the water cuts it, for the sea to break round: half its
+ * length, out to where `keel` comes up through the surface, and half its
+ * beam amidships, `SECTION` read at the water's height up the side.
+ */
+export const WATERLINE = {
+  half: LENGTH / 2 * (DRAFT / (DRAFT + STEM * 0.42)) ** (1 / 4.5),
+  beam: BEAM / 2 * (SECTION[1][0] + (SECTION[2][0] - SECTION[1][0]) * (DRAFT / (DRAFT + FREEBOARD) - SECTION[1][1]) / (SECTION[2][1] - SECTION[1][1])),
+} as const
+
 /** Where the three thwarts are, as parts of the half-length, and how high. The mast stands through the middle one. */
 const THWARTS = [ -0.52, 0.14, 0.6 ] as const
 const SEAT    = FREEBOARD - 0.2

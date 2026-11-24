@@ -6,7 +6,8 @@ import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { scatterOnGround } from '../../shared/scatter.ts'
-import { createStoneGeometry } from '../../shared/stone.ts'
+import { SQUAT, createStoneGeometry } from '../../shared/stone.ts'
+import { waterline } from '../../shared/wash.ts'
 import type { Feature, World } from '../../world.ts'
 
 
@@ -23,6 +24,9 @@ const OFF_SUMMIT  = 4
 const OFF_SHELTER = 2
 const OFF_TREE    = 0.8
 const OFF_DYKE    = 1
+
+/** A boulder whose foot is lower than this over the water stands in it, and the sea breaks round it. */
+const STANDING = 0.25
 
 /** Module-scope scratch, so placing an instance allocates nothing. */
 const dummy = new THREE.Object3D()
@@ -66,7 +70,11 @@ export function createRocks (world: World): Feature {
         // Sunk a little, so a boulder on a slope does not hover on its high side.
         dummy.position.set(spot.x, spot.height - size * 0.18, spot.z)
         dummy.rotation.set(place.range(-0.3, 0.3), place.range(0, Math.PI * 2), place.range(-0.3, 0.3))
-        dummy.scale.set(size, size * place.range(0.7, 1.1), size * place.range(0.8, 1.2))
+
+        const tall = place.range(0.7, 1.1)
+        const wide = place.range(0.8, 1.2)
+
+        dummy.scale.set(size, size * tall, size * wide)
         dummy.updateMatrix()
         tint.set(PALETTE.rock).offsetHSL(0, 0, place.range(-0.07, 0.07))
 
@@ -88,6 +96,10 @@ export function createRocks (world: World): Feature {
         mesh.setMatrixAt(kept, dummy.matrix)
         mesh.setColorAt(kept, tint)
         kept += 1
+
+        // One that stands in the sea is one the sea breaks round.
+        if (spot.height < ground.waterLevel + STANDING)
+          world.wash.stand(spot.x, spot.z, waterline(dummy.position.y, size * (1 + wide) / 2, size * tall * SQUAT, ground.waterLevel))
       }
 
       mesh.count = kept

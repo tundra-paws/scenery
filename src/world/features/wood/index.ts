@@ -4,6 +4,7 @@ import { createNoise3D } from 'threejs-scenes/primitives'
 
 import { amendShader, insertAfter } from '../../shared/amend.ts'
 import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { WIND_GLSL } from '../../shared/wind.ts'
 import type { Wind } from '../../shared/wind.ts'
 import type { Feature, World } from '../../world.ts'
@@ -104,6 +105,11 @@ export function createWoodFeature (world: World): Feature {
       mesh.castShadow          = true
       mesh.receiveShadow       = true
       mesh.customDepthMaterial = depth
+
+      // Behind the beach from most of the sea, and the island's costliest
+      // mesh: a phone leaves it out of the sea's reflection.
+      if (world.quality.tier === 'mobile')
+        keepOutOfMirror(mesh)
 
       scene.add(mesh)
     },

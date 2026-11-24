@@ -2,6 +2,9 @@
 import * as THREE from 'three'
 import { createNoise3D } from 'threejs-scenes/primitives'
 
+/** How much less a stone stands than it is wide: squashed a little, so it sits. */
+export const SQUAT = 0.72
+
 /**
  * One stone: an icosahedron pushed around by noise, squashed a little so it sits.
  *
@@ -23,7 +26,7 @@ export function createStoneGeometry (seed: number, detail = 1): THREE.BufferGeom
     // together and the surface stays closed.
     const bump = 1 + noise.sample(x * 1.3, y * 1.3, z * 1.3) * 0.3
 
-    position.setXYZ(index, x * bump, y * bump * 0.72, z * bump)
+    position.setXYZ(index, x * bump, y * bump * SQUAT, z * bump)
   }
 
   geometry.computeVertexNormals()

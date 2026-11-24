@@ -1,6 +1,8 @@
 // src/world/features/boat/mooring.ts
 import type { Ground } from '../../shared/ground.ts'
 import type { Path } from '../../shared/path.ts'
+import { swellAt } from '../../shared/swell.ts'
+import type { Swell } from '../../shared/swell.ts'
 import type { Wind } from '../../shared/wind.ts'
 
 /** Where the boat lies when the wind holds it straight: this far out from the waterline, and this far along the shore from the landing. */
@@ -18,6 +20,15 @@ export const AFLOAT = 1
  * when nothing holds it, and in a gust, when the wind has it by the bow.
  */
 const SWING = [ 0.15, 0.05 ] as const
+
+/**
+ * How much of the swell the boat takes: a boat half a swell long sits across
+ * its backs and does not follow every one of them up and down.
+ */
+const RIDE = 0.75
+
+/** Module-scope scratch, so a step allocates nothing. */
+const sea: Swell = { height: 0, slopeX: 0, slopeZ: 0 }
 
 /** Where the boat lies, and what it lies to. */
 export interface Mooring {
@@ -76,7 +87,9 @@ export function findMooring (ground: Ground, path: Path, wind: Wind): Mooring {
  * hangs downwind of its anchor and sheers slowly from side to side about it,
  * wide when the wind drops and narrow when a gust takes it by the bow, which
  * is the wind read on the CPU (`wind.gustAt`) as the shelter's smoke reads
- * it. On top of that it rides: a little heave, a little pitch, more roll.
+ * it. On top of that it rides the swell the sea's shader draws (`swell.ts`):
+ * up as a back passes under it, bow up as one comes at it and down as it
+ * goes, rolling as it is tilted across, and a little more of its own.
  */
 export function berthAt ({ anchor, rest, level }: Mooring, wind: Wind, time: number, out: Berth): Berth {
   const gust  = wind.gustAt(rest.x, rest.z, time)
@@ -87,15 +100,23 @@ export function berthAt ({ anchor, rest, level }: Mooring, wind: Wind, time: num
   const dx = wind.direction[0] * Math.cos(sheer) - wind.direction[1] * Math.sin(sheer)
   const dz = wind.direction[0] * Math.sin(sheer) + wind.direction[1] * Math.cos(sheer)
 
-  out.x     = anchor.x + dx * SCOPE
-  out.z     = anchor.z + dz * SCOPE
-  out.heave = level + 0.045 * Math.sin(time * 0.9) + 0.025 * Math.sin(time * 1.37 + 1.1)
-  out.yaw   = Math.atan2(dz, -dx)
-  out.pitch = 0.022 * Math.sin(time * 0.8 + 0.4) + 0.01 * Math.sin(time * 1.9)
-  out.roll  = 0.05 * Math.sin(time * 0.62 + 2) + 0.02 * Math.sin(time * 1.41)
+  out.x   = anchor.x + dx * SCOPE
+  out.z   = anchor.z + dz * SCOPE
+  out.yaw = Math.atan2(dz, -dx)
+
+  // The bow is toward the anchor; starboard is the bow turned a right angle
+  // the way three turns the boat's own z.
+  swellAt(wind.direction, out.x, out.z, time, sea)
+
+  const ahead  = -(sea.slopeX * dx + sea.slopeZ * dz)
+  const across = sea.slopeX * Math.sin(out.yaw) + sea.slopeZ * Math.cos(out.yaw)
+
+  out.heave = level + sea.height * RIDE + 0.015 * Math.sin(time * 1.37 + 1.1)
+  out.pitch = Math.atan(ahead * RIDE) + 0.008 * Math.sin(time * 1.9)
+  out.roll  = -Math.atan(across * RIDE) + 0.04 * Math.sin(time * 0.62 + 2) + 0.015 * Math.sin(time * 1.41)
 
   return out
 }
 
-// perf: trivial — the place is found once; a step is a dozen sines and one
-// question to the wind.
+// perf: trivial — the place is found once; a step is a dozen sines, one
+// question to the wind and one to the swell.

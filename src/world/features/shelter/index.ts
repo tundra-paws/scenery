@@ -60,7 +60,12 @@ export function createShelterFeature (world: World): Feature {
       shadeUnderClouds(stone, world)
       shadeUnderClouds(built, world)
 
-      walls = layWalls(createStoneGeometry(rng.fork('shelter:shape').int(1, 1_000_000)), stone, rng.fork('shelter:lay'), land)
+      // A phone gets the same stones with fewer facets, as the dykes do:
+      // two hundred of them, drawn for the sun's shadow and the sea's mirror
+      // as well as for the eye.
+      const detail = world.quality.tier === 'mobile' ? 0 : 1
+
+      walls = layWalls(createStoneGeometry(rng.fork('shelter:shape').int(1, 1_000_000), detail), stone, rng.fork('shelter:lay'), land)
 
       // The dark inside goes down as far as the lowest ground at any corner.
       const foot = Math.min(land(-HALF_DEEP, -HALF_LONG), land(HALF_DEEP, -HALF_LONG), land(-HALF_DEEP, HALF_LONG), land(HALF_DEEP, HALF_LONG)) - 1

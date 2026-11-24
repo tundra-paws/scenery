@@ -3,6 +3,7 @@ import * as THREE from 'three'
 
 import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
 import { disposeInstances } from '../../shared/instances.ts'
+import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { createStoneGeometry } from '../../shared/stone.ts'
 import type { Feature, World } from '../../world.ts'
@@ -10,6 +11,14 @@ import { sowBarley } from './barley.ts'
 import { layDyke } from './dyke.ts'
 import { hangGate } from './gate.ts'
 import { ploughRigs } from './rigs.ts'
+
+
+/**
+ * Where a wall goes into the sea: how often along it the sea is told, how
+ * wide it is at the waterline, and how deep the water may be over its foot
+ * before even its cope is under.
+ */
+const WADE = { every: 0.5, half: 0.42, drowned: 0.8 } as const
 
 
 /** A mesh that owns its geometry and its one material, unhooked. */
@@ -20,6 +29,27 @@ function free (mesh: THREE.Mesh | null): void {
     mesh.material.dispose()
 
   mesh?.removeFromParent()
+}
+
+/** Tell the sea where the walls stand in it: the head-dyke runs down into it. */
+function wade (world: World): void {
+  const { ground, infield, wash } = world
+
+  for (const run of infield.runs)
+    for (let index = 1; index < run.length; index += 1) {
+      const from = run[index - 1]!
+      const to   = run[index]!
+      const span = Math.hypot(to.x - from.x, to.z - from.z)
+
+      for (let along = 0; along <= span; along += WADE.every) {
+        const x     = from.x + (to.x - from.x) * along / span
+        const z     = from.z + (to.z - from.z) * along / span
+        const depth = ground.waterLevel - ground.heightAt(x, z)
+
+        if (depth > 0 && depth < WADE.drowned)
+          wash.stand(x, z, WADE.half)
+      }
+    }
 }
 
 /**
@@ -74,6 +104,14 @@ export function createInfieldFeature (world: World): Feature {
       barley = sowBarley(field.ears, ears, rng.fork('infield:barley'), world.quality.tier, wind)
       gate   = hangGate(ground, infield.gates[0]!, shelter, wood)
 
+      // The ears are many and small; in the sea the rigs' colour is enough.
+      // A phone leaves the walls' hundreds of stones out of it too.
+      keepOutOfMirror(barley)
+
+      if (world.quality.tier === 'mobile')
+        keepOutOfMirror(dyke)
+
+      wade(world)
       scene.add(dyke, rigs, barley, gate)
     },
 
