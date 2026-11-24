@@ -12,6 +12,8 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 2. **A night worth staying up for.** The night is a moon, stars, high cloud and one lamp. A
    lantern at the boat's masthead, the window's light falling on the grass, a meteor now and
    then.
+3. **The mill on the burn.** A click mill astride the lower falls, a water-gate where the
+   burn goes under the head-dyke (the wall is simply laid across it now), a slab bridge.
 
 ## Known problems
 
@@ -27,8 +29,6 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   Move the shelter, the path or the land and look at `hero`, `landing`, `boat`, `infield`.
 - The walls are solid only to the eye: the explore walk goes through them, and the flown
   legs clear them only because they keep five units up.
-- The barley's ripple and the potato rigs are seen at second ten in gold light; at night the
-  field is one dark shape. The rigs cast no shadow of their own (receive only).
 - The lone birches are strewn by rule over the whole island (`strew`). One stands by the
   landing, in `hero`, `landing` and `boat`, where the pennant flies across its crown. Tests
   keep every tree off every postcard's camera and out of the tour's way: move a view or a
@@ -36,8 +36,9 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - Stops on borrowed time: `skerry` and `wood` (the afternoon's legs were cut to pay for them:
   `east` 5, `skerry` 5, `wood` 5, `shelter` 7, `boat` 4, `starlings` 5), `mirror` and `moor`
   (`ridge` 5 + `moor` 5 + a dwell = the 15 s leg they split). Change one and the day test
-  fails until they sum to what they did. The next view needs `DAY` to grow, and then `ridge`
-  falls before sunrise: retune `EDGE` and `SLOW`, or take the time from the night's legs.
+  fails until they sum to what they did. `burn` grew `DAY` by its stop and leg, and `ridge`
+  fell before sunrise: `cove`'s leg was given 22 s to hold it (the sun is half a degree up
+  there now). The next view will need that again, or `EDGE` and `SLOW` retuned.
 - Nothing knows a tree is there but the boulders: an exploring visitor walks through a trunk,
   tufts grow against it, and the lamp lights the far side of it. The crowns are lit as if
   half turned to the sky (`SKYWARD` in `wood/timber.ts`), so under the moon they are a little
@@ -47,24 +48,18 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 
 - The first frame waits for every shader program to link (`lib-stack/README.md`, "Tried and
   dropped"). Fewer programs would help: the gate counts 20.
-- Nothing guards how long the world takes to start: `budgets.json` holds counts, not times.
-  Ground samples per boot is a count, and tracks it. It would need a counter in the harness.
 - The terrain's slope is read from `world.grid`, so it is measured across grid points, which
   are further apart on the smaller tiers. A rule keyed to slope (the rock line) lands a little
   differently on each tier.
 - `bun run diff` and the gate's policy check trust the local `origin/main`, which is behind in a
   fresh checkout: the gate then reports other people's commits as yours. Run
   `git fetch origin main` before believing either.
-- The waterline's clear fringe shows what is behind it, not the sand under it. On a far shore
-  seen at a slant that is the horizon colour, since the deep sea floor is no longer built.
 - The tour's flown legs keep five units over the ground but do not know what stands on it.
   `climb` to `island` leaves the cairn 21 units to one side. A new view near a tall thing needs
   a look at the legs into and out of it.
 - A leg between two views that face opposite ways swings the camera round as it passes what it
   was looking at (`ridge` to `hero` did, at 72 degrees a second, until `east` went between
   them). A test now walks the whole loop and fails over 35 a second: add a view between.
-- `hero` to `landing` is all over water and still rises eleven units on the way: the spline
-  between a high neighbour and a low view dips under the sea and the lift over-corrects.
 - The path is colour only. The ground under it is as steep across as the hill it crosses;
   benching it would change `ground.heightAt` for everything that stands on the land.
 - The path follows the land, but two views do not follow the path: `landing` and `climb` are
@@ -82,8 +77,6 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   in `shared/wind.ts` or the landing and look at `hero`, `boat` and `landing` again.
 - The boat rides the sea's swell (`shared/swell.ts`) and lays its shadow on the water, but an
   exploring visitor can walk through it. It makes no wake: at anchor it hardly moves.
-- The smoke is opaque puffs that shade nothing. From `hero` at second ten the top of the plume
-  stands against a cloud of the same colours.
 - The clouds' shadow and the sun's shadow map do not know about each other: a boulder's own
   shadow is as dark under a cloud as in the open. The clouds' shadow is also only roughly
   theirs now: it is laid as if the light never stood lower than 24 degrees (`REACH`), and a
@@ -95,7 +88,7 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   decides the gusts the smoke at second ten left the chimney in, and so its bend.
 
 - **The day is typed in to fit the tour.** `DAY` in `shared/daylight.ts` is the loop's length
-  (297.5 s since `starlings`) and `OPENING`, `EDGE` and `SLOW` put each stop at its hour. Add a view,
+  (313.5 s since `burn`) and `OPENING`, `EDGE` and `SLOW` put each stop at its hour. Add a view,
   or give a leg its own `travel`, and a test in `rig/tour.test.ts` fails until `DAY` follows;
   `OPENING` follows `DAY` by itself so second ten keeps its sun. Then print the sun's height at
   every stop and look at the night ones again (`flock` moved sunrise from `cove` toward `ridge`). A visitor who takes the
@@ -113,18 +106,11 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - The haze on the island is one colour, the horizon's. The sea and the land beyond fade into
   the glow on the sun's side (`features/beyond` does it by hand); the island's own far slopes
   still grey toward a sunset. Doing it for every lit material is `shown` in `shared/lit.ts`.
-- The lamp's light grows at night (`DARK_GAIN`) because the picture is exposed for the dark,
-  not because the flame does. The window still lights nothing but itself.
 
 - **The land beyond is typed in to fit `hero`** (`REACHES` in `shared/beyond.ts`). The
   headland's shoulder stops just short of the sun at second ten, and a test fails when it does
   not. Move the sun's place at second ten (`OPENING`, `NORTH`) or `hero`, and retune it by
   printing the skyline from `hero` bearing by bearing, as the test does.
-- The skyline the sun goes behind is measured from the island's middle. From the far side of
-  the island the sun disappears a little before or after its light goes.
-- The sun goes behind the land some eight seconds before it reaches the sea, and from then
-  until the moon takes over (`HANDOVER`) the island has no direct light. The sky's colours
-  still go by the sun's height alone.
 
 - **The mirror draws the world twice** (`water/mirror.ts`): every frame, everything over the
   water again from under it, at half the picture's size (a third on a phone): a draw call
@@ -135,10 +121,8 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   node materials, three's `WebGPURenderer` forced onto WebGL 2 so a visitor gets what the
   gate judged. Native WebGPU is one flag in `main.ts`, the owner's to turn: untried here. The mirror shares the picture's programs now: 20 live
   of 40, where GLSL had 31.
-- The grass and barley read the gust at each vertex, not at the root as the GLSL did: a
-  pixel's difference. A swaying instance's shadow would not sway (`displaceInstances`); none
-  casts one. `main.ts` reaches into three's backend to keep instance matrices out of uniform
-  arrays: look at it again when three is bumped.
+- `main.ts` reaches into three's backend to keep instance matrices out of uniform arrays:
+  look at it again when three is bumped.
 - The sea is still a flat plane: the swell tilts its light and the reflection, it does not move
   the surface, so the boat heaves on water that does not. The surf is a thin line from `hero`:
   the shelf there is steep. The land beyond still has no surf.
@@ -160,16 +144,12 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - The trods are worn only where the path's picture reaches (`terrain/wear.ts`, its second
   channel): the brae and the inbye. The far hefts have sheep and no trods; a picture of the
   whole island would cost the path its texels. The sheep do not walk on their trods.
-- Triangles are at 79% (desktop) and 76% (mobile) since `skerry`: the next chapter must make
-  room. The walling stones are still 80 triangles on desktop, drawn three times.
 
 - **The skerry is typed in to fit `hero`** (`REEF` in `shared/skerry.ts`): bottom right, in
   the one patch of water `shelter`, `wood`, `infield`, `boat` and their legs leave free. A
   test holds it in the frame, off every camera and under the tour. Move a view, look again.
 - Its rocks are not land: `ground` does not know them, a visitor walks through, no shallows
   gather round them. At second ten the hill's shadow is on the reef: a dark shape, pale seals.
-- A seal never leaves its slab. The one in the water comes up at three typed places
-  (`RISES`) and makes no ring. Nothing startles them, not even the tour.
 
 - **The heather is a rule, not a map** (`shared/moor.ts`): above a fifth of the relief, off
   slopes over 0.3, in noise patches. The land's colour and the bushes read it; the grass
@@ -192,17 +172,36 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   camera on the `flock` to `hero` legs. A wing is two triangles, under a pixel from `hero`:
   the cloud is what reads.
 
+- **Every surface has a texture** (`shared/surface.ts`): noise worked out a fragment, no
+  image. `finish(surface)` on a lit material gives it colour and relief (a bumped normal).
+  Still things read `inWorld`, moving ones `inItself`. The land decides sand, turf, heather
+  and rock a fragment from `aLand` (`terrain/land.ts`); its vertex colours are gone. Each kind
+  of finish is a program: 20 became 29. A grain fades out once a pixel spans half a cycle
+  (`kept`): from `hero` only the coarse octaves show, and the brae is in shadow at second ten.
+- **Displacement is only the crags**: the land's vertices are pushed where it is rock
+  (`aLand.w`), never where anything stands, nor near the burn. Relief elsewhere is light, not
+  shape: real displacement wants a finer land near the camera, and triangles the budget lacks.
+- Not textured: sea, clouds, smoke, barley, tufts, pennant, starlings, the lamp.
+- **The burn's course is the land's** (`shared/burn.ts`): it falls from `SPRING` (typed in to
+  fit `hero`) and turns aside from the path and the landing's slip (`SHY`, `NEAR`). Its water
+  lies on the land, which is not cut for it; the head-dyke is laid across it; nothing walks
+  round it but the sheep. It is not in the sun's shadow map, and no rain swells it. The pool
+  is a slow reach, not level water.
+- **The grass is not planted** (`features/grass`): the same blades are gathered ahead of the
+  camera (`PATCH`), so `hero`, out on the water, draws almost none and still pays for them.
+  Where it grows is one picture (`sward.ts`): move a wall or the path and it follows. Blades
+  cast no shadow and stand through a sheep's feet. Tufts are still planted, as before.
+- Triangles: desktop 76%, mobile 79%. The dyke's stones are 20 facets on every tier now, and
+  the waymarks' on a phone.
+
 ## Ideas
 
 Parts for a chapter, never a day by themselves.
 
 - A second colour of dawn: the stops are by the sun's height alone, so morning and evening
   are the same sky. A cooler, pinker east would need the hour as well as the height.
-- Whitecaps far out under a gust.
-- Stooks, a peat stack, a scythe left on the dyke: late summer on the infield, a later day.
-- A kailyard against the house's gable. Peat banks cut into the moor, a peat stack by the door.
+- Whitecaps far out under a gust. Terns over the stacks. Weed on the reef below the tide.
+- Stooks, a peat stack, a scythe left on the dyke. A kailyard against the gable.
 - Leaves torn off the wood by a gust. A few birches turned yellow.
-- Terns over the stacks. Weed on the reef below the tide.
 - The boat's sail furled on its yard; a creel or a net on the beach.
-- Grass growing on the shelter's roof: the meadow's own tufts. The tuft's shape and material
-  would move out of `features/tufts` into `shared/` so both are drawn with one program.
+- Parallax in the land's relief; wet stone beside the burn; ripples where a seal dives.

@@ -59,3 +59,26 @@ In a scratch script: load the page as `scripts/capture.ts` does and read
 `renderer._pipelines.programs.vertex.keys()` (the GLSL of every vertex stage) and
 `renderer._pipelines.caches` (which pairs are linked). Wrapping
 `renderer._pipelines.getForRender` shows which objects share which program.
+
+## Textures (`shared/surface.ts`)
+
+Since `grain-water-and-grass` every lit surface has a texture, and none of them is an image.
+
+- **A surface is a function**, `(seen) => { colour(plain), height }`: the pattern's colour
+  from the plain one, and its relief in world units. `material.finish(surface)` adds the
+  colour as a dye and sets `normalNode = relief(height)`: Mikkelsen's bump mapping from the
+  screen derivatives of a computed height, on the facet's own normal under flat shading.
+- **`inWorld(tier)` or `inItself(tier)`.** What never moves reads the pattern at
+  `positionWorld`. What walks, floats, sways or is displaced reads it at `positionGeometry`
+  (before instancing, the mesh's matrix and `positionNode`), or the grain swims across it.
+- **Build from `grain`, `grit`, `vein`, `cells`.** Each fades out as a pixel comes to span
+  half a cycle (`kept`): never call `mx_noise_float` bare for a fine pattern, it sparkles from
+  far off and its relief turns to noise. `grit` is the finest octave and is nothing on a phone.
+- **Heights are world units.** A bump as steep as it looks is about a tenth of its
+  wavelength high. three's own `bumpMap` wants a texture lookup; `relief` does not.
+- **Colours stay the palette's.** A surface tones the plain colour or leans it toward
+  another palette colour. It does not bring one.
+- **Cost.** Three to six noises a fragment. A new kind of surface is a new program; the same
+  kind on another instanced stone is none.
+- **Reading a map in the vertex stage** (the grass reads the land's height): pass a level,
+  `texture(map, uv, float(0))`.

@@ -125,6 +125,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
   const path    = createPath(ground, summit)
   const beyond  = createLands(seed)
   const shelter = createShelter(ground, path)
+  const infield = createInfield(shelter)
   const wind    = createWind()
 
   return {
@@ -139,8 +140,8 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     beyond,
     day:     createDaylight(createSkyline(beyond)),
     shelter,
-    burn:    createBurn(ground, path),
-    infield: createInfield(shelter),
+    burn:    createBurn(ground, path, [ infield.fold ]),
+    infield,
     wood:    createWood({ ground, summit, path, shelter }, seed),
     moor:    createMoor(ground, seed),
     skerry:  createSkerry(ground, seed, quality.tier),

@@ -51,6 +51,27 @@ on `infra-error` at `publish`, starts the pipeline's `republish` mode when it ha
 Curator, 2026-11-23: the owner has since made the deploy retry (`a54ec39`, "retry failed Pages
 deployments"). Nothing is waiting on this any more; it can move to Closed.
 
+### 2026-11-24 · textures from a package, from photographs, and real displacement
+
+The owner asked for textures on everything, naming `tsl-textures` and ambientCG's maps, and
+displacement for the land. Three parts of that are the owner's to decide, not the curator's:
+
+- **`tsl-textures` as a dependency.** Rule 3: no new npm package. Say the word (add it to
+  `package.json` on `main`) and the patterns in `src/world/shared/surface.ts` can be swapped
+  for its.
+- **Photographed maps (ambientCG and the like).** VISION's own constraint is "made from
+  code", rule 4 forbids fetching at run time, and `budgets.json` allows 400 KB a file and
+  1.5 MB an iteration: one 1K colour + normal + displacement set is most of that. If wanted:
+  say which surfaces, and raise `bytes` in a framework change.
+- **Displacement finer than the land's grid.** The land is 30k triangles drawn three times;
+  displacement that reads needs several times that near the camera, and the budget is 800k
+  with 76% used. Wants either a higher `render.desktop.triangles` or the mirror and shadow
+  passes drawing a coarser land.
+
+Meanwhile: every surface got a texture written here in TSL on three's own noise (what
+`tsl-textures` is built on), with a bump-mapped normal from the same height; the land's rock
+faces are displaced at the grid's own vertices; nothing is downloaded.
+
 <!-- Example:
 ### 2026-12-09 · a smaller capture for the mobile tier
 What: capture the mobile hero at 960x540 in `budgets.json` → `capture`.

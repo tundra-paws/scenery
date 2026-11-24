@@ -38,7 +38,10 @@ const FAN  = 0.9
 
 /** Where the land falls less than `STILL[1]` a unit the burn slows and widens, fully at `STILL[0]`; a pool is that much wider again. */
 const STILL = [ 0.22, 0.5 ] as const
-const POOL  = 1.25
+const POOL  = 0.95
+
+/** The least ground left between the water's edge and the middle of a round wall it passes (the fold's). */
+const WALL_FOOT = 0.75
 
 /** Height over the sea below which the burn is on the beach. */
 const BEACH = 1.6
@@ -46,6 +49,9 @@ const BEACH = 1.6
 /** How fast the water runs, in units a second, on the level and for each unit of fall. */
 const PACE  = 0.7
 const HASTE = 1.9
+
+/** Something round the water passes and must not widen into. */
+type Round = Waypoint & { readonly radius: number }
 
 /** A place on the burn: one cross-section of its water. */
 export interface Reach extends Waypoint {
@@ -166,7 +172,7 @@ function eased (values: readonly number[], span: number): number[] {
   })
 }
 
-export function createBurn (ground: Ground, path: Path): Burn {
+export function createBurn (ground: Ground, path: Path, walls: readonly Round[] = []): Burn {
   const line   = pace(descend(ground, path))
   const height = line.map(point => ground.heightAt(point.x, point.z))
   const steps  = line.map((_, index) => {
@@ -207,7 +213,10 @@ export function createBurn (ground: Ground, path: Path): Burn {
       since += steps[index]! / (PACE + HASTE * falls[index]!)
     }
 
-    return { ...point, along, since, ahead: [ (next.x - last.x) / span, (next.z - last.z) / span ], fall: falls[index]!, half: halves[index]! }
+    // A pool widens as far as the wall beside it lets it.
+    const room = Math.min(...walls.map(wall => Math.hypot(point.x - wall.x, point.z - wall.z) - wall.radius - WALL_FOOT))
+
+    return { ...point, along, since, ahead: [ (next.x - last.x) / span, (next.z - last.z) / span ], fall: falls[index]!, half: Math.min(halves[index]!, Math.max(room, HALF[0])) }
   })
 
   // The pool is the stillest water above the beach; the falls, the steepest below it.
