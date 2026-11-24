@@ -26,7 +26,7 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   the field dyke on dry ground. The wood does not know about the walls: the test does.
   Move the shelter, the path or the land and look at `hero`, `landing`, `boat`, `infield`.
 - The walls are solid only to the eye: the explore walk goes through them, and the flown
-  legs clear them only because they keep five units up. Nothing grazes in the fold.
+  legs clear them only because they keep five units up.
 - The barley's ripple and the potato rigs are seen at second ten in gold light; at night the
   field is one dark shape. The rigs cast no shadow of their own (receive only).
 - The lone birches are strewn by rule over the whole island (`strew`). One stands by the
@@ -96,9 +96,10 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   decides the gusts the smoke at second ten left the chimney in, and so its bend.
 
 - **The day is typed in to fit the tour.** `DAY` in `shared/daylight.ts` is the loop's length
-  (277.5 s) and `OPENING`, `EDGE` and `SLOW` put each stop at its hour. Add a view, or give a
-  leg its own `travel`, and a test in `rig/tour.test.ts` fails until `DAY` follows; then print
-  the sun's height at every stop and look at the night ones again. A visitor who takes the
+  (289.5 s since `flock`) and `OPENING`, `EDGE` and `SLOW` put each stop at its hour. Add a view,
+  or give a leg its own `travel`, and a test in `rig/tour.test.ts` fails until `DAY` follows;
+  `OPENING` follows `DAY` by itself so second ten keeps its sun. Then print the sun's height at
+  every stop and look at the night ones again (`flock` moved sunrise from `cove` toward `ridge`). A visitor who takes the
   camera keeps the same clock: nothing lets them wait for the moon or hurry the dawn.
 - Every postcard, and so every thumbnail in the gallery, is taken at second ten: the gallery
   will never show the night. A second picture of an iteration (`seaward` at second 90) needs
@@ -150,6 +151,24 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - `mirror` stands between `hero` and `landing` on time taken from that one leg, so the day did
   not move. It looks across the bay at the island and its reflection, low over the water.
 
+- **The hefts are typed in to fit `hero`** (`HEFTS` in `shared/flock.ts`): the brae under the
+  cairn, the inbye above the landing, the dooryard, the fold, and two on the far side for
+  `cove`. Which ground a sheep stands on is a rule (grass, not steep, clear of the path and its
+  waymarks, walls, trees, house, cairn, boulders and every postcard's camera); a test walks
+  every sheep's round against it. Boulders are known only once `rocks` has built
+  (`world.clutter`), so the test's flock does not know them. Move a view, and look again.
+- A sheep's round is a loop of two to four places, walked in straight lines; it never meets
+  another sheep, so two can walk through each other. Nothing but the boulders and the walls
+  turn them: an exploring visitor walks through a sheep, and the tour's legs ignore them.
+- The flock keeps its own clock (`at` in `shared/flock.ts`): it stops when the sun is under a
+  degree and a half, so every sheep lies down where it stood, and runs again from sunrise.
+- The trods are worn only where the path's picture reaches (`terrain/wear.ts`, its second
+  channel): the brae and the inbye. The far hefts have sheep and no trods; a picture of the
+  whole island would cost the path its texels. The sheep do not walk on their trods.
+- Triangles are at 78% on both tiers. The flock costs 22k on desktop with its woolsack
+  fleeces; the next thing that is many should make room first (the dykes' 500 stones at 80
+  triangles, drawn three times, are the biggest share).
+
 ## Ideas
 
 Parts for a chapter, never a day by themselves.
@@ -167,7 +186,8 @@ Parts for a chapter, never a day by themselves.
 - An axe left in a stump by the stack. Leaves torn off the wood by a gust and carried
   downwind. A few of the birches turned yellow, for a day late in the summer.
 - Something that lives here and is never near: terns over the stacks, a seal's head off the
-  landing. Small, far, and gone when looked for.
+  landing. Small, far, and gone when looked for. Sheep on the shore at low water, for the weed.
+- The flock gathered: on one day of the year, all of it in the fold and its pen full.
 - The boat's sail, furled on its yard along the thwarts, and a creel or a net on the beach.
 - Grass growing on the shelter's roof: the meadow's own tufts. The tuft's shape and material
   would move out of `features/tufts` into `shared/` so both are drawn with one program.

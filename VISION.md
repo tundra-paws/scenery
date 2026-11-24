@@ -29,7 +29,11 @@ the house is the only wood on the island, birch, bent by the wind; the trees nea
 are stumps, and their logs are stacked under the eave. Below the house is the ground they
 worked: a field of rigs, barley and potatoes, walled round with the stones that came out of it,
 its gate left open; a fold across the path; and the head-dyke that keeps both from the hill,
-running down into the sea. It lies off a mountain coast: a high fell and a long range in the
+running down into the sea. Its sheep are out on the hill: the brae under the cairn and the
+inbye above the landing are flecked with them, white, a few brown or black, some with a lamb at
+foot, each keeping to its own heft and its own trods worn along the level of the slope; four
+are penned in the fold. They are the only thing on the island that moves of its own accord,
+and they keep themselves. It lies off a mountain coast: a high fell and a long range in the
 haze to the north-west, which nobody goes to, and which the sun goes down behind.
 
 **Mood and light.** One summer's day in the north, turning once in the time the tour takes, so
@@ -54,7 +58,9 @@ keeps the water out. One pale thing that grows: birch `bark`, near white, scarre
 rock's grey taken almost to black; its leaves are the meadow's own two greens, and its cut
 wood the bark's colour warmed. One thing sown, `barley`, a pale green-gold, only on the rigs; the
 potatoes beside it are the meadow's green gone darker, the furrows bare earth turned darker still.
-And one dyed thing, a worn red (`pennant`): cloth made only to be seen
+The flock's wool is its own: a dull cream white (`fleece`), a brown (`moorit`) for a few, and
+the near black of their faces and legs (`face`), which a black sheep is all over. And one dyed
+thing, a worn red (`pennant`): cloth made only to be seen
 from the water, and never more than a scrap of it. A new colour needs a job none of these does.
 The sky and its light are the exception that is not one: the same few roles (zenith, horizon,
 light, fill, ground) at five hours, day, gold, sunset, dusk and night (`HOURS`), blended by how
@@ -84,6 +90,10 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
   it runs back off. A gust roughens it and the picture in it breaks up.
 - *Distance.* What is far is seen through air: fainter, bluer, and fading into the sky's own
   colour on that side, glow and all. Layers (stacks, headland, range) say how far.
+- *The flock.* Sheep, never people: grazing a while head down, lifting it now and then to look
+  round, walking a few strides to the next bite, round and round their heft; lying down as the
+  sun goes and up again at first light. A sheep is a faceted woolsack, a dark head and four
+  sticks, never a model of a sheep. Their trods are worn into the turf as the path is, fainter.
 - *Low-poly, flat-shaded, few colours.* Facets are the style, not a shortcut to hide.
 
 **What it is not.** Not a game: no score, no quest, no characters. Not tropical, not fantasy, no
@@ -97,8 +107,8 @@ cairn, which the tour walks), the shelter with its lamp, its fire and its smoke,
 anchor off the landing, the day itself (evening, night with a moon and stars, and morning,
 once round in a visit), the land beyond, which the sun goes down behind, the birch wood
 beside the shelter, with its outliers on the open island, the infield: the field of rigs,
-its dyke and gate, the fold and the head-dyke, and a sea that answers (its mirror, its swell,
-its foam round what stands in it, the wet sand). Next: the inside of the shelter, and a night
+its dyke and gate, the fold and the head-dyke, a sea that answers (its mirror, its swell,
+its foam round what stands in it, the wet sand), and the flock on its hefts and its trods. Next: the inside of the shelter, and a night
 worth staying up for.
 
 ## Where it starts
