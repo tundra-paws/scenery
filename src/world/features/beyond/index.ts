@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { amendShader, insertAfter } from '../../shared/amend.ts'
 import { SKY_GLOW_GLSL } from '../../shared/daylight.ts'
 import type { Feature, World } from '../../world.ts'
-import { createBeyondGeometry, createLands } from './shape.ts'
+import { createBeyondGeometry } from '../../shared/beyond.ts'
 
 
 /**
@@ -89,7 +89,7 @@ export function createBeyond (world: World): Feature {
         )
       })
 
-      mesh      = new THREE.Mesh(createBeyondGeometry(createLands(world.seed), world.quality.tier), material)
+      mesh      = new THREE.Mesh(createBeyondGeometry(world.beyond, world.quality.tier), material)
       mesh.name = 'beyond'
 
       scene.add(mesh)

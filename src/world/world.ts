@@ -2,6 +2,8 @@
 import type { QualitySettings } from 'threejs-scenes'
 import type { AppModule } from 'threejs-scenes/core'
 
+import { createLands, createSkyline } from './shared/beyond.ts'
+import type { Land } from './shared/beyond.ts'
 import { createCloudShadow } from './shared/cloud-shadow.ts'
 import type { CloudShadow } from './shared/cloud-shadow.ts'
 import { createDaylight } from './shared/daylight.ts'
@@ -48,7 +50,8 @@ export type Feature = AppModule<WorldState>
  * terrain meshes, the scatterers place on, the water meets and the camera walks
  * over, and which must therefore be one function they all share. The same goes
  * for the air over it: one wind, one shadow from the clouds it carries, and
- * one hour of the day that the sky, the light and the sea all keep.
+ * one hour of the day that the sky, the light and the sea all keep, under a
+ * horizon with land on it.
  * And for what was made on it: the summit the cairn stands on, the one path
  * up to it, and the shelter beside that path.
  */
@@ -62,6 +65,9 @@ export interface World {
   wind:   Wind
   clouds: CloudShadow
   day:    Daylight
+
+  /** The land on the horizon, which the sun goes down behind. */
+  beyond: readonly Land[]
 
   /** The highest point of the land. */
   summit:  Waypoint
@@ -78,6 +84,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
   const ground = createGround({ seed })
   const summit = findSummit(ground)
   const path   = createPath(ground, summit)
+  const beyond = createLands(seed)
 
   return {
     seed,
@@ -88,7 +95,8 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     grid:    createHeightGrid(ground, GRID_SEGMENTS[quality.tier]),
     wind:    createWind(),
     clouds:  createCloudShadow(),
-    day:     createDaylight(),
+    beyond,
+    day:     createDaylight(createSkyline(beyond)),
     shelter: createShelter(ground, path),
   }
 }

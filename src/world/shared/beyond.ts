@@ -1,10 +1,10 @@
-// src/world/features/beyond/shape.ts
+// src/world/shared/beyond.ts
 import * as THREE from 'three'
 import type { QualityTier } from 'threejs-scenes'
 import { createNoise2D, smoothstep } from 'threejs-scenes/primitives'
 import type { Noise2D } from 'threejs-scenes/primitives'
 
-import { PALETTE } from '../../shared/palette.ts'
+import { PALETTE } from './palette.ts'
 
 
 /**
@@ -33,6 +33,10 @@ const ACROSS: Record<QualityTier, number> = { mobile: 12, desktop: 20, highEnd: 
 
 /** How much of a reach's height lies under the water at its edges, so every coast shelves into the sea. */
 const SHELF = 0.22
+
+/** The skyline is measured every this many degrees of bearing, and this many units out along each. */
+const SKYLINE_STEP  = 0.5
+const SKYLINE_REACH = 4
 
 /** Cells whose every corner is this far under the water are left out: the sea is opaque out there. */
 const SUNK = -3
@@ -112,6 +116,36 @@ export function landHeight ({ reach, noise }: Land, bearing: number, distance: n
   const rise  = (0.3 + 0.7 * peak) * (0.4 + 0.6 * crest) + 0.1 * hills
 
   return reach.height * ((1 + SHELF) * ends * side * rise - SHELF)
+}
+
+/**
+ * How high the land on the horizon stands toward each bearing, seen from the
+ * island's middle at the water, in degrees: what the sun goes down behind.
+ * Under the horizon (-90) where there is only sea. Measured once, on a table.
+ */
+export function createSkyline (lands: readonly Land[]): (bearing: number) => number {
+  const table = new Map<number, number>()
+
+  for (const land of lands) {
+    const { from, to, near, far } = land.reach
+
+    for (let bearing = Math.ceil(from / SKYLINE_STEP) * SKYLINE_STEP; bearing <= to; bearing += SKYLINE_STEP)
+      for (let distance = near; distance <= far; distance += SKYLINE_REACH) {
+        const height = landHeight(land, bearing, distance)
+        const key    = Math.round(bearing / SKYLINE_STEP)
+
+        if (height > 0)
+          table.set(key, Math.max(table.get(key) ?? -90, THREE.MathUtils.radToDeg(Math.atan2(height, distance))))
+      }
+  }
+
+  return bearing => {
+    const at   = bearing / SKYLINE_STEP
+    const low  = table.get(Math.floor(at)) ?? -90
+    const high = table.get(Math.ceil(at)) ?? -90
+
+    return Math.min(low, high) === -90 ? Math.max(low, high) : THREE.MathUtils.lerp(low, high, at - Math.floor(at))
+  }
 }
 
 /** What the far ground is made of, as a colour: the island's own bands, coarser. */

@@ -55,6 +55,9 @@ const NOON = Math.PI * 2 / EDGE * (1 - SLOW) + SLOW
 /** Sun elevation, in degrees, under which the moon is the body that lights the land. The light is out as it passes. */
 const HANDOVER = -7
 
+/** Degrees either side of the skyline over which a sun going behind the land on the horizon fades off the island. */
+const BEHIND = 0.7
+
 /** The lowest the light on the land is taken to stand, in degrees: a shadow can be long but not endless. */
 const LOWEST = 7
 
@@ -102,6 +105,9 @@ export const SKY_GLOW_GLSL = /* glsl */ `
     return uGlow * pow(toward, 4.0) * exp(-max(direction.y, 0.0) * 5.0);
   }
 `
+
+/** How high the land on the horizon stands toward a bearing, in degrees; -90 where there is none. */
+export type Skyline = (bearing: number) => number
 
 interface Stop {
   hour:      HourName
@@ -228,7 +234,18 @@ function stopUnder (elevation: number): number {
   return lower
 }
 
-export function createDaylight (): Daylight {
+/** The bearing of a direction, in degrees from -z toward +x. */
+function bearingOf ({ x, z }: THREE.Vector3): number {
+  return THREE.MathUtils.radToDeg(Math.atan2(x, -z))
+}
+
+/**
+ * The hour, under a sky whose horizon may not be level: `skyline` is the land
+ * on it, which the sun goes down behind before it reaches the sea. The island
+ * is then in that land's shadow, and the sea has no sun to glint with, while
+ * the sky over them keeps the hour it has by the sun's height alone.
+ */
+export function createDaylight (skyline: Skyline = () => -90): Daylight {
   const uniforms: DaylightUniforms = {
     uSunDirection:   { value: new THREE.Vector3(0, 1, 0) },
     uBodyDirection:  { value: new THREE.Vector3(0, 1, 0) },
@@ -297,6 +314,12 @@ export function createDaylight (): Daylight {
 
       light.colour.lerpColors(low.light, high.light, part)
       light.intensity = THREE.MathUtils.lerp(from.light, to.light, part)
+
+      if (elevation >= HANDOVER) {
+        const ridge = skyline(bearingOf(sun))
+
+        light.intensity *= THREE.MathUtils.smoothstep(elevation, ridge - BEHIND, ridge + BEHIND)
+      }
 
       fill.sky.lerpColors(low.fill, high.fill, part)
       fill.ground.lerpColors(low.ground, high.ground, part)

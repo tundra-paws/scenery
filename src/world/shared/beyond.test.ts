@@ -1,13 +1,13 @@
-// src/world/features/beyond/shape.test.ts
+// src/world/shared/beyond.test.ts
 import { describe, expect, test } from 'bun:test'
 import * as THREE from 'three'
 
-import { elevationAt, sunAt } from '../../shared/daylight.ts'
-import { createGround } from '../../shared/ground.ts'
-import { findView } from '../../views.ts'
-import { WORLD_SEED } from '../../world.ts'
-import { REACHES, createBeyondGeometry, createLands, heading, landHeight } from './shape.ts'
-import type { Land } from './shape.ts'
+import { createDaylight, elevationAt, sunAt } from './daylight.ts'
+import { createGround } from './ground.ts'
+import { findView } from '../views.ts'
+import { WORLD_SEED } from '../world.ts'
+import { REACHES, createBeyondGeometry, createLands, createSkyline, heading, landHeight } from './beyond.ts'
+import type { Land } from './beyond.ts'
 
 
 const lands = createLands(WORLD_SEED)
@@ -85,6 +85,33 @@ describe('the land beyond', () => {
 
     // The disc is about a degree across, and its halo wants room under it.
     expect(skyline(eye, sunBearing(POSTCARD))).toBeLessThan(elevationAt(POSTCARD) - 2)
+  })
+
+  test('puts the island in its shadow before the sun is down, and not before the postcards', () => {
+    const shaded = createDaylight(createSkyline(lands))
+    const open   = createDaylight()
+    let time     = POSTCARD
+
+    shaded.turn(POSTCARD)
+    open.turn(POSTCARD)
+
+    expect(shaded.light.intensity).toBe(open.light.intensity)
+
+    while (elevationAt(time) > 1)
+      time += 0.25
+
+    shaded.turn(time)
+    open.turn(time)
+
+    expect(open.light.intensity).toBeGreaterThan(1)
+    expect(shaded.light.intensity).toBe(0)
+  })
+
+  test('has a skyline that is the land it is measured from', () => {
+    const measured = createSkyline(lands)
+
+    for (let bearing = -140; bearing <= 40; bearing += 7)
+      expect(Math.abs(measured(bearing) - Math.max(skyline([ 0, 0, 0 ], bearing), -90))).toBeLessThan(0.6)
   })
 
   test('is one geometry of a size a phone can draw', () => {

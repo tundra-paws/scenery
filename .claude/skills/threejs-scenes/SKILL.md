@@ -63,6 +63,29 @@ Vanilla three.js (WebGL2), procedural-first. Load only the references the task n
   666 lines per file, a `// perf:` note at the bottom of non-trivial modules, Semantic Nodes
   CSS for any DOM UI, pointer events only. `bun run lint` has zero warnings allowed.
 
+## Reach for what exists first
+
+Do not reinvent the wheel. Before writing a helper, a shader, a loader, a control or a
+post pass, look for one that is already installed, and use it when it fits:
+
+1. **three itself**: core classes and their methods, `MathUtils`, `ShaderChunk`s, and the
+   built-in materials extended with `onBeforeCompile` instead of rewritten as a
+   `ShaderMaterial` (`shared/amend.ts` lets several features amend one material).
+2. **three's add-ons**: `node_modules/three/examples/jsm`, imported as `three/addons/…`
+   (`BufferGeometryUtils.mergeGeometries`, `SimplexNoise`, `Sky`, `Water`, `Lensflare`,
+   `ConvexGeometry`, `RoundedBoxGeometry`, the post-processing passes, and more). `ls` the
+   folder before writing something an add-on may already do.
+3. **The scene library**: `grep` `.scenery/api.md` (most of its exports are still unused):
+   noise (`createNoise2D`/`createNoise3D`, `fbm`, `ridged`), `smoothstep`, `poissonDisk`,
+   instancing, props, materials, lighting rigs, post chains.
+4. **This repository's `shared/`**: the ground, the grid, the scatter, the wind, the hour,
+   the clouds' shadow and the haze's glow (`SKY_GLOW_GLSL`) are already one signal each.
+
+Write your own only when none of those fits, and say why in a comment where you do. When
+the library is the right home for what you wrote, give it there (`lib-stack/`). An add-on
+is still bound by the rules above: no network, no second copy of three, no loop of its own,
+and it counts toward the draw-call budget like anything else.
+
 ## Non-negotiables
 
 - Programmatic generation over static data; more than ~20 hand-typed entries is a smell.
