@@ -79,8 +79,33 @@ function hideFallback () {
   fallback.hidden = true
 }
 
-/** @param {string} url */
-function navigateFrame (url) {
+/**
+ * Whether the frame is already showing a page.
+ *
+ * On a reload Firefox puts the frame back where it was by itself, before this
+ * script has even arrived, as long as the page is still fresh in its cache.
+ *
+ * @param {string} url
+ */
+function frameIsAt (url) {
+  try {
+    return frame.contentWindow?.location.href === url
+  }
+  catch {
+    return false
+  }
+}
+
+/**
+ * @param {string} url
+ * @param {boolean} fresh  load it even if the frame is already there
+ */
+function navigateFrame (url, fresh) {
+  // Sending the frame where it already is would build the same world a second
+  // time and throw the first one away: 430 ms of a 962 ms reload, when measured.
+  if (!fresh && frameIsAt(url))
+    return
+
   if (!frame.getAttribute('src')) {
     frame.src = url
     return
@@ -95,12 +120,15 @@ function navigateFrame (url) {
   }
 }
 
-/** @param {Iteration} iteration */
-function loadFrame (iteration) {
+/**
+ * @param {Iteration} iteration
+ * @param {{ fresh?: boolean }} [options]  `fresh` for a retry: the page that is there is the one that failed
+ */
+function loadFrame (iteration, { fresh = false } = {}) {
   const url = new URL(iteration.dir, document.baseURI).href
   hideFallback()
   frame.title = `Scenery iteration ${iteration.id}: ${iteration.title}`
-  navigateFrame(url)
+  navigateFrame(url, fresh)
   watcher.start(url)
 }
 
@@ -294,7 +322,7 @@ async function start () {
   fallbackRetry.addEventListener('click', () => {
     const iteration = current()
     if (iteration)
-      loadFrame(iteration)
+      loadFrame(iteration, { fresh: true })
   })
   prev.addEventListener('click', () => step(-1))
   next.addEventListener('click', () => step(1))
