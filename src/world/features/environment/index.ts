@@ -90,7 +90,7 @@ export function createEnvironment (world: World): Feature {
 
       fill = createHemisphereFill()
 
-      sky = new THREE.Mesh(new THREE.SphereGeometry(SKY_RADIUS, 24, 12), createSkyMaterial(world.day.uniforms))
+      sky = new THREE.Mesh(new THREE.SphereGeometry(SKY_RADIUS, 24, 12), createSkyMaterial(world.day.uniforms, world.wind.uniforms))
       sky.name          = 'sky'
       sky.frustumCulled = false
       sky.renderOrder   = -1
@@ -101,6 +101,7 @@ export function createEnvironment (world: World): Feature {
         colour: HOURS.night.light,
         pole:   POLE,
         day:    world.day.uniforms,
+        wind:   world.wind.uniforms,
       })
 
       scene.add(sun, sun.target, fill, sky, stars.points)

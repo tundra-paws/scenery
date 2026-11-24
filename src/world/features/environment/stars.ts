@@ -2,7 +2,9 @@
 import * as THREE from 'three'
 import type { SeededRng } from 'threejs-scenes'
 
+import { CIRRUS_GLSL } from '../../shared/cirrus.ts'
 import type { DaylightUniforms } from '../../shared/daylight.ts'
+import type { WindUniforms } from '../../shared/wind.ts'
 
 
 /** Distance the stars are drawn at: outside the furthest cloud, inside the camera's far plane. */
@@ -12,6 +14,8 @@ const RADIUS = 2000
 const SIZE = [ 1.2, 3.4 ] as const
 
 const VERTEX = /* glsl */ `
+  ${CIRRUS_GLSL}
+
   uniform float uNight;
   uniform float uTime;
   uniform float uPixelRatio;
@@ -28,7 +32,8 @@ const VERTEX = /* glsl */ `
     float clear     = smoothstep(0.03, 0.3, direction.y);
     float flicker   = 0.82 + 0.18 * sin(uTime * (1.3 + aStar.z) + aStar.z * 40.0);
 
-    vLight = uNight * clear * aStar.y * flicker;
+    // The high cloud hides them as it passes, all but the brightest.
+    vLight = uNight * clear * aStar.y * flicker * (1.0 - 1.4 * cirrusCover(direction));
 
     // Around the camera, like the dome. A star with no light is put outside
     // the picture, so by day they cost nothing to fill.
@@ -68,6 +73,9 @@ interface StarOptions {
   /** The axis the sky turns about. */
   pole: THREE.Vector3
   day:  DaylightUniforms
+
+  /** The wind, which carries the high cloud across them. */
+  wind: WindUniforms
 }
 
 /**
@@ -78,7 +86,7 @@ interface StarOptions {
  * scene, so the night allocates nothing the day did not: by day every point
  * is moved off the screen in the vertex shader.
  */
-export function createStars ({ count, rng, colour, pole, day }: StarOptions): Stars {
+export function createStars ({ count, rng, colour, pole, day, wind }: StarOptions): Stars {
   const positions = new Float32Array(count * 3)
   const stars     = new Float32Array(count * 3)
 
@@ -109,6 +117,7 @@ export function createStars ({ count, rng, colour, pole, day }: StarOptions): St
 
     uniforms: {
       uNight:      day.uNight,
+      uWindAloft:  wind.uWindAloft,
       uTime:       { value: 0 },
       uPixelRatio: { value: 1 },
       uStar:       { value: new THREE.Color(colour) },

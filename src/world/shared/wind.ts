@@ -19,6 +19,14 @@ const HEADING = -1.2
 const SPEED = 7
 
 /**
+ * The air aloft, which carries the high cloud: which way it goes, turned
+ * half a radian from the wind below it, and how fast against it. High cloud
+ * seen from the ground creeps; the low clouds go by under it.
+ */
+export const ALOFT      = [ Math.cos(HEADING + 0.5), Math.sin(HEADING + 0.5) ] as const
+export const ALOFT_PACE = 0.35
+
+/**
  * Seconds the wind has already been blowing when the world begins.
  *
  * The weather is a fixed pattern, so this picks which part of it the visit
@@ -110,6 +118,9 @@ export interface WindUniforms {
 
   /** How far the air has moved, wrapped to the weather's span. */
   uWindDrift: { value: THREE.Vector2 }
+
+  /** How far the air aloft has moved, along `ALOFT`, unwrapped: the high cloud it carries never comes round. */
+  uWindAloft: { value: THREE.Vector2 }
 }
 
 function glsl (value: number): string {
@@ -123,7 +134,7 @@ function wrap (value: number, span: number): number {
 
 export function createWind (): Wind {
   const direction = [ Math.cos(HEADING), Math.sin(HEADING) ] as const
-  const uniforms  = { uWindDrift: { value: new THREE.Vector2() }}
+  const uniforms  = { uWindDrift: { value: new THREE.Vector2() }, uWindAloft: { value: new THREE.Vector2() }}
 
   return {
     direction,
@@ -134,6 +145,7 @@ export function createWind (): Wind {
       const gone = SPEED * (time + HEAD_START)
 
       uniforms.uWindDrift.value.set(wrap(direction[0] * gone, WEATHER_SPAN), wrap(direction[1] * gone, WEATHER_SPAN))
+      uniforms.uWindAloft.value.set(ALOFT[0], ALOFT[1]).multiplyScalar(gone * ALOFT_PACE)
     },
 
     gustAt (x, z, time) {
