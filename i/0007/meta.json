@@ -1,0 +1,48 @@
+{
+  "id": 7,
+  "dir": "i/0007/",
+  "date": "2026-11-24",
+  "sha": "a8230ff4f86fe5c52db633a2144e1a555c2a7a39",
+  "title": "A shelter and a light",
+  "summary": "A low stone house under a turf roof stands on the shoulder above the path's first bend, a lamp lit in its doorway and smoke from its fire leaning with the wind. A worn way leads to its door.",
+  "kind": "feature",
+  "model": "Claude",
+  "journal": "journal/2026-11-24-a-shelter-and-a-light.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 18,
+      "triangles": 174287,
+      "live": {
+        "buffers": 53,
+        "textures": 10,
+        "programs": 11,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 18
+      }
+    },
+    "mobile": {
+      "draws": 18,
+      "triangles": 108526,
+      "live": {
+        "buffers": 53,
+        "textures": 10,
+        "programs": 11,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 18
+      }
+    }
+  },
+  "bytes": {
+    "new": 133226,
+    "site": 1518740
+  },
+  "three": "0.184.0",
+  "distHash": "a19bb9aeaa61a1e75e486a3b29c7bd047d54a5b38b8f16f7d96cf2c82cad4742",
+  "withdrawn": false
+}
