@@ -46,7 +46,7 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   lumps: no light comes through a crown and none falls dappled under it.
 
 - The first frame waits for every shader program to link (`lib-stack/README.md`, "Tried and
-  dropped"). Fewer programs would help: the gate counts 31.
+  dropped"). Fewer programs would help: the gate counts 20.
 - Nothing guards how long the world takes to start: `budgets.json` holds counts, not times.
   Ground samples per boot is a count, and tracks it. It would need a counter in the harness.
 - The terrain's slope is read from `world.grid`, so it is measured across grid points, which
@@ -112,7 +112,7 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   degrees (`LOWEST`), so at sunset the shadows are shorter than the sun says.
 - The haze on the island is one colour, the horizon's. The sea and the land beyond fade into
   the glow on the sun's side (`features/beyond` does it by hand); the island's own far slopes
-  still grey toward a sunset. Doing it for every built-in material is one `fog_fragment`.
+  still grey toward a sunset. Doing it for every lit material is `shown` in `shared/lit.ts`.
 - The lamp's light grows at night (`DARK_GAIN`) because the picture is exposed for the dark,
   not because the flame does. The window still lights nothing but itself.
 
@@ -127,16 +127,18 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   still go by the sun's height alone.
 
 - **The mirror draws the world twice** (`water/mirror.ts`): every frame, everything over the
-  water again from under it, at half the picture's size (a third on a phone). It costs a draw
-  call an object and its triangles again: hero went from 31 draws and 400k triangles to 47
-  and 604k on desktop (31 and 201k to 45 and 229k on a phone). Tufts and barley are kept out of it everywhere (`keepOutOfMirror`),
-  the wood and the dykes on a phone, and the house's stones are cut coarser on a phone to pay
-  for it. Something new that is many and small should be kept out too. The pass draws even
-  when little water is on screen (`climb`, `summit`).
-- The mirror pass renders into a target, where three neither tone-maps nor encodes, so every
-  material it draws links a second program, on the first frame: live programs went from 19 to
-  31 of 40. A new material now costs two. Rendering the mirror with the screen's own programs
-  (and mixing it in after the sea's tone mapping) would win them back.
+  water again from under it, at half the picture's size (a third on a phone): a draw call
+  an object and its triangles again. Tufts and barley are kept out of it everywhere
+  (`keepOutOfMirror`), the wood and the dykes on a phone. Something new that is many and
+  small should be kept out too. It draws even when little water is on screen.
+- **Every shader is TSL** since `tsl` (`.claude/skills/threejs-scenes/references/tsl.md`):
+  node materials, three's `WebGPURenderer` forced onto WebGL 2 so a visitor gets what the
+  gate judged. Native WebGPU is one flag in `main.ts`, the owner's to turn: untried here. The mirror shares the picture's programs now: 20 live
+  of 40, where GLSL had 31.
+- The grass and barley read the gust at each vertex, not at the root as the GLSL did: a
+  pixel's difference. A swaying instance's shadow would not sway (`displaceInstances`); none
+  casts one. `main.ts` reaches into three's backend to keep instance matrices out of uniform
+  arrays: look at it again when three is bumped.
 - The sea is still a flat plane: the swell tilts its light and the reflection, it does not move
   the surface, so the boat heaves on water that does not. The surf is a thin line from `hero`:
   the shelf there is steep. The land beyond still has no surf.
@@ -196,11 +198,11 @@ Parts for a chapter, never a day by themselves.
 
 - A second colour of dawn: the stops are by the sun's height alone, so morning and evening
   are the same sky. A cooler, pinker east would need the hour as well as the height.
-- Whitecaps far out where a gust crosses deep water.
+- Whitecaps far out under a gust.
 - Stooks, a peat stack, a scythe left on the dyke: late summer on the infield, a later day.
 - A kailyard against the house's gable. Peat banks cut into the moor, a peat stack by the door.
-- Leaves torn off the wood by a gust. A few birches turned yellow, late in the summer.
-- Terns over the stacks. Sheep on the shore at low water. Weed on the reef below the tide.
-- The boat's sail furled on its yard, and a creel or a net on the beach.
+- Leaves torn off the wood by a gust. A few birches turned yellow.
+- Terns over the stacks. Weed on the reef below the tide.
+- The boat's sail furled on its yard; a creel or a net on the beach.
 - Grass growing on the shelter's roof: the meadow's own tufts. The tuft's shape and material
   would move out of `features/tufts` into `shared/` so both are drawn with one program.

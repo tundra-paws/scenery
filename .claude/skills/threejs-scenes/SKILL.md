@@ -1,10 +1,11 @@
 ---
 name: threejs-scenes
 description: >
-  Craft rules and API map for writing three.js (WebGL2) world code in this repo with
-  three 0.184 and threejs-scenes 3.0.0. Use whenever you add or change anything under
-  src/world or src/rig, or touch three.js: procedural geometry, instancing/BatchedMesh,
-  shaders and ShaderMaterial, lighting and shadows, particles, billboards, textures,
+  Craft rules and API map for writing three.js world code in this repo with three 0.184
+  (node materials in TSL, drawn by WebGPURenderer on its WebGL 2 backend) and
+  threejs-scenes 3.0.0. Use whenever you add or change anything under src/world or
+  src/rig, or touch three.js: procedural geometry, instancing/BatchedMesh, shaders and
+  node materials, lighting and shadows, particles, billboards, textures,
   post-processing, chunk streaming, performance and draw-call budgets, determinism,
   disposal, or code style for 3D code.
 ---
@@ -22,7 +23,11 @@ The library installed here is 3.0.0 plus this repository's own improvements in `
 When the library is slow, wrong, or missing something any scene would want, add an entry
 there (`lib-stack/README.md`) instead of working around it. Never edit `node_modules`.
 
-Vanilla three.js (WebGL2), procedural-first. Load only the references the task needs.
+Vanilla three.js, procedural-first. Load only the references the task needs. Since
+2026-11-24 every shader here is TSL: read `references/tsl.md` before touching a material.
+The library's own references (`shaders.md`, `materials.md`, `particles.md`,
+`post-processing.md`) still describe GLSL and `WebGLRenderer`; their ideas hold, their
+code does not run here.
 
 ## Scenery rules (authoritative over everything else here)
 
@@ -43,17 +48,20 @@ Vanilla three.js (WebGL2), procedural-first. Load only the references the task n
 - **No library scaffolds.** Never `createFpsScaffold`, `createRailsScaffold`,
   `createOrbitScaffold`, `createTppScaffold`, `createIsoScaffold`: each builds its own app
   and rAF loop, so it cannot be stepped or captured. Rigs are modules in `src/rig`.
-- **Imports.** three only as `'three'` and `'three/addons/...'`. Never `three/src/...`,
-  `three/webgpu` or `three/tsl`: three ships as one shared external file and a second
-  bundled copy fails the gate. No three imports inside web workers (import maps do not
-  apply there).
+- **Imports.** three only as `'three'`, `'three/webgpu'` (the renderer, node materials,
+  node types), `'three/tsl'` (the shading language) and `'three/addons/...'`. Never
+  `three/src/...`: three ships as shared external files and a bundled copy fails the gate.
+  No three imports inside web workers (import maps do not apply there).
 - **No runtime network.** No CDN URLs, remote assets, or web fonts. Procedural-first; a
   binary asset only when unavoidable and small.
 - **Budgets** live in `budgets.json` (for example 100 draw calls on the mobile tier, 160 on
   desktop). The gate counts WebGL draw calls itself, so trimming what `renderer.info`
   reports does not help. Instance, batch or merge.
-- **WebGL2 only.** `WebGLRenderer`; GLSL through `ShaderMaterial` / `RawShaderMaterial`; a
-  custom material that should fog must include three's fog chunks (`shaders.md`).
+- **One renderer, one shading language.** `WebGPURenderer` with `forceWebGL` (made in
+  `src/main.ts`), so a visitor gets the backend the gate judged. Shaders are TSL on node
+  materials. `ShaderMaterial`, `RawShaderMaterial`, `onBeforeCompile` and GLSL strings do
+  nothing under it. The renderer does no tone mapping and no encoding: every material ends
+  in `shared/output.ts` (`developed`, `printed`, `hazed`). Rules in `references/tsl.md`.
 - **Shadows.** The environment feature sets the shadow map type (`PCFShadowMap`). Do not set
   `PCFSoftShadowMap`: it is deprecated in this three version and logs a warning.
 - **Disposal.** A module disposes what it owns in `dispose()`; never pooled/shared
@@ -68,9 +76,10 @@ Vanilla three.js (WebGL2), procedural-first. Load only the references the task n
 Do not reinvent the wheel. Before writing a helper, a shader, a loader, a control or a
 post pass, look for one that is already installed, and use it when it fits:
 
-1. **three itself**: core classes and their methods, `MathUtils`, `ShaderChunk`s, and the
-   built-in materials extended with `onBeforeCompile` instead of rewritten as a
-   `ShaderMaterial` (`shared/amend.ts` lets several features amend one material).
+1. **three itself**: core classes and their methods, `MathUtils`, TSL's own functions
+   (`node_modules/three/src/nodes/TSL.js` lists them), and three's node materials extended
+   through their nodes instead of rewritten (`createLitMaterial` in `shared/lit.ts` is the
+   lit one every feature shares).
 2. **three's add-ons**: `node_modules/three/examples/jsm`, imported as `three/addons/…`
    (`BufferGeometryUtils.mergeGeometries`, `SimplexNoise`, `Sky`, `Water`, `Lensflare`,
    `ConvexGeometry`, `RoundedBoxGeometry`, the post-processing passes, and more). `ls` the
@@ -79,7 +88,8 @@ post pass, look for one that is already installed, and use it when it fits:
    noise (`createNoise2D`/`createNoise3D`, `fbm`, `ridged`), `smoothstep`, `poissonDisk`,
    instancing, props, materials, lighting rigs, post chains.
 4. **This repository's `shared/`**: the ground, the grid, the scatter, the wind, the hour,
-   the clouds' shadow and the haze's glow (`SKY_GLOW_GLSL`) are already one signal each.
+   the clouds' shadow and the haze's glow are already one signal each, as nodes
+   (`world.wind.nodes`, `world.day.nodes`, `world.clouds.light`).
 
 Write your own only when none of those fits, and say why in a comment where you do. When
 the library is the right home for what you wrote, give it there (`lib-stack/`). An add-on
@@ -140,7 +150,8 @@ multi-module.
 | `geometry.md` | programmatic meshes: shapes, extrusion, lathe, deformers, merge, tubes, layout |
 | `materials.md` | PBR presets, toon, matcap, holographic, sharing and disposal |
 | `textures-and-maps.md` | colour/normal/ORM maps, procedural textures, render-target textures |
-| `shaders.md` | custom `ShaderMaterial`, fog chunks, `onBeforeCompile`, GLSL chunks |
+| `tsl.md` | **any material or shader here**: the node layer, typing, instancing, output |
+| `shaders.md` | (GLSL, for ideas only) custom `ShaderMaterial`, fog chunks, `onBeforeCompile` |
 | `lighting.md` | sun, hemisphere, IBL, shadow tuning, cascaded shadows |
 | `particles.md` | emitters (CPU/GPU), GPGPU ping-pong, vertex-shader particles |
 | `billboards.md` | sprites and GLSL-billboarded `InstancedMesh`, soft particles |
@@ -161,8 +172,9 @@ Picks: **new feature** `core-principles` + `production-lessons` + `code-style`; 
 
 - **Black or empty frame** — camera inside geometry, or no light and the material is not
   `MeshBasicMaterial`. Check `ctx.camera` and what owns the lights.
-- **Shader compile error** — uniform names must match; do not redeclare `position` /
-  `modelViewMatrix` in a `ShaderMaterial`. **Ignores fog** — missing fog chunks.
+- **A node material draws nothing, or in the wrong place** — `positionNode` runs before
+  the instance matrix (`tsl.md`). **Too bright, or grey** — it did not end in
+  `developed` / `printed`. **Ignores the haze** — it did not end in `hazed`.
 - **GC spikes** — `new Vector3()`, captured fresh objects, `Array.from()` in `update`.
 - **Z-fighting** — tighten `near` / `far`, offset co-planar surfaces.
 - **Capture differs run to run** — wall time, `Math.random`, async arrival order, or cells

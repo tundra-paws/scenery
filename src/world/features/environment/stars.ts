@@ -1,6 +1,6 @@
 // src/world/features/environment/stars.ts
 import * as THREE from 'three'
-import { cameraProjectionMatrix, cameraViewMatrix, length, max, modelWorldMatrix, positionGeometry, screenSize, select, sin, smoothstep, uniform, uv, varying, vec4 } from 'three/tsl'
+import { cameraProjectionMatrix, cameraViewMatrix, length, max, modelWorldMatrix, positionGeometry, screenSize, select, sin, smoothstep, uniform, varying, vec4 } from 'three/tsl'
 import { NodeMaterial } from 'three/webgpu'
 import type { SeededRng } from 'threejs-scenes'
 
@@ -44,9 +44,9 @@ interface StarOptions {
  * The stars: points on the sky all the way round, most of them faint, that
  * turn about the pole with the sun and come out as it goes.
  *
- * One draw call, added to whatever is behind it: a small square a star,
- * every one an instance of the same two triangles, facing the eye and sized
- * in pixels. They are always in the scene, so the night allocates nothing
+ * One draw call, added to whatever is behind it: a small disc a star,
+ * every one an instance of the same triangle, facing the eye and sized in
+ * pixels. They are always in the scene, so the night allocates nothing
  * the day did not: by day every star is moved off the screen in the vertex
  * shader.
  */
@@ -65,12 +65,12 @@ export function createStars ({ count, rng, colour, pole, day, wind }: StarOption
     stars.set([ THREE.MathUtils.lerp(SIZE[0], SIZE[1], bright), 0.35 + 0.65 * bright, rng.next() ], index * 3)
   }
 
-  const square   = new THREE.PlaneGeometry(1, 1)
   const geometry = new THREE.InstancedBufferGeometry()
 
-  geometry.setIndex(square.getIndex())
-  geometry.setAttribute('position', square.getAttribute('position'))
-  geometry.setAttribute('uv', square.getAttribute('uv'))
+  // One triangle a star, big enough to hold the square its disc is drawn in:
+  // half the triangles two would be, and the corners beyond the square are
+  // dark anyway.
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute([ -0.5, -0.5, 0, 1.5, -0.5, 0, -0.5, 1.5, 0 ], 3))
   geometry.setAttribute('aPlace', new THREE.InstancedBufferAttribute(places, 3))
   geometry.setAttribute('aStar', new THREE.InstancedBufferAttribute(stars, 3))
   geometry.instanceCount = count
@@ -108,7 +108,7 @@ export function createStars ({ count, rng, colour, pole, day, wind }: StarOption
   material.name         = 'stars'
   material.vertexNode   = select(light.greaterThan(0.003), vec4(middle.xy.add(corner), middle.zw), vec4(2, 2, 2, 1))
   material.fragmentNode = vec4(printed(uniform(new THREE.Color(colour)).mul(light)
-    .mul(smoothstep(0.5, 0.15, length(uv().sub(0.5))))), 1)
+    .mul(smoothstep(0.5, 0.15, length(varying(positionGeometry.xy))))), 1)
   material.transparent = true
   material.depthWrite  = false
   material.blending    = THREE.AdditiveBlending
@@ -133,7 +133,6 @@ export function createStars ({ count, rng, colour, pole, day, wind }: StarOption
     },
 
     dispose () {
-      square.dispose()
       geometry.dispose()
       material.dispose()
       points.removeFromParent()
@@ -141,5 +140,5 @@ export function createStars ({ count, rng, colour, pole, day, wind }: StarOption
   }
 }
 
-// perf: cheap — one draw call of two triangles a star, a few hundred stars on
+// perf: cheap — one draw call of one triangle a star, a few hundred stars on
 // a phone and a thousand or so above. By day none of them reaches the rasteriser.
