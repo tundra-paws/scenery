@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" data-scenery-state="booting" data-scenery-mode="tour">
+  <head>
+
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="A 3D world that an LLM curator improves a little every day." />
+    <title>scenery</title>
+    <!-- Inline, so a page that must make no request it does not need never asks for /favicon.ico. -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%236f8f4e' d='M0 12l5-7 3 4 2-2 6 5v4H0z'/%3E%3Ccircle cx='12' cy='4' r='2' fill='%23fff1d6'/%3E%3C/svg%3E" />
+    <script type="importmap">{"imports":{"three":"../../v/three@0.184.0/three.module.min.js"}}</script>
+    <script type="module" crossorigin src="./a/index-KgTf9Usq.js"></script>
+    <link rel="stylesheet" crossorigin href="./a/index-PhvyldR2.css">
+    <link rel="modulepreload" href="../../v/three@0.184.0/three.module.min.js">
+    <link rel="modulepreload" href="../../v/three@0.184.0/three.core.min.js">
+  </head>
+  <body>
+    <main>
+      <canvas aria-label="A 3D landscape. Drag to look around; the Explore button lets you walk or fly."></canvas>
+    </main>
+
+    <nav aria-label="Camera">
+      <button type="button" aria-pressed="false">Explore</button>
+    </nav>
+
+    <aside>
+      <p data-for="tour">Drag to look around. Scroll or pinch to zoom.</p>
+      <p data-for="explore">Drag to look. W A S D or the stick to move, Space to rise, C to sink, Shift to hurry. Esc returns to the tour.</p>
+    </aside>
+
+    <scenery-stick aria-hidden="true"></scenery-stick>
+
+    <output role="alert"></output>
+
+  </body>
+</html>

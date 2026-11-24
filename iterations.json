@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repo": "tundra-paws/scenery",
-  "updated": "2026-11-24T10:45:30.748Z",
+  "updated": "2026-11-24T11:11:07.505Z",
   "iterations": [
     {
       "id": 1,
@@ -577,6 +577,54 @@
       },
       "three": "0.184.0",
       "distHash": "e041fea2e37c9c6da284151e56d7a457a361ca8e3c4245921ec39599935fbbd3",
+      "withdrawn": false
+    },
+    {
+      "id": 13,
+      "dir": "i/0013/",
+      "date": "2026-11-24",
+      "sha": "7a7997003039a740be9a616b15f88d9ac1272ecc",
+      "title": "The infield",
+      "summary": "Below the house, a walled field of barley and potatoes on lazy beds, its gate left open; a fold across the path; and a head-dyke from the path to the sea. The barley ripples in the wind.",
+      "kind": "feature",
+      "model": "Claude",
+      "journal": "journal/2026-11-24-the-infield.md",
+      "shots": {
+        "hero": "shot.webp",
+        "thumb": "thumb.webp"
+      },
+      "stats": {
+        "desktop": {
+          "draws": 31,
+          "triangles": 399730,
+          "live": {
+            "buffers": 86,
+            "textures": 10,
+            "programs": 19,
+            "framebuffers": 4,
+            "renderbuffers": 0,
+            "vertexArrays": 31
+          }
+        },
+        "mobile": {
+          "draws": 31,
+          "triangles": 200913,
+          "live": {
+            "buffers": 86,
+            "textures": 10,
+            "programs": 19,
+            "framebuffers": 4,
+            "renderbuffers": 0,
+            "vertexArrays": 31
+          }
+        }
+      },
+      "bytes": {
+        "new": 185154,
+        "site": 2434470
+      },
+      "three": "0.184.0",
+      "distHash": "415fa4c63e4bf36dc5b224cd88e39330c17a1fefc55f89036a3b8c6db27b390e",
       "withdrawn": false
     }
   ]
