@@ -6,6 +6,7 @@ import { disposeInstances } from '../../shared/instances.ts'
 import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { createStoneGeometry } from '../../shared/stone.ts'
+import { inItself, inWorld, stone as stonework, tilth, timber } from '../../shared/surface.ts'
 import type { Feature, World } from '../../world.ts'
 import { sowBarley } from './barley.ts'
 import { layDyke } from './dyke.ts'
@@ -83,6 +84,12 @@ export function createInfieldFeature (world: World): Feature {
         polygonOffsetUnits:  -2,
       })
       const wood = createLitMaterial(world, { name: 'infield-gate', color: PALETTE.timber, roughness: 0.95 })
+
+      // Each in its own grain: the dyke's stone where it lies, the rigs' earth
+      // where it was turned (before the crop on it bows), the gate's boards along their rails.
+      stone.finish(stonework(inWorld(world.quality.tier)))
+      earth.finish(tilth(inItself(world.quality.tier)))
+      wood.finish(timber(inItself(world.quality.tier)))
 
       // A phone gets the same stones with fewer facets: there are hundreds of them.
       const detail = world.quality.tier === 'mobile' ? 0 : 1

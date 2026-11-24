@@ -7,6 +7,7 @@ import { createBeyondGeometry } from '../../shared/beyond.ts'
 import type { DaylightNodes } from '../../shared/daylight.ts'
 import { LitMaterial } from '../../shared/lit.ts'
 import { developed, printed } from '../../shared/output.ts'
+import { fell, inWorld } from '../../shared/surface.ts'
 import type { Feature, World } from '../../world.ts'
 
 
@@ -75,6 +76,8 @@ export function createBeyond (world: World): Feature {
         roughness:    1,
         metalness:    0,
       })
+
+      material.finish(fell(inWorld(world.quality.tier)))
 
       mesh      = new THREE.Mesh(createBeyondGeometry(world.beyond, world.quality.tier), material)
       mesh.name = 'beyond'

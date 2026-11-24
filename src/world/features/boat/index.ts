@@ -2,6 +2,7 @@
 import * as THREE from 'three'
 
 import { createLitMaterial } from '../../shared/lit.ts'
+import { inItself, timber } from '../../shared/surface.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { MAST, WATERLINE, createHullGeometry } from './hull.ts'
@@ -62,6 +63,9 @@ export function createBoat (world: World): Feature {
 
     build ({ scene }) {
       const material = createLitMaterial(world, { name: 'boat', vertexColors: true })
+
+      // Planks, their grain run from stem to stern, in the boat's own space: it goes where she swings.
+      material.finish(timber(inItself(world.quality.tier)))
 
       mooring = findMooring(world.ground, world.path, world.wind)
 

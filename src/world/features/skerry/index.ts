@@ -9,6 +9,7 @@ import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { createReefStone } from '../../shared/skerry.ts'
 import type { Haul, Skerry, Swim } from '../../shared/skerry.ts'
+import { hide, inItself, inWorld, stone } from '../../shared/surface.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { LUMPS, createLumpGeometry, poseSeal, poseSwimmer } from './seal.ts'
@@ -36,9 +37,11 @@ interface Drawn {
   seals:  THREE.InstancedMesh
 }
 
-/** A mesh lit like the boulders, so it shares their program, and shaded by the clouds. */
-function lit (world: World, name: string, geometry: THREE.BufferGeometry, count: number): THREE.InstancedMesh {
+/** A mesh lit like the boulders and shaded by the clouds: stone, textured where it lies (so it shares the boulders' program), or a seal's hide, which goes with the seal. */
+function lit (world: World, name: string, geometry: THREE.BufferGeometry, count: number, alive = false): THREE.InstancedMesh {
   const material = createLitMaterial(world, { name })
+
+  material.finish(alive ? hide(inItself(world.quality.tier)) : stone(inWorld(world.quality.tier)))
 
   const mesh = new THREE.InstancedMesh(geometry, material, count)
 
@@ -119,7 +122,7 @@ export function createSkerryFeature (world: World): Feature {
     build ({ scene, rng }) {
       const { skerry, quality } = world
       const stones              = lit(world, 'skerry', createReefStone(skerry.shape), skerry.rocks.length + COURSES + 1)
-      const seals               = lit(world, 'seals', createLumpGeometry(), skerry.seals.length * LUMPS + 1)
+      const seals               = lit(world, 'seals', createLumpGeometry(), skerry.seals.length * LUMPS + 1, true)
 
       skerry.rocks.forEach((rock, index) => {
         stones.setMatrixAt(index, rock.matrix)

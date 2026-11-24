@@ -7,6 +7,7 @@ import type { Coat, Flock, Hold, Moment, Sheep } from '../../shared/flock.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { PALETTE } from '../../shared/palette.ts'
+import { inItself, wool } from '../../shared/surface.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { BODY, LEG, NECK, SINK, createFleeceGeometry, createHeadGeometry, createLegGeometry } from './sheep.ts'
@@ -120,9 +121,11 @@ function poseOne ({ flock, fleece, heads, legs }: Herd, { grid }: World, sheep: 
   })
 }
 
-/** A mesh of the flock: lit like the rocks (so it shares their program), shaded by the clouds, left out of a phone's reflection. */
+/** A mesh of the flock: lit like the rocks, in a fleece that goes where the sheep goes (the three share a program), shaded by the clouds, left out of a phone's reflection. */
 function herdMesh (world: World, name: string, geometry: THREE.BufferGeometry, count: number, shadow: boolean): THREE.InstancedMesh {
   const material = createLitMaterial(world, { name })
+
+  material.finish(wool(inItself(world.quality.tier)))
 
   const mesh = new THREE.InstancedMesh(geometry, material, count)
 

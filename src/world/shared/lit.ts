@@ -7,6 +7,8 @@ import { GLOOM } from './cloud-shadow.ts'
 import type { CloudShadow } from './cloud-shadow.ts'
 import type { Daylight } from './daylight.ts'
 import { developed, hazed } from './output.ts'
+import { relief } from './surface.ts'
+import type { Surface } from './surface.ts'
 
 /** The part of the world a material needs: the clouds that shade it, and the hour, for the haze it fades into. */
 interface Air {
@@ -102,6 +104,16 @@ export class LitMaterial extends MeshStandardNodeMaterial {
    */
   dye (change: (colour: Node<'vec3'>) => Node<'vec3'>): void {
     this.dyes.push(change)
+  }
+
+  /**
+   * Give the surface its texture (`shared/surface.ts`): the pattern's colour
+   * as one more dye, and its relief as the normal the light is worked out
+   * from, so a facet is no longer one flat tone.
+   */
+  finish (surface: Surface): void {
+    this.dye(surface.colour)
+    this.normalNode = relief(surface.height)
   }
 }
 

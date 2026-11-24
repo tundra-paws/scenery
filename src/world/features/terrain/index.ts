@@ -1,48 +1,17 @@
 // src/world/features/terrain/index.ts
 import * as THREE from 'three'
-import { smoothstep } from 'threejs-scenes/primitives'
 
 import { createLitMaterial } from '../../shared/lit.ts'
 import { DEEP_WATER } from '../../shared/ground.ts'
-import { PALETTE } from '../../shared/palette.ts'
 import { traceTrods } from '../../shared/trods.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
+import { describeLand, textureLand } from './land.ts'
 import { createPathWear, wearPath } from './wear.ts'
 import type { PathWear } from './wear.ts'
 import { wetTheShore } from './wet.ts'
 import type { WetShore } from './wet.ts'
 
-
-const SAND  = new THREE.Color(PALETTE.sand)
-const GRASS = new THREE.Color(PALETTE.grass)
-const DRY   = new THREE.Color(PALETTE.grassDry)
-const ROCK  = new THREE.Color(PALETTE.rock)
-const LING  = new THREE.Color(PALETTE.heather)
-
-/** How far the land under the heather goes to its bloom: the bushes on it carry the rest. */
-const BLOOM = 0.75
-
-const scratch = new THREE.Color()
-
-/**
- * What the ground is made of at a point, as a colour.
- *
- * Height picks the band (sand at the water, grass above it, straw toward the
- * tops) and steepness overrides it with rock, because nothing grows on a cliff.
- */
-function colourAt (world: World, x: number, z: number, slope: number, height: number, out: THREE.Color): THREE.Color {
-  const { ground } = world
-  const above      = height - ground.waterLevel
-
-  out.copy(SAND)
-  out.lerp(GRASS, smoothstep(0.7, 2.4, above))
-  out.lerp(DRY, smoothstep(0.35, 0.6, above / ground.relief))
-  out.lerp(LING, world.moor.heatherAt(x, z, height, slope) * BLOOM)
-  out.lerp(ROCK, smoothstep(0.16, 0.34, slope))
-
-  return out
-}
 
 /**
  * The grid's triangles, without the cells that lie wholly under deep water.
@@ -67,7 +36,7 @@ function cellsAbove (geometry: THREE.BufferGeometry, floor: number): number[] {
   return kept
 }
 
-/** The land: one heightfield mesh, coloured per vertex, shaded flat, with the path and the ways to the shelter's door and the field gate worn into it, and its foot wet where the sea runs up it. */
+/** The land: one heightfield mesh, textured a fragment (`land.ts`), shaded flat under its relief, its crags pushed out of true, with the path and the ways to the shelter's door and the field gate worn into it, and its foot wet where the sea runs up it. */
 export function createTerrain (world: World): Feature {
   let mesh: THREE.Mesh | null = null
   let wear: PathWear | null   = null
@@ -83,7 +52,7 @@ export function createTerrain (world: World): Feature {
       geometry.rotateX(-Math.PI / 2)
 
       const position = geometry.getAttribute('position')
-      const colours  = new Float32Array(position.count * 3)
+      const said     = new Float32Array(position.count * 3)
 
       // The plane's vertices are the grid's corners, in the grid's order, so
       // each takes its height by index and its slope from its neighbours.
@@ -92,20 +61,24 @@ export function createTerrain (world: World): Feature {
         const height = grid.heights[index]!
 
         position.setY(index, height)
-        colourAt(world, position.getX(index), position.getZ(index), grid.slopeAt(column, (index - column) / grid.side), height, scratch).toArray(colours, index * 3)
+        describeLand(world, position.getX(index), position.getZ(index), grid.slopeAt(column, (index - column) / grid.side), height, said, index * 3)
       }
 
-      geometry.setAttribute('color', new THREE.BufferAttribute(colours, 3))
+      geometry.setAttribute('aLand', new THREE.BufferAttribute(said, 3))
       geometry.setIndex(cellsAbove(geometry, ground.waterLevel - DEEP_WATER))
       geometry.computeVertexNormals()
       geometry.computeBoundingBox()
       geometry.computeBoundingSphere()
 
-      const material = createLitMaterial(world, { name: 'terrain', vertexColors: true, roughness: 0.96 })
+      const material = createLitMaterial(world, { name: 'terrain', roughness: 0.96 })
+      const land     = textureLand(world)
+
+      material.finish(land.surface)
+      material.positionNode = land.position
 
       wear = createPathWear(world.path, world.quality.tier, [ world.shelter.spur, world.infield.track ], traceTrods(world, world.seed))
 
-      wearPath(material, wear)
+      wearPath(material, wear, land.grit)
       shore = wetTheShore(material, world.wind, ground.waterLevel)
 
       mesh               = new THREE.Mesh(geometry, material)

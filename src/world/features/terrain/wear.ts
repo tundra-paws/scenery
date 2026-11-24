@@ -1,6 +1,7 @@
 // src/world/features/terrain/wear.ts
 import * as THREE from 'three'
 import { fwidth, max, mix, positionWorld, smoothstep, texture, uniform } from 'three/tsl'
+import type { Node } from 'three/webgpu'
 import type { QualityTier } from 'threejs-scenes'
 
 import type { LitMaterial } from '../../shared/lit.ts'
@@ -37,6 +38,9 @@ const VERGE_TINT = 0.55
 
 /** How much of the ground's own colour the bare path replaces: not all, so the beach and the rock still show through. */
 const BARE = 0.92
+
+/** How much lighter and darker the grit in the bare earth is than the earth. */
+const GRAVEL = 0.2
 
 /** Height over the water between which grass takes over from sand: only grass has a verge to yellow. */
 const TURF = [ 0.7, 2.4 ] as const
@@ -132,17 +136,18 @@ export function createPathWear (path: Path, tier: QualityTier, spurs: readonly (
 }
 
 /**
- * Let a ground material show the path: bare earth down its middle, yellowed
- * grass beside it, and the sheep's trods fainter than either.
+ * Let a ground material show the path: bare earth down its middle, gritty
+ * with the land's own grain (`grit`), yellowed grass beside it, and the
+ * sheep's trods fainter than either.
  *
  * The picture holds distance from the path, not the path, so the edge is
  * found between texels the way a distance-field font's is and stays clean
  * however coarse the terrain's own grid is on this tier.
  */
-export function wearPath (material: LitMaterial, wear: PathWear): void {
+export function wearPath (material: LitMaterial, wear: PathWear, grit: Node<'float'>): void {
   const frame = uniform(wear.frame)
   const worn  = texture(wear.texture, positionWorld.xz.sub(frame.xy).mul(frame.zw))
-  const bare  = uniform(new THREE.Color(PALETTE.path))
+  const bare  = uniform(new THREE.Color(PALETTE.path)).mul(grit.mul(GRAVEL).add(1))
   const verge = uniform(new THREE.Color(PALETTE.grassDry))
   const turf  = smoothstep(TURF[0], TURF[1], positionWorld.y)
 

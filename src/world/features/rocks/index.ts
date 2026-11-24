@@ -7,6 +7,7 @@ import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { scatterOnGround } from '../../shared/scatter.ts'
 import { SQUAT, createStoneGeometry } from '../../shared/stone.ts'
+import { inWorld, stone } from '../../shared/surface.ts'
 import { waterline } from '../../shared/wash.ts'
 import type { Feature, World } from '../../world.ts'
 
@@ -54,6 +55,8 @@ export function createRocks (world: World): Feature {
 
       const geometry = createStoneGeometry(shape.int(1, 1_000_000))
       const material = createLitMaterial(world, { name: 'rock' })
+
+      material.finish(stone(inWorld(world.quality.tier)))
 
       mesh = new THREE.InstancedMesh(geometry, material, spots.length)
       mesh.name          = 'rocks'

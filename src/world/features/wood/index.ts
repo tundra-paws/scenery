@@ -1,12 +1,13 @@
 // src/world/features/wood/index.ts
 import * as THREE from 'three'
-import { cos, dot, positionLocal, sin, step, vec2, vec3 } from 'three/tsl'
+import { cos, dot, positionLocal, sin, smoothstep, step, vec2, vec3 } from 'three/tsl'
 import { createNoise3D } from 'threejs-scenes/primitives'
 
 import { createLitMaterial } from '../../shared/lit.ts'
 import type { LitMaterial } from '../../shared/lit.ts'
 import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { vec4Attribute } from '../../shared/nodes.ts'
+import { birch, inItself } from '../../shared/surface.ts'
 import type { Wind } from '../../shared/wind.ts'
 import type { Feature, World } from '../../world.ts'
 import { growBirch } from './birch.ts'
@@ -22,6 +23,9 @@ const ROCK = 0.012
 
 /** How far a lump of leaves is tossed, in world units, on top of what its tree does. */
 const FLUTTER = 0.11
+
+/** How far a trunk's vertex travels with a gust (`sway.z`) below which it is the dark, rough foot of the tree. */
+const FOOT = 0.5
 
 /**
  * Let the wood's material give to the wind. The wood is one mesh in world
@@ -90,6 +94,13 @@ export function createWoodFeature (world: World): Feature {
       const material = createLitMaterial(world, { name: 'wood', vertexColors: true, flatShading: false })
 
       swayInWind(material, wind)
+
+      // Bark and leaves in one material: a vertex that flutters is a leaf,
+      // and one that hardly travels with a gust is near the tree's foot.
+      // Read where the tree stands at rest, so the pattern sways with it.
+      const sway = vec4Attribute('sway')
+
+      material.finish(birch(inItself(quality.tier), step(0.001, sway.w), smoothstep(0, FOOT, sway.z).oneMinus()))
 
       mesh               = new THREE.Mesh(timber.build(), material)
       mesh.name          = 'wood'

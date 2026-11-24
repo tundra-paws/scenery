@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { createLitMaterial, createUnlitMaterial } from '../../shared/lit.ts'
 import { disposeInstances } from '../../shared/instances.ts'
 import { createStoneGeometry } from '../../shared/stone.ts'
+import { inWorld, stone as stonework, turf } from '../../shared/surface.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { createBodyGeometry } from './body.ts'
@@ -56,6 +57,10 @@ export function createShelterFeature (world: World): Feature {
 
       const stone = createLitMaterial(world, { name: 'shelter-stone' })
       const built = createLitMaterial(world, { name: 'shelter-body', vertexColors: true })
+
+      // The walls are the island's stone, the roof its turf: the same grain as both.
+      stone.finish(stonework(inWorld(world.quality.tier)))
+      built.finish(turf(inWorld(world.quality.tier)))
 
       // A phone gets the same stones with fewer facets, as the dykes do:
       // two hundred of them, drawn for the sun's shadow and the sea's mirror
