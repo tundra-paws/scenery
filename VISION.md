@@ -78,6 +78,10 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
   keeps a colour of the sky for itself. Sun and moon are one light that is out as it changes
   hands; the lamp is the only light that is somebody's.
 - *The line between.* Shore, ridge and horizon: edges are where the detail goes.
+- *The sea gives back.* The water is a mirror, shaken by its ripples and by a low swell: the
+  island, the cairn, the boat and the sky lie upside down in it, and the lamp at night. It
+  breaks white round whatever stands in it, rides the boat on its swell, and wets the sand
+  it runs back off. A gust roughens it and the picture in it breaks up.
 - *Distance.* What is far is seen through air: fainter, bluer, and fading into the sky's own
   colour on that side, glow and all. Layers (stacks, headland, range) say how far.
 - *Low-poly, flat-shaded, few colours.* Facets are the style, not a shortcut to hide.
@@ -92,9 +96,10 @@ clouds whose shadows cross the island), the way up (a landing, a worn and waymar
 cairn, which the tour walks), the shelter with its lamp, its fire and its smoke, the boat at
 anchor off the landing, the day itself (evening, night with a moon and stars, and morning,
 once round in a visit), the land beyond, which the sun goes down behind, the birch wood
-beside the shelter, with its outliers on the open island, and the infield: the field of rigs,
-its dyke and gate, the fold and the head-dyke. Next: the inside of the shelter, and a sea
-that answers to what stands in it.
+beside the shelter, with its outliers on the open island, the infield: the field of rigs,
+its dyke and gate, the fold and the head-dyke, and a sea that answers (its mirror, its swell,
+its foam round what stands in it, the wet sand). Next: the inside of the shelter, and a night
+worth staying up for.
 
 ## Where it starts
 

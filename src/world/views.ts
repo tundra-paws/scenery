@@ -9,7 +9,8 @@ import type { Ground } from './shared/ground.ts'
  * growing if that frame holds still. Add views freely; move `hero` only for a
  * reason worth breaking the timelapse over, and say so in the journal.
  *
- * The order is a visit and then a circuit. In from the sea to the landing, up
+ * The order is a visit and then a circuit. Low over the bay, where the island
+ * lies upside down in the water, and in from the sea to the landing, up
  * the path on foot, past the shelter, to the cairn; round to look back over
  * the way up and out to sea; over the summit, and out over the water until
  * the whole island is in the frame; then round it: the western beach, the
@@ -35,7 +36,8 @@ import type { Ground } from './shared/ground.ts'
  * A short hop can be given less: `wood` stands between `east` and `shelter`
  * on time taken from the three legs round it, and `infield` between `boat`
  * and `hero` on the one leg it splits, so the day is the length it was and
- * every stop before them keeps its hour.
+ * every stop before them keeps its hour. `mirror` stands between `hero` and
+ * `landing` the same way, on the one leg it splits.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },

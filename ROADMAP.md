@@ -9,11 +9,7 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 
 1. **Inside.** The shelter is a shell. A floor, a hearth with the fire in it, a bench, and a rig
    that knows a wall from a door, for the visitor who walks in.
-2. **The sea answers.** The sea takes nothing from what stands in it: no shadow under the boat,
-   no foam at its waterline or round the landing's stones, no wake when it sheers. The water is
-   a shader of its own with one height map of the land (`water/index.ts`); a second small map
-   of what floats and stands in it would give all three. The land beyond has no surf either.
-3. **A night worth staying up for.** The night is a moon, stars and one lamp. A lantern at the
+2. **A night worth staying up for.** The night is a moon, stars and one lamp. A lantern at the
    boat's masthead, the window's light falling on the grass, and something in the sky that
    moves: thin high cloud combed by the wind, or a meteor now and then.
 
@@ -55,8 +51,6 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - The terrain's slope is read from `world.grid`, so it is measured across grid points, which
   are further apart on the smaller tiers. A rule keyed to slope (the rock line) lands a little
   differently on each tier.
-- A boulder standing in the sea gets no foam: the height map holds the land, not the rocks.
-  The landing's stones in the water are the same.
 - `bun run diff` and the gate's policy check trust the local `origin/main`, which is behind in a
   fresh checkout: the gate then reports other people's commits as yours. Run
   `git fetch origin main` before believing either.
@@ -85,8 +79,8 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   not blow it back across, in water its own test says is deep enough from end to end. Its anchor
   lies under the `landing` view's feet, and that view does not show the boat. Move `HEADING`
   in `shared/wind.ts` or the landing and look at `hero`, `boat` and `landing` again.
-- The boat rides by its own sines, not the sea's: the water is flat and only shaded as waves.
-  It throws no shadow on the water and an exploring visitor can walk through it.
+- The boat rides the sea's swell (`shared/swell.ts`) and lays its shadow on the water, but an
+  exploring visitor can walk through it. It makes no wake: at anchor it hardly moves.
 - Two runs built the shelter on the same day from the same roadmap line, and only one could
   land. A run that finds `main` has gained its chapter sets its own aside and takes the next.
 - The smoke is opaque puffs that shade nothing. From `hero` at second ten the top of the plume
@@ -133,18 +127,41 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   until the moon takes over (`HANDOVER`) the island has no direct light. The sky's colours
   still go by the sun's height alone.
 
+- **The mirror draws the world twice** (`water/mirror.ts`): every frame, everything over the
+  water again from under it, at half the picture's size (a third on a phone). It costs a draw
+  call an object and its triangles again: hero went from 31 draws and 400k triangles to 47
+  and 604k on desktop (31 and 201k to 45 and 229k on a phone). Tufts and barley are kept out of it everywhere (`keepOutOfMirror`),
+  the wood and the dykes on a phone, and the house's stones are cut coarser on a phone to pay
+  for it. Something new that is many and small should be kept out too. The pass draws even
+  when little water is on screen (`climb`, `summit`).
+- The mirror pass renders into a target, where three neither tone-maps nor encodes, so every
+  material it draws links a second program, on the first frame: live programs went from 19 to
+  31 of 40. A new material now costs two. Rendering the mirror with the screen's own programs
+  (and mixing it in after the sea's tone mapping) would win them back.
+- The sea is still a flat plane: the swell tilts its light and the reflection, it does not move
+  the surface, so the boat heaves on water that does not. The surf is a thin line from `hero`:
+  the shelf there is steep. The land beyond still has no surf.
+- What stands in the sea is told to it at build (`world.wash.stand`): the boulders, the
+  landing's stones, the head-dyke's foot. Something new that stands in the water must say so,
+  and `water` must stay last in `index.ts` to hear it. The boat is three uniforms, set each step.
+- Far reflections are hazed twice (the mirror's fog and the sea's), and the sky comes back
+  through the tone mapping it otherwise skips, so the reflected sky is a little darker than the
+  sky. It reads as water; it is not exact.
+- `mirror` stands between `hero` and `landing` on time taken from that one leg, so the day did
+  not move. It looks across the bay at the island and its reflection, low over the water.
+
 ## Ideas
 
 Parts for a chapter, never a day by themselves.
 
-- Wet sand: a darker band just above the waterline, from the same height map.
 - Fainter tracks contouring the hills, from a second channel of the path's texture (`wear.ts`).
 - Flat stones set as steps into the steepest stretch of the path.
 - A second colour of dawn: the stops are by the sun's height alone, so morning and evening
   are the same sky. A cooler, pinker east would need the hour as well as the height.
 - The moon always full, because it stands opposite the sun. A phase would need it to be its
   own body, and then some nights would have none.
-- Whitecaps far out where a gust crosses deep water; today a gust only darkens it.
+- Whitecaps far out where a gust crosses deep water; today a gust only darkens it and breaks
+  up the reflection.
 - Stooks, a peat stack, a scythe left on the dyke: late summer on the infield, a later day.
 - A kailyard: a small round walled garden against the house's gable, from `infield/dyke.ts`.
 - An axe left in a stump by the stack. Leaves torn off the wood by a gust and carried
