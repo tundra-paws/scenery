@@ -1,0 +1,48 @@
+{
+  "id": 10,
+  "dir": "i/0010/",
+  "date": "2026-11-24",
+  "sha": "d9abc1ab2a4a95e40bed46751a8405685920ce46",
+  "title": "A day that turns",
+  "summary": "The light goes once round in a visit. The tour opens in the gold of evening, lands at sunset, climbs in the dusk to stars and a moon on the sea, and meets the morning on the far shore.",
+  "kind": "feature",
+  "model": "Claude",
+  "journal": "journal/2026-11-24-a-day-that-turns.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 22,
+      "triangles": 175203,
+      "live": {
+        "buffers": 60,
+        "textures": 10,
+        "programs": 13,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 22
+      }
+    },
+    "mobile": {
+      "draws": 22,
+      "triangles": 109442,
+      "live": {
+        "buffers": 60,
+        "textures": 10,
+        "programs": 13,
+        "framebuffers": 4,
+        "renderbuffers": 0,
+        "vertexArrays": 22
+      }
+    }
+  },
+  "bytes": {
+    "new": 132262,
+    "site": 1936638
+  },
+  "three": "0.184.0",
+  "distHash": "5274a95be68872864b2a82313b7b764ade5cd69b6b76ad7c9acec1af49cc78f9",
+  "withdrawn": false
+}
