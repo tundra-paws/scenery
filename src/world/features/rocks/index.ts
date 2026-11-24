@@ -12,8 +12,13 @@ import type { Feature, World } from '../../world.ts'
 
 const COUNT: Record<QualityTier, number> = { mobile: 60, desktop: 140, highEnd: 220 }
 
-/** Clear ground kept between a boulder and the middle of the path, on top of the boulder's own size. */
-const OFF_PATH = 1.6
+/**
+ * Clear ground kept round a boulder, on top of its own size: from the middle of
+ * the path, far enough that it never leans on a waymark, and from the summit,
+ * where the cairn and its spill stand.
+ */
+const OFF_PATH   = 3
+const OFF_SUMMIT = 4
 
 /** Module-scope scratch, so placing an instance allocates nothing. */
 const dummy = new THREE.Object3D()
@@ -27,9 +32,9 @@ export function createRocks (world: World): Feature {
     name: 'rocks',
 
     build ({ scene, rng }) {
-      const { ground } = world
-      const place      = rng.fork('rocks:place')
-      const shape      = rng.fork('rocks:shape')
+      const { ground, summit } = world
+      const place              = rng.fork('rocks:place')
+      const shape              = rng.fork('rocks:shape')
 
       const spots = scatterOnGround({
         ground,
@@ -60,9 +65,10 @@ export function createRocks (world: World): Feature {
         dummy.updateMatrix()
         tint.set(PALETTE.rock).offsetHSL(0, 0, place.range(-0.07, 0.07))
 
-        // A boulder lying on the path was rolled off it long ago. Left out
-        // after its draws are taken, so every other boulder stays where it was.
-        if (world.path.distanceTo(spot.x, spot.z) < size + OFF_PATH)
+        // A boulder lying on the path was rolled off it long ago, and one
+        // on the summit went into the cairn. Left out after its draws are
+        // taken, so every other boulder stays where it was.
+        if (world.path.distanceTo(spot.x, spot.z) < size + OFF_PATH || Math.hypot(spot.x - summit.x, spot.z - summit.z) < size + OFF_SUMMIT)
           continue
 
         mesh.setMatrixAt(kept, dummy.matrix)
