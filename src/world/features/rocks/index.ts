@@ -14,11 +14,12 @@ const COUNT: Record<QualityTier, number> = { mobile: 60, desktop: 140, highEnd: 
 
 /**
  * Clear ground kept round a boulder, on top of its own size: from the middle of
- * the path, far enough that it never leans on a waymark, and from the summit,
- * where the cairn and its spill stand.
+ * the path, far enough that it never leans on a waymark, from the summit,
+ * where the cairn and its spill stand, and from the shelter's walls.
  */
-const OFF_PATH   = 3
-const OFF_SUMMIT = 4
+const OFF_PATH    = 3
+const OFF_SUMMIT  = 4
+const OFF_SHELTER = 2
 
 /** Module-scope scratch, so placing an instance allocates nothing. */
 const dummy = new THREE.Object3D()
@@ -32,9 +33,10 @@ export function createRocks (world: World): Feature {
     name: 'rocks',
 
     build ({ scene, rng }) {
-      const { ground, summit } = world
-      const place              = rng.fork('rocks:place')
-      const shape              = rng.fork('rocks:shape')
+      const { ground, summit, path, shelter } = world
+
+      const place = rng.fork('rocks:place')
+      const shape = rng.fork('rocks:shape')
 
       const spots = scatterOnGround({
         ground,
@@ -65,10 +67,15 @@ export function createRocks (world: World): Feature {
         dummy.updateMatrix()
         tint.set(PALETTE.rock).offsetHSL(0, 0, place.range(-0.07, 0.07))
 
-        // A boulder lying on the path was rolled off it long ago, and one
-        // on the summit went into the cairn. Left out after its draws are
-        // taken, so every other boulder stays where it was.
-        if (world.path.distanceTo(spot.x, spot.z) < size + OFF_PATH || Math.hypot(spot.x - summit.x, spot.z - summit.z) < size + OFF_SUMMIT)
+        // A boulder lying on the path was rolled off it long ago, one on the
+        // summit went into the cairn, and one where the shelter stands into
+        // its walls. Left out after its draws are taken, so every other
+        // boulder stays where it was.
+        const taken = path.distanceTo(spot.x, spot.z) < size + OFF_PATH ||
+          Math.hypot(spot.x - summit.x, spot.z - summit.z) < size + OFF_SUMMIT ||
+          shelter.distanceTo(spot.x, spot.z) < size + OFF_SHELTER
+
+        if (taken)
           continue
 
         mesh.setMatrixAt(kept, dummy.matrix)

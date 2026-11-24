@@ -11,6 +11,7 @@ export const PALETTE = {
   zenith:       '#2f5f9f',
   horizon:      '#d3e0ea',
   sun:          '#fff1d6',
+  lamp:         '#ffb45a',
   skyFill:      '#a9c4e8',
   groundFill:   '#6b6452',
   sand:         '#cdbf9a',

@@ -8,6 +8,8 @@ import { createGround } from './shared/ground.ts'
 import type { Ground } from './shared/ground.ts'
 import { createPath, findSummit } from './shared/path.ts'
 import type { Path, Waypoint } from './shared/path.ts'
+import { createShelter } from './shared/shelter.ts'
+import type { Shelter } from './shared/shelter.ts'
 import { createWind } from './shared/wind.ts'
 import type { Wind } from './shared/wind.ts'
 
@@ -42,8 +44,8 @@ export type Feature = AppModule<WorldState>
  * terrain meshes, the scatterers place on, the water meets and the camera walks
  * over, and which must therefore be one function they all share. The same goes
  * for the air over it: one wind, and one shadow from the clouds it carries.
- * And for what was made on it: the summit the cairn stands on, and the one
- * path up to it.
+ * And for what was made on it: the summit the cairn stands on, the one path
+ * up to it, and the shelter beside that path.
  */
 export interface World {
   seed:    number
@@ -53,8 +55,9 @@ export interface World {
   clouds:  CloudShadow
 
   /** The highest point of the land. */
-  summit: Waypoint
-  path:   Path
+  summit:  Waypoint
+  path:    Path
+  shelter: Shelter
 }
 
 interface WorldOptions {
@@ -66,5 +69,14 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
   const ground = createGround({ seed })
   const summit = findSummit(ground)
 
-  return { seed, quality, ground, wind: createWind(), clouds: createCloudShadow(), summit, path: createPath(ground, summit) }
+  return {
+    seed,
+    quality,
+    ground,
+    summit,
+    wind:    createWind(),
+    clouds:  createCloudShadow(),
+    path:    createPath(ground, summit),
+    shelter: createShelter(ground),
+  }
 }

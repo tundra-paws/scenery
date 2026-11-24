@@ -16,8 +16,9 @@ import type { Feature, World } from '../../world.ts'
 
 const COUNT: Record<QualityTier, number> = { mobile: 900, desktop: 2600, highEnd: 4200 }
 
-/** How far from the middle of the path the grass is trodden out. */
-const OFF_PATH = 1.9
+/** How far from the middle of the path the grass is trodden out, and how far from the shelter's walls. */
+const OFF_PATH    = 1.9
+const OFF_SHELTER = 0.9
 
 /** Length of a blade before it is leant and scaled. */
 const BLADE = 0.8
@@ -161,9 +162,9 @@ export function createTufts (world: World): Feature {
         dummy.updateMatrix()
         tint.set(place.next() < 0.3 ? PALETTE.grassDry : PALETTE.grass).offsetHSL(0, 0, place.range(-0.05, 0.08))
 
-        // Nothing grows where feet go. Left out after its draws are taken, so
-        // every other tuft stays where it was.
-        if (world.path.distanceTo(spot.x, spot.z) < OFF_PATH)
+        // Nothing grows where feet go, or under a wall. Left out after its
+        // draws are taken, so every other tuft stays where it was.
+        if (world.path.distanceTo(spot.x, spot.z) < OFF_PATH || world.shelter.distanceTo(spot.x, spot.z) < OFF_SHELTER)
           continue
 
         mesh.setMatrixAt(kept, dummy.matrix)
