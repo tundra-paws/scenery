@@ -1,7 +1,7 @@
 // src/world/features/flock/index.ts
 import * as THREE from 'three'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
 import { createFlock } from '../../shared/flock.ts'
 import type { Coat, Flock, Hold, Moment, Sheep } from '../../shared/flock.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
@@ -122,9 +122,7 @@ function poseOne ({ flock, fleece, heads, legs }: Herd, { grid }: World, sheep: 
 
 /** A mesh of the flock: lit like the rocks (so it shares their program), shaded by the clouds, left out of a phone's reflection. */
 function herdMesh (world: World, name: string, geometry: THREE.BufferGeometry, count: number, shadow: boolean): THREE.InstancedMesh {
-  const material = new THREE.MeshStandardMaterial({ name, flatShading: true, roughness: 1, metalness: 0 })
-
-  shadeUnderClouds(material, world)
+  const material = createLitMaterial(world, { name })
 
   const mesh = new THREE.InstancedMesh(geometry, material, count)
 

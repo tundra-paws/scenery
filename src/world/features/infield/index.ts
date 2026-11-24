@@ -1,7 +1,7 @@
 // src/world/features/infield/index.ts
 import * as THREE from 'three'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
 import { disposeInstances } from '../../shared/instances.ts'
 import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { PALETTE } from '../../shared/palette.ts'
@@ -74,22 +74,15 @@ export function createInfieldFeature (world: World): Feature {
     build ({ scene, rng }) {
       const { ground, grid, infield, shelter, wind } = world
 
-      const stone = new THREE.MeshStandardMaterial({ name: 'infield-stone', flatShading: true, roughness: 1, metalness: 0 })
-      const earth = new THREE.MeshStandardMaterial({
+      const stone = createLitMaterial(world, { name: 'infield-stone' })
+      const earth = createLitMaterial(world, {
         name:                'infield-rigs',
         vertexColors:        true,
-        flatShading:         true,
-        roughness:           1,
-        metalness:           0,
         polygonOffset:       true,
         polygonOffsetFactor: -1,
         polygonOffsetUnits:  -2,
       })
-      const wood = new THREE.MeshStandardMaterial({ name: 'infield-gate', color: PALETTE.timber, flatShading: true, roughness: 0.95, metalness: 0 })
-
-      shadeUnderClouds(stone, world)
-      shadeUnderClouds(earth, world)
-      shadeUnderClouds(wood, world)
+      const wood = createLitMaterial(world, { name: 'infield-gate', color: PALETTE.timber, roughness: 0.95 })
 
       // A phone gets the same stones with fewer facets: there are hundreds of them.
       const detail = world.quality.tier === 'mobile' ? 0 : 1
@@ -99,9 +92,7 @@ export function createInfieldFeature (world: World): Feature {
       dyke = layDyke(createStoneGeometry(shape, detail), createStoneGeometry(shape, 0), stone, rng.fork('infield:lay'), ground, infield)
 
       const field = ploughRigs(earth, rng.fork('infield:rigs'), ground, grid, infield, wind)
-      const ears  = new THREE.MeshStandardMaterial({ name: 'infield-barley', roughness: 1, metalness: 0, side: THREE.DoubleSide })
-
-      shadeUnderClouds(ears, world)
+      const ears  = createLitMaterial(world, { name: 'infield-barley', flatShading: false, side: THREE.DoubleSide })
 
       rigs   = field.mesh
       barley = sowBarley(field.ears, ears, rng.fork('infield:barley'), world.quality.tier, wind)

@@ -1,8 +1,9 @@
 // src/world/features/terrain/wear.ts
 import * as THREE from 'three'
+import { fwidth, max, mix, positionWorld, smoothstep, texture, uniform } from 'three/tsl'
 import type { QualityTier } from 'threejs-scenes'
 
-import { amendShader, insertAfter } from '../../shared/amend.ts'
+import type { LitMaterial } from '../../shared/lit.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { distanceToSpan } from '../../shared/path.ts'
 import type { Path, Waypoint } from '../../shared/path.ts'
@@ -39,33 +40,6 @@ const BARE = 0.92
 
 /** Height over the water between which grass takes over from sand: only grass has a verge to yellow. */
 const TURF = [ 0.7, 2.4 ] as const
-
-const WEAR_VERTEX = /* glsl */ `
-  vec3 pathAt = (modelMatrix * vec4(transformed, 1.0)).xyz;
-
-  vPathAt = vec3((pathAt.xz - uPathFrame.xy) * uPathFrame.zw, pathAt.y);
-`
-
-/**
- * The path, laid over the ground's own colour.
- *
- * The picture holds distance from the path, not the path, so the edge is
- * found between texels the way a distance-field font's is and stays clean
- * however coarse the terrain's own grid is on this tier.
- */
-const WEAR_FRAGMENT = /* glsl */ `
-  float pathAway = (1.0 - texture2D(uPathWear, vPathAt.xy).r) * ${REACH.toFixed(1)};
-  float pathEdge = max(fwidth(pathAway), 0.05);
-  float pathTurf = smoothstep(${TURF[0]}, ${TURF[1]}, vPathAt.z);
-
-  diffuseColor.rgb = mix(diffuseColor.rgb, uPathVerge, ${VERGE_TINT} * pathTurf * (1.0 - smoothstep(1.0, ${VERGE}, pathAway)));
-  diffuseColor.rgb = mix(diffuseColor.rgb, uPathBare, ${BARE} * (1.0 - smoothstep(1.0 - pathEdge, 1.0 + pathEdge, pathAway)));
-
-  float trodAway = (1.0 - texture2D(uPathWear, vPathAt.xy).g) * ${TROD_REACH.toFixed(1)};
-  float trodEdge = max(fwidth(trodAway), 0.08);
-
-  diffuseColor.rgb = mix(diffuseColor.rgb, uPathBare, ${TROD_BARE} * pathTurf * (1.0 - smoothstep(1.0 - trodEdge, 1.0 + trodEdge, trodAway)));
-`
 
 /** The path as something the terrain's shader can look up. */
 export interface PathWear {
@@ -157,29 +131,36 @@ export function createPathWear (path: Path, tier: QualityTier, spurs: readonly (
   return { texture, frame: new THREE.Vector4(minX, minZ, 1 / (columns * texel), 1 / (rows * texel)) }
 }
 
-/** Let a ground material show the path: bare earth down its middle, yellowed grass beside it. */
-export function wearPath (material: THREE.Material, wear: PathWear): void {
-  const uniforms = {
-    uPathWear:  { value: wear.texture },
-    uPathFrame: { value: wear.frame },
-    uPathBare:  { value: new THREE.Color(PALETTE.path) },
-    uPathVerge: { value: new THREE.Color(PALETTE.grassDry) },
-  }
+/**
+ * Let a ground material show the path: bare earth down its middle, yellowed
+ * grass beside it, and the sheep's trods fainter than either.
+ *
+ * The picture holds distance from the path, not the path, so the edge is
+ * found between texels the way a distance-field font's is and stays clean
+ * however coarse the terrain's own grid is on this tier.
+ */
+export function wearPath (material: LitMaterial, wear: PathWear): void {
+  const frame = uniform(wear.frame)
+  const worn  = texture(wear.texture, positionWorld.xz.sub(frame.xy).mul(frame.zw))
+  const bare  = uniform(new THREE.Color(PALETTE.path))
+  const verge = uniform(new THREE.Color(PALETTE.grassDry))
+  const turf  = smoothstep(TURF[0], TURF[1], positionWorld.y)
 
-  amendShader(material, 'path-wear', shader => {
-    Object.assign(shader.uniforms, uniforms)
+  const pathAway = worn.r.oneMinus().mul(REACH)
+  const pathEdge = max(fwidth(pathAway), 0.05)
+  const trodAway = worn.g.oneMinus().mul(TROD_REACH)
+  const trodEdge = max(fwidth(trodAway), 0.08)
 
-    shader.vertexShader = insertAfter(
-      insertAfter(shader.vertexShader, '#include <common>', 'uniform vec4 uPathFrame;\nvarying vec3 vPathAt;'),
-      '#include <project_vertex>',
-      WEAR_VERTEX,
-    )
+  material.dye(colour => {
+    const verged = mix(colour, verge, smoothstep(1, VERGE, pathAway).oneMinus()
+      .mul(turf)
+      .mul(VERGE_TINT))
+    const walked = mix(verged, bare, smoothstep(pathEdge.oneMinus(), pathEdge.add(1), pathAway).oneMinus()
+      .mul(BARE))
 
-    shader.fragmentShader = insertAfter(
-      insertAfter(shader.fragmentShader, '#include <common>', 'uniform sampler2D uPathWear;\nuniform vec3 uPathBare;\nuniform vec3 uPathVerge;\nvarying vec3 vPathAt;'),
-      '#include <color_fragment>',
-      WEAR_FRAGMENT,
-    )
+    return mix(walked, bare, smoothstep(trodEdge.oneMinus(), trodEdge.add(1), trodAway).oneMinus()
+      .mul(turf)
+      .mul(TROD_BARE))
   })
 }
 

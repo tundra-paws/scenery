@@ -1,11 +1,15 @@
 // src/world/features/environment/stars.ts
 import * as THREE from 'three'
+import { cameraProjectionMatrix, cameraViewMatrix, length, max, modelWorldMatrix, positionGeometry, screenSize, select, sin, smoothstep, uniform, uv, varying, vec4 } from 'three/tsl'
+import { NodeMaterial } from 'three/webgpu'
 import type { SeededRng } from 'threejs-scenes'
 
-import { CIRRUS_GLSL } from '../../shared/cirrus.ts'
-import type { DaylightUniforms } from '../../shared/daylight.ts'
+import { cirrusCover } from '../../shared/cirrus.ts'
+import type { DaylightNodes } from '../../shared/daylight.ts'
+import { heldFloat, vec3Attribute } from '../../shared/nodes.ts'
+import { printed } from '../../shared/output.ts'
+import type { WindNodes } from '../../shared/wind.ts'
 import { NIGHT_THINS } from './sky.ts'
-import type { WindUniforms } from '../../shared/wind.ts'
 
 
 /** Distance the stars are drawn at: outside the furthest cloud, inside the camera's far plane. */
@@ -14,52 +18,9 @@ const RADIUS = 2000
 /** A star's width in pixels, smallest and largest. Most are small. */
 const SIZE = [ 1.2, 3.4 ] as const
 
-const VERTEX = /* glsl */ `
-  ${CIRRUS_GLSL}
-
-  uniform float uNight;
-  uniform float uTime;
-  uniform float uPixelRatio;
-
-  // Width in pixels, brightness, and where in its flicker it is.
-  attribute vec3 aStar;
-
-  varying float vLight;
-
-  void main () {
-    // The mesh turns about the pole with the sky. Where a star is after that
-    // is where it is seen: the haze takes the low ones, and the day all.
-    vec3  direction = normalize(mat3(modelMatrix) * position);
-    float clear     = smoothstep(0.03, 0.3, direction.y);
-    float flicker   = 0.82 + 0.18 * sin(uTime * (1.3 + aStar.z) + aStar.z * 40.0);
-
-    // The high cloud hides them as it passes, all but the brightest.
-    vLight = uNight * clear * aStar.y * flicker * max(1.0 - 1.4 * cirrusCover(direction) * ${1 - NIGHT_THINS}, 0.0);
-
-    // Around the camera, like the dome. A star with no light is put outside
-    // the picture, so by day they cost nothing to fill.
-    gl_Position  = vLight > 0.003 ? projectionMatrix * vec4(mat3(viewMatrix) * direction * ${RADIUS.toFixed(1)}, 1.0) : vec4(2.0, 2.0, 2.0, 1.0);
-    gl_PointSize = aStar.x * uPixelRatio;
-  }
-`
-
-const FRAGMENT = /* glsl */ `
-  uniform vec3 uStar;
-
-  varying float vLight;
-
-  void main () {
-    float away = length(gl_PointCoord - 0.5);
-
-    gl_FragColor = vec4(uStar * vLight * smoothstep(0.5, 0.15, away), 1.0);
-
-    #include <colorspace_fragment>
-  }
-`
-
 /** What the stars are told each step, besides the hour. */
 export interface Stars {
-  points: THREE.Points
+  points: THREE.Mesh
 
   /** Turn them with the sky, and keep their size in screen pixels. */
   turn (time: number, hour: number, pixelRatio: number): void
@@ -73,23 +34,25 @@ interface StarOptions {
 
   /** The axis the sky turns about. */
   pole: THREE.Vector3
-  day:  DaylightUniforms
+  day:  DaylightNodes
 
   /** The wind, which carries the high cloud across them. */
-  wind: WindUniforms
+  wind: WindNodes
 }
 
 /**
  * The stars: points on the sky all the way round, most of them faint, that
  * turn about the pole with the sun and come out as it goes.
  *
- * One draw call, added to whatever is behind it. They are always in the
- * scene, so the night allocates nothing the day did not: by day every point
- * is moved off the screen in the vertex shader.
+ * One draw call, added to whatever is behind it: a small square a star,
+ * every one an instance of the same two triangles, facing the eye and sized
+ * in pixels. They are always in the scene, so the night allocates nothing
+ * the day did not: by day every star is moved off the screen in the vertex
+ * shader.
  */
 export function createStars ({ count, rng, colour, pole, day, wind }: StarOptions): Stars {
-  const positions = new Float32Array(count * 3)
-  const stars     = new Float32Array(count * 3)
+  const places = new Float32Array(count * 3)
+  const stars  = new Float32Array(count * 3)
 
   for (let index = 0; index < count; index += 1) {
     // Even over the sphere: a height, and a turn about it.
@@ -98,34 +61,60 @@ export function createStars ({ count, rng, colour, pole, day, wind }: StarOption
     const flat   = Math.sqrt(1 - y * y)
     const bright = rng.next() ** 3
 
-    positions.set([ flat * Math.cos(turn), y, flat * Math.sin(turn) ], index * 3)
+    places.set([ flat * Math.cos(turn), y, flat * Math.sin(turn) ], index * 3)
     stars.set([ THREE.MathUtils.lerp(SIZE[0], SIZE[1], bright), 0.35 + 0.65 * bright, rng.next() ], index * 3)
   }
 
-  const geometry = new THREE.BufferGeometry()
+  const square   = new THREE.PlaneGeometry(1, 1)
+  const geometry = new THREE.InstancedBufferGeometry()
 
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  geometry.setAttribute('aStar', new THREE.BufferAttribute(stars, 3))
+  geometry.setIndex(square.getIndex())
+  geometry.setAttribute('position', square.getAttribute('position'))
+  geometry.setAttribute('uv', square.getAttribute('uv'))
+  geometry.setAttribute('aPlace', new THREE.InstancedBufferAttribute(places, 3))
+  geometry.setAttribute('aStar', new THREE.InstancedBufferAttribute(stars, 3))
+  geometry.instanceCount = count
 
-  const material = new THREE.ShaderMaterial({
-    name:           'stars',
-    vertexShader:   VERTEX,
-    fragmentShader: FRAGMENT,
-    transparent:    true,
-    depthWrite:     false,
-    blending:       THREE.AdditiveBlending,
-    fog:            false,
+  const time       = { value: 0 }
+  const pixelRatio = { value: 1 }
+  const material   = new NodeMaterial()
 
-    uniforms: {
-      uNight:      day.uNight,
-      uWindAloft:  wind.uWindAloft,
-      uTime:       { value: 0 },
-      uPixelRatio: { value: 1 },
-      uStar:       { value: new THREE.Color(colour) },
-    },
-  })
+  // Width in pixels, brightness, and where in its flicker it is.
+  const star = vec3Attribute('aStar')
 
-  const points = new THREE.Points(geometry, material)
+  // The mesh turns about the pole with the sky. Where a star is after that
+  // is where it is seen: the haze takes the low ones, and the day all.
+  const direction = modelWorldMatrix.mul(vec4(vec3Attribute('aPlace'), 0)).xyz.normalize()
+  const clear     = smoothstep(0.03, 0.3, direction.y)
+  const flicker   = sin(heldFloat(time).mul(star.z.add(1.3))
+    .add(star.z.mul(40))).mul(0.18)
+    .add(0.82)
+
+  // The high cloud hides them as it passes, all but the brightest.
+  const light = varying(day.night.mul(clear).mul(star.y)
+    .mul(flicker)
+    .mul(max(cirrusCover(direction, wind.aloft).mul(-1.4 * (1 - NIGHT_THINS))
+      .add(1), 0)))
+
+  // Around the camera, like the dome, and its corner so many pixels out
+  // from its middle. A star with no light is put outside the picture, so by
+  // day they cost nothing to fill.
+  const middle = cameraProjectionMatrix.mul(vec4(cameraViewMatrix.mul(vec4(direction.mul(RADIUS), 0)).xyz, 1))
+  const corner = positionGeometry.xy.mul(star.x).mul(heldFloat(pixelRatio))
+    .mul(2)
+    .div(screenSize)
+    .mul(middle.w)
+
+  material.name         = 'stars'
+  material.vertexNode   = select(light.greaterThan(0.003), vec4(middle.xy.add(corner), middle.zw), vec4(2, 2, 2, 1))
+  material.fragmentNode = vec4(printed(uniform(new THREE.Color(colour)).mul(light)
+    .mul(smoothstep(0.5, 0.15, length(uv().sub(0.5))))), 1)
+  material.transparent = true
+  material.depthWrite  = false
+  material.blending    = THREE.AdditiveBlending
+  material.fog         = false
+
+  const points = new THREE.Mesh(geometry, material)
 
   points.name          = 'stars'
   points.frustumCulled = false
@@ -137,13 +126,14 @@ export function createStars ({ count, rng, colour, pole, day, wind }: StarOption
   return {
     points,
 
-    turn (time, hour, pixelRatio) {
-      material.uniforms.uTime!.value       = time
-      material.uniforms.uPixelRatio!.value = pixelRatio
+    turn (now, hour, ratio) {
+      time.value       = now
+      pixelRatio.value = ratio
       points.quaternion.setFromAxisAngle(pole, -hour)
     },
 
     dispose () {
+      square.dispose()
       geometry.dispose()
       material.dispose()
       points.removeFromParent()
@@ -151,5 +141,5 @@ export function createStars ({ count, rng, colour, pole, day, wind }: StarOption
   }
 }
 
-// perf: cheap — one draw call of points, a few hundred on a phone and a
-// thousand or so above. By day none of them reaches the rasteriser.
+// perf: cheap — one draw call of two triangles a star, a few hundred stars on
+// a phone and a thousand or so above. By day none of them reaches the rasteriser.

@@ -1,10 +1,13 @@
 // src/world/features/beyond/index.ts
 import * as THREE from 'three'
+import { cameraPosition, exp, exp2, float, length, max, mix, positionWorld } from 'three/tsl'
+import type { Node } from 'three/webgpu'
 
-import { amendShader, insertAfter } from '../../shared/amend.ts'
-import { SKY_GLOW_GLSL } from '../../shared/daylight.ts'
-import type { Feature, World } from '../../world.ts'
 import { createBeyondGeometry } from '../../shared/beyond.ts'
+import type { DaylightNodes } from '../../shared/daylight.ts'
+import { LitMaterial } from '../../shared/lit.ts'
+import { developed, printed } from '../../shared/output.ts'
+import type { Feature, World } from '../../world.ts'
 
 
 /**
@@ -22,27 +25,29 @@ const CLEAREST = 0.2
 const COOL = 0.3
 
 /**
- * The haze, by hand, in place of the fog. The fog fades into one colour, the
- * horizon's, which is right for the island and wrong out here: a far coast
- * stands in front of the sunset, and the air between it and the eye is lit by
- * the glow that is in the sky over it. So it fades into the sky's own colour
- * in the direction looked in, the way the far sea does, and the two meet as
- * one where the land comes down to the water.
+ * The haze, by hand, in place of the fog: the far land's way to the screen.
+ * The fog fades into one colour, the horizon's, which is right for the
+ * island and wrong out here: a far coast stands in front of the sunset, and
+ * the air between it and the eye is lit by the glow that is in the sky over
+ * it. So it fades into the sky's own colour in the direction looked in, the
+ * way the far sea does, and the two meet as one where the land comes down to
+ * the water.
  */
-const HAZE = /* glsl */ `
-  vec3  hazeRay      = vBeyond - cameraPosition;
-  float hazeDistance = length(hazeRay);
-  vec3  hazeSky      = uHorizon + skyGlow(hazeRay / hazeDistance);
-  float hazeMist     = exp(-max(vBeyond.y, 0.0) / ${MIST.toFixed(1)});
-  float hazed        = 1.0 - (1.0 - ${CLEAREST.toFixed(2)}) * exp2(-hazeDistance / ${HALF_HAZE.toFixed(1)});
+function hazeOver (light: Node<'vec3'>, { horizon, zenith, skyGlow }: DaylightNodes): Node<'vec3'> {
+  const ray   = positionWorld.sub(cameraPosition)
+  const far   = length(ray)
+  const sky   = horizon.add(skyGlow(ray.div(far)))
+  const mist  = exp(max(positionWorld.y, 0).div(-MIST))
+  const hazed = exp2(far.div(-HALF_HAZE)).mul(1 - CLEAREST)
+    .oneMinus()
 
   // Air seen against the land is lit from all of the sky, not only from the
   // glow on the horizon behind it, so it is a little of the zenith's blue.
   // The mist on the water is the horizon's alone, where the sea meets it.
-  vec3 hazeAir = linearToOutputTexel(vec4(mix(mix(hazeSky, uZenith, ${COOL.toFixed(2)}), hazeSky, hazeMist), 1.0)).rgb;
+  const air = printed(mix(mix(sky, zenith, COOL), sky, mist))
 
-  gl_FragColor.rgb = mix(gl_FragColor.rgb, hazeAir, mix(hazed, 1.0, hazeMist));
-`
+  return mix(developed(light), air, mix(hazed, 1, mist))
+}
 
 /**
  * Land on the horizon: a mountain coast across the north-west that the sun
@@ -62,31 +67,13 @@ export function createBeyond (world: World): Feature {
     name: 'beyond',
 
     build ({ scene }) {
-      const { uHorizon, uZenith, uSunDirection, uGlow } = world.day.uniforms
-
-      const material = new THREE.MeshStandardMaterial({
+      // Far outside the clouds the island has: nothing shades it but the hour.
+      const material = new LitMaterial(float(1), light => hazeOver(light, world.day.nodes), {
         name:         'beyond',
         vertexColors: true,
         flatShading:  true,
         roughness:    1,
         metalness:    0,
-        fog:          false,
-      })
-
-      amendShader(material, 'beyond-haze', shader => {
-        Object.assign(shader.uniforms, { uHorizon, uZenith, uSunDirection, uGlow })
-
-        shader.vertexShader = insertAfter(
-          insertAfter(shader.vertexShader, '#include <common>', 'varying vec3 vBeyond;'),
-          '#include <project_vertex>',
-          'vBeyond = (modelMatrix * vec4(transformed, 1.0)).xyz;',
-        )
-
-        shader.fragmentShader = insertAfter(
-          insertAfter(shader.fragmentShader, '#include <common>', `${SKY_GLOW_GLSL}uniform vec3 uHorizon;uniform vec3 uZenith;varying vec3 vBeyond;`),
-          '#include <colorspace_fragment>',
-          HAZE,
-        )
       })
 
       mesh      = new THREE.Mesh(createBeyondGeometry(world.beyond, world.quality.tier), material)

@@ -1,7 +1,7 @@
 // src/world/features/cairn/index.ts
 import * as THREE from 'three'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { createStoneGeometry } from '../../shared/stone.ts'
@@ -39,9 +39,7 @@ export function createCairn (world: World): Feature {
       const lay                = rng.fork('cairn:lay')
 
       const geometry = createStoneGeometry(rng.fork('cairn:shape').int(1, 1_000_000))
-      const material = new THREE.MeshStandardMaterial({ name: 'cairn', flatShading: true, roughness: 1, metalness: 0 })
-
-      shadeUnderClouds(material, world)
+      const material = createLitMaterial(world, { name: 'cairn' })
 
       mesh = new THREE.InstancedMesh(geometry, material, COURSES + 1 + SPILL)
       mesh.name          = 'cairn'

@@ -1,4 +1,6 @@
 // src/world/shared/swell.ts
+import { cos, dot, sin, vec2, vec3 } from 'three/tsl'
+import type { Node } from 'three/webgpu'
 
 /**
  * The swell: long, low waves the wind has raised out on the open sea, running
@@ -20,35 +22,6 @@ const TRAINS: readonly Train[] = [
 
 /** Gravity, for how fast a wave of a given length runs in deep water. */
 const GRAVITY = 9.8
-
-/**
- * The swell for a shader, to go after `WIND_GLSL`: `swellAt` gives the height
- * of the sea over its level at a place and time, and how steep it is there
- * along x and along z.
- */
-export const SWELL_GLSL = /* glsl */ `
-  #ifndef SWELL_GLSL
-  #define SWELL_GLSL
-
-  vec3 swellAt (vec2 at, float time) {
-    vec3 swell = vec3(0.0);
-    vec2 along;
-    float phase;
-${TRAINS.map(train => {
-  const { k, omega } = motion(train)
-  const [ c, s ]     = [ Math.cos(train.turn), Math.sin(train.turn) ].map(float)
-
-  return `
-    along  = vec2(WIND.x * ${c} - WIND.y * ${s}, WIND.x * ${s} + WIND.y * ${c});
-    phase  = dot(at, along) * ${float(k)} - time * ${float(omega)} + ${float(train.phase)};
-    swell += vec3(${float(train.height)} * sin(phase), ${float(train.height * k)} * cos(phase) * along);`
-}).join('')}
-
-    return swell;
-  }
-
-  #endif
-`
 
 /** One train of waves, as `TRAINS` lists them. */
 interface Train {
@@ -73,11 +46,6 @@ export interface Swell {
   /** How much it rises for each unit along x, and along z. */
   slopeX: number
   slopeZ: number
-}
-
-/** A number as a GLSL float literal, never an int. */
-function float (value: number): string {
-  return value.toFixed(6)
 }
 
 /** A train's wave number and how fast its phase turns, from its length. */
@@ -109,6 +77,29 @@ export function swellAt (wind: readonly [number, number], x: number, z: number, 
   }
 
   return out
+}
+
+/**
+ * The swell for a node material: the height of the sea over its level at a
+ * place (`xz`) and a time, and how steep it is there along x and along z, as
+ * one vector. The same sums as `swellAt`.
+ */
+export function swellNode (wind: readonly [number, number], at: Node<'vec2'>, time: Node<'float'>): Node<'vec3'> {
+  let swell: Node<'vec3'> = vec3(0)
+
+  for (const train of TRAINS) {
+    const { k, omega } = motion(train)
+    const ax           = wind[0] * Math.cos(train.turn) - wind[1] * Math.sin(train.turn)
+    const az           = wind[0] * Math.sin(train.turn) + wind[1] * Math.cos(train.turn)
+    const phase        = dot(at, vec2(ax, az)).mul(k)
+      .sub(time.mul(omega))
+      .add(train.phase)
+    const rise         = cos(phase).mul(train.height * k)
+
+    swell = swell.add(vec3(sin(phase).mul(train.height), rise.mul(ax), rise.mul(az)))
+  }
+
+  return swell
 }
 
 // perf: trivial — two sines and two cosines a call. The boat asks three

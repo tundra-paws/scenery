@@ -2,7 +2,7 @@
 import * as THREE from 'three'
 import { smoothstep } from 'threejs-scenes/primitives'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
 import { DEEP_WATER } from '../../shared/ground.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { traceTrods } from '../../shared/trods.ts'
@@ -101,18 +101,11 @@ export function createTerrain (world: World): Feature {
       geometry.computeBoundingBox()
       geometry.computeBoundingSphere()
 
-      const material = new THREE.MeshStandardMaterial({
-        name:         'terrain',
-        vertexColors: true,
-        flatShading:  true,
-        roughness:    0.96,
-        metalness:    0,
-      })
+      const material = createLitMaterial(world, { name: 'terrain', vertexColors: true, roughness: 0.96 })
 
       wear = createPathWear(world.path, world.quality.tier, [ world.shelter.spur, world.infield.track ], traceTrods(world, world.seed))
 
       wearPath(material, wear)
-      shadeUnderClouds(material, world)
       shore = wetTheShore(material, world.wind, ground.waterLevel)
 
       mesh               = new THREE.Mesh(geometry, material)

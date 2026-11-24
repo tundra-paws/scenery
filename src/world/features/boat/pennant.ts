@@ -1,7 +1,7 @@
 // src/world/features/boat/pennant.ts
 import * as THREE from 'three'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import type { Wind } from '../../shared/wind.ts'
 import type { World } from '../../world.ts'
@@ -88,9 +88,7 @@ export function createPennant (world: World): Pennant {
   // everywhere it can reach.
   geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), LENGTH + HOIST)
 
-  const material = new THREE.MeshStandardMaterial({ name: 'pennant', color: PALETTE.pennant, flatShading: true, roughness: 1, metalness: 0, side: THREE.DoubleSide })
-
-  shadeUnderClouds(material, world)
+  const material = createLitMaterial(world, { name: 'pennant', color: PALETTE.pennant, side: THREE.DoubleSide })
 
   const mesh = new THREE.Mesh(geometry, material)
 

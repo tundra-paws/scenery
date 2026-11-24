@@ -1,14 +1,14 @@
 // src/world/features/water/index.ts
 import * as THREE from 'three'
+import type { WebGPURenderer } from 'three/webgpu'
 import type { QualityTier } from 'threejs-scenes'
 
 import { createHeightMap } from '../../shared/height-map.ts'
-import { PALETTE } from '../../shared/palette.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { createMirror } from './mirror.ts'
 import type { Mirror } from './mirror.ts'
-import { FRAGMENT, VERTEX } from './shader.ts'
+import { createSeaMaterial } from './shader.ts'
 import { createWashMap } from './wash.ts'
 
 
@@ -33,11 +33,13 @@ const MIRROR_SCALE: Record<QualityTier, number> = { mobile: 0.35, desktop: 0.5, 
  * its lee. Built last, after everything that stands in it has said so.
  */
 export function createWater (world: World): Feature {
-  let mesh: THREE.Mesh | null               = null
-  let material: THREE.ShaderMaterial | null = null
-  let ground: THREE.DataTexture | null      = null
-  let wash: THREE.DataTexture | null        = null
-  let mirror: Mirror | null                 = null
+  const time = { value: 0 }
+
+  let mesh: THREE.Mesh | null          = null
+  let material: THREE.Material | null  = null
+  let ground: THREE.DataTexture | null = null
+  let wash: THREE.DataTexture | null   = null
+  let mirror: Mirror | null            = null
 
   return {
     name: 'water',
@@ -46,44 +48,10 @@ export function createWater (world: World): Feature {
       const heights = createHeightMap(world.ground, world.grid)
       const washMap = createWashMap(world.wash.footings, world.ground.size)
 
-      const { uSeaTint, uSeaGlint, uLightDirection, uHorizon, uSunDirection, uGlow } = world.day.uniforms
-
       ground   = heights.texture
       wash     = washMap.texture
       mirror   = createMirror({ level: world.ground.waterLevel, scale: MIRROR_SCALE[world.quality.tier] })
-      material = new THREE.ShaderMaterial({
-        name:           'water',
-        vertexShader:   VERTEX,
-        fragmentShader: FRAGMENT,
-        transparent:    true,
-        fog:            true,
-
-        // The wind's drift, the clouds' shadow, the hour and the boat's berth
-        // are the world's own uniform objects, shared by reference, so they
-        // are spread in and not cloned.
-        uniforms: {
-          ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
-          ...world.wind.uniforms,
-          ...world.clouds.uniforms,
-          ...world.wash.uniforms,
-          uSeaTint,
-          uSeaGlint,
-          uLightDirection,
-          uHorizon,
-          uSunDirection,
-          uGlow,
-          uTime:         { value: 0 },
-          uDeep:         { value: new THREE.Color(PALETTE.waterDeep) },
-          uShallow:      { value: new THREE.Color(PALETTE.waterShallow) },
-          uFoam:         { value: new THREE.Color(PALETTE.foam) },
-          uGround:       { value: ground },
-          uGroundScale:  { value: heights.scale },
-          uWash:         { value: wash },
-          uWashScale:    { value: washMap.scale },
-          uMirror:       { value: mirror.texture },
-          uMirrorMatrix: { value: mirror.matrix },
-        },
-      })
+      material = createSeaMaterial({ wind: world.wind, clouds: world.clouds, day: world.day, wash: world.wash, ground: heights, standing: washMap, mirror, time })
 
       const geometry = new THREE.PlaneGeometry(EXTENT, EXTENT)
 
@@ -98,14 +66,13 @@ export function createWater (world: World): Feature {
       const sea = mesh
       const own = mirror
 
-      mesh.onBeforeRender = (renderer, drawn, camera) => own.reflect(renderer, drawn, camera, sea)
+      mesh.onBeforeRender = (renderer, drawn, camera) => own.reflect(renderer as unknown as WebGPURenderer, drawn, camera, sea)
 
       scene.add(mesh)
     },
 
     update (_state, frame) {
-      if (material)
-        material.uniforms.uTime!.value = frame.frame * STEP
+      time.value = frame.frame * STEP
     },
 
     dispose () {

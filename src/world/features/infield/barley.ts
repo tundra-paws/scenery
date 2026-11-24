@@ -1,34 +1,16 @@
 // src/world/features/infield/barley.ts
 import * as THREE from 'three'
+import { clamp, dot, mix, positionGeometry, sin, smoothstep, varyingProperty, vec2, vec3 } from 'three/tsl'
+import type { Node } from 'three/webgpu'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import type { QualityTier, SeededRng } from 'threejs-scenes'
 
-import { amendShader, insertAfter } from '../../shared/amend.ts'
-import { commitInstances } from '../../shared/instances.ts'
+import { commitInstances, tellReach } from '../../shared/instances.ts'
+import type { LitMaterial } from '../../shared/lit.ts'
+import { displaceInstances, floatAttribute } from '../../shared/nodes.ts'
 import { PALETTE } from '../../shared/palette.ts'
-import { WIND_GLSL } from '../../shared/wind.ts'
 import type { Wind } from '../../shared/wind.ts'
 
-
-/**
- * How barley bows in the wind, for a shader that has `WIND_GLSL` already:
- * the gust where it stands, and on top of it a ripple carried at the wind's
- * own speed. Where the ripple is, the ears bow and show their paler side,
- * which is how wind is seen on a field from a long way off. 0 standing, 1
- * bowed right over.
- */
-export const BOW_GLSL = /* glsl */ `
-  #ifndef BOW_GLSL
-  #define BOW_GLSL
-
-  float cropBow (vec2 at) {
-    float ripple = 0.5 + 0.5 * sin(dot(windFrame(at), vec2(170.0, -120.0)));
-
-    return windGust(at) * (0.35 + 0.65 * ripple);
-  }
-
-  #endif
-`
 
 /** Of the ears a tier is offered, how many it keeps. A phone gets the field's colour and fewer stalks. */
 const KEEP: Record<QualityTier, number> = { mobile: 0.4, desktop: 1, highEnd: 1 }
@@ -37,26 +19,53 @@ const KEEP: Record<QualityTier, number> = { mobile: 0.4, desktop: 1, highEnd: 1 
 const STALK = 0.62
 const BOW   = 0.32
 
-/** A stalk, leaning and bowing, in its own space: only moved and scaled when placed, never turned. */
-const EAR_VERTEX = /* glsl */ `
-  #ifdef USE_INSTANCING
-    vec2  earRoot = instanceMatrix[3].xz;
-    float earBow  = cropBow(earRoot);
-    float earUp   = clamp(transformed.y / ${STALK}, 0.0, 1.0);
-
-    transformed.xz += WIND * (0.06 + ${BOW} * earBow) * earUp * earUp;
-    transformed.y  -= 0.25 * earBow * earBow * earUp * earUp;
-    vEarSheen       = earBow * earUp;
-  #endif
-`
-
 /** Module-scope scratch, so placing an instance allocates nothing. */
 const dummy = new THREE.Object3D()
 const tint  = new THREE.Color()
 
-/** A colour a little paler where a crop bows, for a fragment shader: the expression, of the varying named. */
-export function SHEEN (varying: string): string {
-  return `mix(diffuseColor.rgb, diffuseColor.rgb * 1.22 + 0.035, smoothstep(0.2, 0.85, ${varying}))`
+/**
+ * How barley bows in the wind at a place on the ground: the gust where it
+ * stands, and on top of it a ripple carried at the wind's own speed. Where
+ * the ripple is, the ears bow and show their paler side, which is how wind
+ * is seen on a field from a long way off. 0 standing, 1 bowed right over.
+ */
+export function cropBow (wind: Wind, at: Node<'vec2'>): Node<'float'> {
+  const ripple = sin(dot(wind.nodes.frame(at), vec2(170, -120))).mul(0.5)
+    .add(0.5)
+
+  return wind.nodes.gust(at).mul(ripple.mul(0.65).add(0.35))
+}
+
+/** A colour a little paler where a crop bows by `amount`. */
+export function sheen (colour: Node<'vec3'>, amount: Node<'float'>): Node<'vec3'> {
+  return mix(colour, colour.mul(1.22).add(0.035), smoothstep(0.2, 0.85, amount))
+}
+
+/**
+ * Let the barley's material lean and bow: a stalk is only moved and scaled
+ * when placed, never turned, so the push is the wind's own way, as far as
+ * the stalk was stretched (`aReach`).
+ */
+function bowInWind (material: LitMaterial, wind: Wind): void {
+  // How far this vertex of the stalk has bowed, for the sheen: worked out
+  // where the lean is, once the stalk has been placed, and handed on.
+  const paled = varyingProperty('float', 'vBarleyBow') as Node<'float'>
+
+  displaceInstances(material, placed => {
+    const bowed = cropBow(wind, placed.xz)
+    const up    = clamp(positionGeometry.y.div(STALK), 0, 1)
+    const reach = up.mul(up).mul(floatAttribute('aReach'))
+
+    paled.assign(bowed.mul(up))
+
+    return placed
+      .add(vec3(wind.direction[0], 0, wind.direction[1]).mul(bowed.mul(BOW).add(0.06))
+        .mul(reach))
+      .sub(vec3(0, bowed.mul(bowed).mul(reach)
+        .mul(0.25), 0))
+  })
+
+  material.dye(colour => sheen(colour, paled))
 }
 
 /** One stalk's clump: three thin open cones, nearly upright. Nine triangles, lit like the ground under them. */
@@ -90,28 +99,14 @@ function createEarGeometry (): THREE.BufferGeometry {
  * The barley standing on its rigs, one clump of stalks at each place it was
  * offered, as one instanced mesh that bows with the rigs under it.
  */
-export function sowBarley (ears: readonly number[], material: THREE.MeshStandardMaterial, lay: SeededRng, tier: QualityTier, wind: Wind): THREE.InstancedMesh {
+export function sowBarley (ears: readonly number[], material: LitMaterial, lay: SeededRng, tier: QualityTier, wind: Wind): THREE.InstancedMesh {
   const keep: number[] = []
 
   for (let index = 0; index < ears.length; index += 3)
     if (lay.next() < KEEP[tier])
       keep.push(index)
 
-  amendShader(material, 'barley-bow', shader => {
-    Object.assign(shader.uniforms, wind.uniforms)
-
-    shader.vertexShader = insertAfter(
-      insertAfter(shader.vertexShader, '#include <common>', `${WIND_GLSL}\n${BOW_GLSL}\nvarying float vEarSheen;`),
-      '#include <begin_vertex>',
-      EAR_VERTEX,
-    )
-
-    shader.fragmentShader = insertAfter(
-      insertAfter(shader.fragmentShader, '#include <common>', 'varying float vEarSheen;'),
-      '#include <color_fragment>',
-      `diffuseColor.rgb = ${SHEEN('vEarSheen')};`,
-    )
-  })
+  bowInWind(material, wind)
 
   const mesh = new THREE.InstancedMesh(createEarGeometry(), material, keep.length)
 
@@ -129,6 +124,7 @@ export function sowBarley (ears: readonly number[], material: THREE.MeshStandard
   mesh.name          = 'infield-barley'
   mesh.receiveShadow = true
 
+  tellReach(mesh)
   commitInstances(mesh)
 
   return mesh

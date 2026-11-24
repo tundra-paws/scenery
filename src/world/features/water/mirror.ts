@@ -1,7 +1,9 @@
 // src/world/features/water/mirror.ts
 import * as THREE from 'three'
+import type { WebGPURenderer } from 'three/webgpu'
 
 import { isKeptOutOfMirror } from '../../shared/mirror.ts'
+import { drawMirror } from '../../shared/output.ts'
 
 
 /** Clip space to texture space: [-1, 1] to [0, 1] on both axes. */
@@ -34,7 +36,7 @@ export interface Mirror {
   matrix: THREE.Matrix4
 
   /** Draw the reflection for `viewer`, leaving out `sea` and whatever was kept out of the mirror. */
-  reflect (renderer: THREE.WebGLRenderer, scene: THREE.Scene, viewer: THREE.Camera, sea: THREE.Object3D): void
+  reflect (renderer: WebGPURenderer, scene: THREE.Scene, viewer: THREE.Camera, sea: THREE.Object3D): void
   dispose (): void
 }
 
@@ -59,10 +61,11 @@ interface MirrorOptions {
  * lines are here.
  */
 export function createMirror ({ level, scale }: MirrorOptions): Mirror {
-  const target                   = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: true })
-  const camera                   = new THREE.PerspectiveCamera()
-  const matrix                   = new THREE.Matrix4()
-  const hidden: THREE.Object3D[] = []
+  const target                    = new THREE.RenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: true })
+  const camera                    = new THREE.PerspectiveCamera()
+  const matrix                    = new THREE.Matrix4()
+  const hidden: THREE.Object3D[]  = []
+  const held: THREE.LightShadow[] = []
 
   target.texture.name = 'mirror'
 
@@ -70,6 +73,13 @@ export function createMirror ({ level, scale }: MirrorOptions): Mirror {
     if (object.visible && isKeptOutOfMirror(object)) {
       object.visible = false
       hidden.push(object)
+    }
+
+    // A light's shadow map is already drawn for this frame: the mirror
+    // reads it and does not draw it again.
+    if (object instanceof THREE.DirectionalLight && object.shadow.autoUpdate) {
+      object.shadow.autoUpdate = false
+      held.push(object.shadow)
     }
   }
 
@@ -137,28 +147,25 @@ export function createMirror ({ level, scale }: MirrorOptions): Mirror {
       sea.visible = false
       scene.traverse(hide)
 
-      const before     = renderer.getRenderTarget()
-      const autoUpdate = renderer.shadowMap.autoUpdate
+      const before = renderer.getRenderTarget()
 
-      // The sun's shadow map is already drawn for this frame: the mirror
-      // reads it and does not draw it again.
-      renderer.shadowMap.autoUpdate = false
+      // In linear light, with no way to the screen: the sea develops it.
+      drawMirror(true)
       renderer.setRenderTarget(target)
-      renderer.state.buffers.depth.setMask(true)
-
-      if (!renderer.autoClear)
-        renderer.clear()
-
       renderer.render(scene, camera)
-      renderer.shadowMap.autoUpdate = autoUpdate
       renderer.setRenderTarget(before)
+      drawMirror(false)
 
       sea.visible = true
 
       for (const object of hidden)
         object.visible = true
 
+      for (const shadow of held)
+        shadow.autoUpdate = true
+
       hidden.length = 0
+      held.length   = 0
     },
 
     dispose () {

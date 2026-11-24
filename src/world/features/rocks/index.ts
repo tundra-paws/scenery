@@ -2,7 +2,7 @@
 import * as THREE from 'three'
 import type { QualityTier } from 'threejs-scenes'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { scatterOnGround } from '../../shared/scatter.ts'
@@ -53,9 +53,7 @@ export function createRocks (world: World): Feature {
       })
 
       const geometry = createStoneGeometry(shape.int(1, 1_000_000))
-      const material = new THREE.MeshStandardMaterial({ name: 'rock', flatShading: true, roughness: 1, metalness: 0 })
-
-      shadeUnderClouds(material, world)
+      const material = createLitMaterial(world, { name: 'rock' })
 
       mesh = new THREE.InstancedMesh(geometry, material, spots.length)
       mesh.name          = 'rocks'

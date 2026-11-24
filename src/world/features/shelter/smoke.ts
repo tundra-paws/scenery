@@ -3,6 +3,8 @@ import * as THREE from 'three'
 import type { QualityTier } from 'threejs-scenes'
 import { createNoise3D, hash2, smoothstep } from 'threejs-scenes/primitives'
 
+
+import { createLitMaterial } from '../../shared/lit.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import type { Wind } from '../../shared/wind.ts'
 
@@ -53,8 +55,8 @@ interface SmokeOptions {
   /** The top of the chimney, in the world. */
   from: THREE.Vector3
 
-  /** The horizon's colour at this hour, kept by whoever turns the day: the smoke's own thin light. */
-  haze: THREE.Color
+  /** What the puffs are drawn with (`createSmokeMaterial`). */
+  material: THREE.Material
 }
 
 /** One puff: the clouds' own shape in small, all the way round. */
@@ -78,6 +80,21 @@ function createPuffGeometry (seed: number): THREE.BufferGeometry {
 }
 
 /**
+ * What smoke is drawn with. No colour of its own, like the clouds: the
+ * horizon's pale, which the light's colour lights on one side and the sky's
+ * fills on the other. What shows through it is the haze of the hour (`haze`,
+ * the same colour object whoever turns the day keeps, not a copy), so smoke
+ * at night is not lit from within by the day's sky.
+ */
+export function createSmokeMaterial (air: Parameters<typeof createLitMaterial>[0], haze: THREE.Color): THREE.Material {
+  const material = createLitMaterial(air, { name: 'smoke', color: PALETTE.horizon, emissiveIntensity: THIN })
+
+  material.emissive = haze
+
+  return material
+}
+
+/**
  * Smoke from the chimney: the first thing in the world to read the wind on
  * the CPU.
  *
@@ -89,23 +106,8 @@ function createPuffGeometry (seed: number): THREE.BufferGeometry {
  * whenever it is asked for. Puffs are opaque, like the clouds: they come from
  * nothing and thin to nothing by size, not by fading.
  */
-export function createSmoke ({ tier, seed, wind, from, haze }: SmokeOptions): Smoke {
+export function createSmoke ({ tier, seed, wind, from, material }: SmokeOptions): Smoke {
   const count = PUFFS[tier]
-
-  // No colour of its own, like the clouds: the horizon's pale, which the
-  // light's colour lights on one side and the sky's fills on the other.
-  const material = new THREE.MeshStandardMaterial({
-    name:              'smoke',
-    color:             PALETTE.horizon,
-    emissiveIntensity: THIN,
-    flatShading:       true,
-    roughness:         1,
-    metalness:         0,
-  })
-
-  // What shows through it is the haze of the hour: the same colour object,
-  // not a copy, so smoke at night is not lit from within by the day's sky.
-  material.emissive = haze
 
   const mesh  = new THREE.InstancedMesh(createPuffGeometry(seed), material, count)
   const reach = LIFE * (RISE + wind.speed * (CARRY + GUST))

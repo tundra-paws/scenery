@@ -1,5 +1,7 @@
 // src/main.ts
 import './ui/style.css'
+import * as THREE from 'three'
+import { WebGPURenderer } from 'three/webgpu'
 import { createApp, createClock } from 'threejs-scenes'
 import type { QualityTier } from 'threejs-scenes'
 import { detectTier, getQualitySettings } from 'threejs-scenes/core'
@@ -37,7 +39,7 @@ type SessionType = { harness: HarnessHandle | null }
  * Under `?harness=1` the page never starts its loop. Time then moves only when a
  * capture asks for a moment, which is what makes that moment reproducible.
  */
-function boot (): void {
+async function boot (): Promise<void> {
   const canvas = document.querySelector('canvas')
 
   if (!canvas)
@@ -69,11 +71,31 @@ function boot (): void {
     paint: () => app.ctx.renderer.render(app.ctx.scene, app.ctx.camera),
   }
 
+  const renderer = new WebGPURenderer({ canvas, antialias: true, forceWebGL: true, powerPreference: 'high-performance' })
+
+  // Each material finds its own way to the screen (`world/shared/output.ts`):
+  // the renderer is to pass on what it is given, with no pass of its own.
+  renderer.outputColorSpace = THREE.LinearSRGBColorSpace
+  renderer.toneMapping      = THREE.NoToneMapping
+
+  await renderer.init()
+
+  // three keeps a small instanced mesh's matrices in a uniform array, and
+  // names the array after a node made for that one draw: so no two instanced
+  // meshes, and no two passes of one mesh, could share a program, and this
+  // world linked ninety. Told that there is no room for such arrays, it puts
+  // every mesh's matrices in attributes, and the stones, the sheep and the
+  // seals are one program again.
+  const { capabilities } = renderer.backend as unknown as { capabilities: { getUniformBufferLimit: () => number }}
+
+  capabilities.getUniformBufferLimit = () => 0
+
   const app = createApp<WorldState>({
     canvas,
-    state: { explore: false },
-    seed:  overrides.seed,
-    clock: createClock({ mode: 'fixed', step: STEP }),
+    rendererInstance: renderer as unknown as THREE.WebGLRenderer,
+    state:            { explore: false },
+    seed:             overrides.seed,
+    clock:            createClock({ mode: 'fixed', step: STEP }),
 
     // The world moves in steps of a sixtieth of a second. On a faster display
     // some frames fall between two steps, and drawing them would be drawing
@@ -115,12 +137,9 @@ function boot (): void {
   session.harness.ready()
 }
 
-try {
-  boot()
-}
-catch (error) {
+boot().catch((error: unknown) => {
   setStatus('failed')
   showFailure('This world could not start on this device.')
   session.harness?.fail(error)
   console.error(error)
-}
+})

@@ -2,7 +2,7 @@
 import * as THREE from 'three'
 import type { SeededRng } from 'threejs-scenes'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
 import { elevationAt } from '../../shared/daylight.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { keepOutOfMirror } from '../../shared/mirror.ts'
@@ -38,9 +38,7 @@ interface Drawn {
 
 /** A mesh lit like the boulders, so it shares their program, and shaded by the clouds. */
 function lit (world: World, name: string, geometry: THREE.BufferGeometry, count: number): THREE.InstancedMesh {
-  const material = new THREE.MeshStandardMaterial({ name, flatShading: true, roughness: 1, metalness: 0 })
-
-  shadeUnderClouds(material, world)
+  const material = createLitMaterial(world, { name })
 
   const mesh = new THREE.InstancedMesh(geometry, material, count)
 

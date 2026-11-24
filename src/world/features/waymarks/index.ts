@@ -2,7 +2,7 @@
 import * as THREE from 'three'
 import type { SeededRng } from 'threejs-scenes'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
 import type { Ground } from '../../shared/ground.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { PALETTE } from '../../shared/palette.ts'
@@ -159,9 +159,7 @@ export function createWaymarks (world: World): Feature {
         marks.push(distance)
 
       const geometry = createStoneGeometry(rng.fork('waymarks:shape').int(1, 1_000_000))
-      const material = new THREE.MeshStandardMaterial({ name: 'waymark', flatShading: true, roughness: 1, metalness: 0 })
-
-      shadeUnderClouds(material, world)
+      const material = createLitMaterial(world, { name: 'waymark' })
 
       mesh = new THREE.InstancedMesh(geometry, material, marks.length * (COURSES + 1) + SLIP_STONES)
       mesh.name          = 'waymarks'

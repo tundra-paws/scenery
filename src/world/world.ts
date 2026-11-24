@@ -119,6 +119,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
   const path    = createPath(ground, summit)
   const beyond  = createLands(seed)
   const shelter = createShelter(ground, path)
+  const wind    = createWind()
 
   return {
     seed,
@@ -127,8 +128,8 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     summit,
     path,
     grid:    createHeightGrid(ground, GRID_SEGMENTS[quality.tier]),
-    wind:    createWind(),
-    clouds:  createCloudShadow(),
+    wind,
+    clouds:  createCloudShadow(wind),
     beyond,
     day:     createDaylight(createSkyline(beyond)),
     shelter,

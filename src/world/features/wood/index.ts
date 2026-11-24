@@ -1,11 +1,12 @@
 // src/world/features/wood/index.ts
 import * as THREE from 'three'
+import { cos, dot, positionLocal, sin, step, vec2, vec3 } from 'three/tsl'
 import { createNoise3D } from 'threejs-scenes/primitives'
 
-import { amendShader, insertAfter } from '../../shared/amend.ts'
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
+import type { LitMaterial } from '../../shared/lit.ts'
 import { keepOutOfMirror } from '../../shared/mirror.ts'
-import { WIND_GLSL } from '../../shared/wind.ts'
+import { vec4Attribute } from '../../shared/nodes.ts'
 import type { Wind } from '../../shared/wind.ts'
 import type { Feature, World } from '../../world.ts'
 import { growBirch } from './birch.ts'
@@ -23,36 +24,31 @@ const ROCK = 0.012
 const FLUTTER = 0.11
 
 /**
- * The sway, for a vertex shader. The wood is one mesh in world space, so a
- * vertex is pushed straight along the wind.
+ * Let the wood's material give to the wind. The wood is one mesh in world
+ * space, so a vertex is pushed straight along the wind; its shadow is drawn
+ * from the same place, so it gives with the tree.
  *
- * A tree reads the gust at its own foot, so a front is seen to cross the
- * wood from tree to tree, and it gives by the square of the height: `sway.z`
- * already holds that, in world units, and is nothing for cut wood. Each lump
- * of leaves is tossed whole, out of step with the next.
+ * A tree reads the gust at its own foot (`sway.xy`), so a front is seen to
+ * cross the wood from tree to tree, and it gives by the square of the
+ * height: `sway.z` already holds that, in world units, and is nothing for
+ * cut wood. Each lump of leaves (`sway.w`) is tossed whole, out of step with
+ * the next.
  */
-const SWAY_VERTEX = /* glsl */ `
-  vec2  treeAir  = windFrame(sway.xy);
-  float treeGust = windGust(sway.xy);
-  float treeGive = ${GIVE} * treeGust + ${ROCK} * sin(dot(treeAir, vec2(61.0, -47.0)) + sway.x) * (0.3 + 0.7 * treeGust);
-  float leafToss = ${FLUTTER} * step(0.001, sway.w) * (0.35 + 0.65 * treeGust);
-  float leafTurn = dot(treeAir, vec2(173.0, -131.0)) + sway.w * 43.0;
+function swayInWind (material: LitMaterial, wind: Wind): void {
+  const sway = vec4Attribute('sway')
+  const air  = wind.nodes.frame(sway.xy)
+  const gust = wind.nodes.gust(sway.xy)
+  const give = gust.mul(GIVE).add(sin(dot(air, vec2(61, -47)).add(sway.x)).mul(ROCK)
+    .mul(gust.mul(0.7).add(0.3)))
+  const toss  = step(0.001, sway.w).mul(FLUTTER)
+    .mul(gust.mul(0.65).add(0.35))
+  const turn  = dot(air, vec2(173, -131)).add(sway.w.mul(43))
+  const along = give.mul(sway.z).add(toss.mul(sin(turn)))
+  const lift  = toss.mul(0.6).mul(cos(turn.mul(1.3)))
+    .sub(give.mul(give).mul(sway.z)
+      .mul(0.5))
 
-  transformed.xz += WIND * (treeGive * sway.z + leafToss * sin(leafTurn));
-  transformed.y  += leafToss * 0.6 * cos(leafTurn * 1.3) - treeGive * treeGive * sway.z * 0.5;
-`
-
-/** Let a material of the wood give to the wind. The same for what is seen and for the shadow it throws. */
-function swayInWind (material: THREE.Material, wind: Wind): void {
-  amendShader(material, 'wood-sway', shader => {
-    Object.assign(shader.uniforms, wind.uniforms)
-
-    shader.vertexShader = insertAfter(
-      insertAfter(shader.vertexShader, '#include <common>', `${WIND_GLSL}attribute vec4 sway;`),
-      '#include <begin_vertex>',
-      SWAY_VERTEX,
-    )
-  })
+  material.positionNode = positionLocal.add(vec3(along.mul(wind.direction[0]), lift, along.mul(wind.direction[1])))
 }
 
 /**
@@ -67,8 +63,7 @@ function swayInWind (material: THREE.Material, wind: Wind): void {
  * tosses with the same gusts as the grass under it.
  */
 export function createWoodFeature (world: World): Feature {
-  let mesh: THREE.Mesh | null               = null
-  let depth: THREE.MeshDepthMaterial | null = null
+  let mesh: THREE.Mesh | null = null
 
   return {
     name: 'wood',
@@ -92,20 +87,14 @@ export function createWoodFeature (world: World): Feature {
       stackLogs(timber, shelter, ground, rng.fork('wood:stack'))
       sphere.dispose()
 
-      const material = new THREE.MeshStandardMaterial({ name: 'wood', vertexColors: true, roughness: 1, metalness: 0 })
+      const material = createLitMaterial(world, { name: 'wood', vertexColors: true, flatShading: false })
 
       swayInWind(material, wind)
-      shadeUnderClouds(material, world)
 
-      // The shadow gives with the tree: the same push in the depth pass.
-      depth = new THREE.MeshDepthMaterial({ name: 'wood-shadow', depthPacking: THREE.RGBADepthPacking })
-      swayInWind(depth, wind)
-
-      mesh                     = new THREE.Mesh(timber.build(), material)
-      mesh.name                = 'wood'
-      mesh.castShadow          = true
-      mesh.receiveShadow       = true
-      mesh.customDepthMaterial = depth
+      mesh               = new THREE.Mesh(timber.build(), material)
+      mesh.name          = 'wood'
+      mesh.castShadow    = true
+      mesh.receiveShadow = true
 
       // Behind the beach from most of the sea, and the island's costliest
       // mesh: a phone leaves it out of the sea's reflection.
@@ -121,10 +110,8 @@ export function createWoodFeature (world: World): Feature {
       if (mesh?.material instanceof THREE.Material)
         mesh.material.dispose()
 
-      depth?.dispose()
       mesh?.removeFromParent()
-      mesh  = null
-      depth = null
+      mesh = null
     },
   }
 }

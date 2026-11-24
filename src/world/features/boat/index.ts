@@ -1,7 +1,7 @@
 // src/world/features/boat/index.ts
 import * as THREE from 'three'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { MAST, WATERLINE, createHullGeometry } from './hull.ts'
@@ -61,9 +61,7 @@ export function createBoat (world: World): Feature {
     name: 'boat',
 
     build ({ scene }) {
-      const material = new THREE.MeshStandardMaterial({ name: 'boat', vertexColors: true, flatShading: true, roughness: 1, metalness: 0 })
-
-      shadeUnderClouds(material, world)
+      const material = createLitMaterial(world, { name: 'boat', vertexColors: true })
 
       mooring = findMooring(world.ground, world.path, world.wind)
 

@@ -1,8 +1,10 @@
 // src/world/shared/cloud-shadow.ts
 import * as THREE from 'three'
+import { float, smoothstep, texture, varying } from 'three/tsl'
+import type { Node } from 'three/webgpu'
 
-import { amendShader, insertAfter } from './amend.ts'
-import { WEATHER_SPAN, WIND_GLSL } from './wind.ts'
+import { heldFloat, heldVec2 } from './nodes.ts'
+import { WEATHER_SPAN, createWind } from './wind.ts'
 import type { Wind } from './wind.ts'
 
 
@@ -11,7 +13,9 @@ export const CLOUD_BASE = 120
 
 /** How much of the sun a cloud takes from what is under it, and how much of the sky's light goes with it. */
 const SHADE = 0.68
-const GLOOM = 0.22
+
+/** How much of the sky's light goes with the sun's under a cloud. */
+export const GLOOM = 0.22
 
 /**
  * A blot is painted as a slope, not a disc: full inside `CORE` of its radius,
@@ -36,31 +40,6 @@ const REACH = 2.25
 const FULL = 1.2
 
 /**
- * The lookup for a shader, to go after `WIND_GLSL`: `cloudShadowUv` in a
- * vertex shader (it is linear in position, so it interpolates exactly) and
- * `cloudLight` in the fragment shader.
- */
-export const CLOUD_SHADOW_GLSL = /* glsl */ `
-  uniform sampler2D uCloudShadow;
-  uniform vec2      uCloudSlant;
-  uniform float     uCloudShade;
-
-  // Where in the picture of the sky to look for a point in the world: up the
-  // light's ray to the height the clouds ride at, then back to where the air
-  // that is there now started from.
-  vec2 cloudShadowUv (vec3 at) {
-    vec2 under = at.xz + uCloudSlant * (${CLOUD_BASE.toFixed(1)} - at.y);
-
-    return (under - uWindDrift) / WEATHER_SPAN + 0.5;
-  }
-
-  // How much of the light gets through: 1 in the open, less under a cloud.
-  float cloudLight (vec2 uv) {
-    return 1.0 - uCloudShade * smoothstep(${RIM[0]}, ${RIM[1]}, texture2D(uCloudShadow, uv).r);
-  }
-`
-
-/**
  * The shadow of the clouds, as something a material can look up.
  *
  * The clouds never change shape and all move as one with the wind, so their
@@ -81,6 +60,16 @@ export interface CloudShadow {
 
   /** Lay the shadows where a light from `toward`, this strong, throws them. */
   cast (toward: THREE.Vector3, intensity: number): void
+
+  /** The picture of the sky from above, when the clouds are built; `null` when they are gone. */
+  cover (picture: THREE.Texture | null): void
+
+  /**
+   * For a node material: how much of the light gets through at a place in
+   * the world, 1 in the open and less under a cloud. The lookup is worked
+   * out at each vertex (it is linear in position, so it interpolates exactly).
+   */
+  light (at: Node<'vec3'>): Node<'float'>
 }
 
 /** A round thing in the sky that blocks the light: where it is before the wind has moved it, and how wide. */
@@ -90,21 +79,40 @@ export interface Blot {
   radius: number
 }
 
-/** The part of the world a material needs to be shaded by the clouds. */
-interface Air {
-  wind:   Wind
-  clouds: CloudShadow
-}
-
-export function createCloudShadow (): CloudShadow {
-  const uniforms = {
+export function createCloudShadow (wind: Wind = createWind()): CloudShadow {
+  const uniforms: CloudShadow['uniforms'] = {
     uCloudShadow: { value: null },
     uCloudSlant:  { value: new THREE.Vector2() },
     uCloudShade:  { value: SHADE },
   }
 
+  // Until the clouds are built there are none: a clear sky, one texel of it.
+  const clear = new THREE.DataTexture(new Uint8Array(1), 1, 1, THREE.RedFormat, THREE.UnsignedByteType)
+
+  clear.needsUpdate = true
+
+  const picture = texture(clear)
+  const slant   = heldVec2(uniforms.uCloudSlant)
+  const shade   = heldFloat(uniforms.uCloudShade)
+
   return {
     uniforms,
+
+    cover (baked) {
+      uniforms.uCloudShadow.value = baked
+      picture.value               = baked ?? clear
+    },
+
+    light (at) {
+      // Up the light's ray to the height the clouds ride at, then back to
+      // where the air that is there now started from.
+      const under = at.xz.add(slant.mul(float(CLOUD_BASE).sub(at.y)))
+      const uv    = varying(under.sub(wind.nodes.drift).div(WEATHER_SPAN)
+        .add(0.5))
+
+      return smoothstep(RIM[0], RIM[1], picture.sample(uv).r).mul(shade)
+        .oneMinus()
+    },
 
     cast (toward, intensity) {
       const flat  = Math.hypot(toward.x, toward.z)
@@ -162,45 +170,6 @@ export function createCloudShadowTexture (blots: readonly Blot[], side: number):
   texture.needsUpdate = true
 
   return texture
-}
-
-/**
- * Let the clouds shade a built-in lit material.
- *
- * The light's own share is dimmed after three has added it up, and a little of
- * the sky's with it, or a shadow on a slope already turned from the sun would
- * not show. What the shadow map says is left as it was.
- */
-export function shadeUnderClouds (material: THREE.Material, { wind, clouds }: Air): void {
-  amendShader(material, 'cloud-shadow', shader => {
-    Object.assign(shader.uniforms, wind.uniforms, clouds.uniforms)
-
-    shader.vertexShader = insertAfter(
-      insertAfter(shader.vertexShader, '#include <common>', `${WIND_GLSL}${CLOUD_SHADOW_GLSL}varying vec2 vCloudUv;`),
-      '#include <project_vertex>',
-      /* glsl */ `
-        vec4 cloudAt = vec4(transformed, 1.0);
-
-        #ifdef USE_INSTANCING
-          cloudAt = instanceMatrix * cloudAt;
-        #endif
-
-        vCloudUv = cloudShadowUv((modelMatrix * cloudAt).xyz);
-      `,
-    )
-
-    shader.fragmentShader = insertAfter(
-      insertAfter(shader.fragmentShader, '#include <common>', `${WIND_GLSL}${CLOUD_SHADOW_GLSL}varying vec2 vCloudUv;`),
-      '#include <lights_fragment_end>',
-      /* glsl */ `
-        float cloudLit = cloudLight(vCloudUv);
-
-        reflectedLight.directDiffuse   *= cloudLit;
-        reflectedLight.directSpecular  *= cloudLit;
-        reflectedLight.indirectDiffuse *= mix(1.0, cloudLit, ${GLOOM});
-      `,
-    )
-  })
 }
 
 // perf: cheap — one single-channel texture (64 KB on the mobile tier, 256 KB

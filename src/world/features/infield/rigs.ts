@@ -1,16 +1,17 @@
 // src/world/features/infield/rigs.ts
 import * as THREE from 'three'
+import { positionLocal, varying, vec3 } from 'three/tsl'
 import type { SeededRng } from 'threejs-scenes'
 import { smoothstep } from 'threejs-scenes/primitives'
 
-import { amendShader, insertAfter } from '../../shared/amend.ts'
 import type { Ground } from '../../shared/ground.ts'
 import type { HeightGrid } from '../../shared/height-grid.ts'
 import type { Infield } from '../../shared/infield.ts'
+import type { LitMaterial } from '../../shared/lit.ts'
+import { floatAttribute } from '../../shared/nodes.ts'
 import { PALETTE } from '../../shared/palette.ts'
-import { WIND_GLSL } from '../../shared/wind.ts'
 import type { Wind } from '../../shared/wind.ts'
-import { BOW_GLSL, SHEEN } from './barley.ts'
+import { cropBow, sheen } from './barley.ts'
 
 
 /** From the middle of one rig to the middle of the next: the bed and its share of the two furrows. */
@@ -60,19 +61,6 @@ const CROPS = {
 /** What is sown, plot by plot across the field, and how many rigs a plot is. */
 const ROTATION = [ 'barley', 'potato', 'barley', 'barley', 'lea', 'potato' ] as const
 const PLOT     = [ 3, 5 ] as const
-
-/** The crop on a rig leaning with the wind, and paling where it bows (`BOW_GLSL`). */
-const RIG_VERTEX = /* glsl */ `
-  float rigBow = aCrop * cropBow(transformed.xz);
-
-  transformed.xz += WIND * aCrop * (0.04 + 0.2 * rigBow);
-  transformed.y  -= 0.12 * rigBow * rigBow;
-  vRigSheen       = rigBow;
-`
-
-const RIG_FRAGMENT = /* glsl */ `
-  diffuseColor.rgb = ${SHEEN('vRigSheen')};
-`
 
 /** Module-scope scratch. */
 const tint = new THREE.Color()
@@ -223,23 +211,21 @@ function plough (out: Plough, grid: HeightGrid, rig: Rig, fall: readonly [number
     }
 }
 
-/** Let the crop on a rig material lean and pale with the wind. */
-function sway (material: THREE.Material, wind: Wind): void {
-  amendShader(material, 'rig-sway', shader => {
-    Object.assign(shader.uniforms, wind.uniforms)
+/**
+ * Let the crop on a rig material lean and pale with the wind. `aCrop` is how
+ * much each vertex gives: nothing in a furrow, most on the crown of a bed.
+ */
+function sway (material: LitMaterial, wind: Wind): void {
+  const crop  = floatAttribute('aCrop')
+  const bowed = crop.mul(cropBow(wind, positionLocal.xz))
+  const paled = varying(bowed)
 
-    shader.vertexShader = insertAfter(
-      insertAfter(shader.vertexShader, '#include <common>', `${WIND_GLSL}\n${BOW_GLSL}\nattribute float aCrop;\nvarying float vRigSheen;`),
-      '#include <begin_vertex>',
-      RIG_VERTEX,
-    )
+  material.positionNode = positionLocal
+    .add(vec3(wind.direction[0], 0, wind.direction[1]).mul(crop)
+      .mul(bowed.mul(0.2).add(0.04)))
+    .sub(vec3(0, bowed.mul(bowed).mul(0.12), 0))
 
-    shader.fragmentShader = insertAfter(
-      insertAfter(shader.fragmentShader, '#include <common>', 'varying float vRigSheen;'),
-      '#include <color_fragment>',
-      RIG_FRAGMENT,
-    )
-  })
+  material.dye(colour => sheen(colour, paled))
 }
 
 /**
@@ -248,7 +234,7 @@ function sway (material: THREE.Material, wind: Wind): void {
  * fall of the land so the rain runs off. Sown in plots across the field:
  * barley, potatoes, and one plot left in grass.
  */
-export function ploughRigs (material: THREE.MeshStandardMaterial, lay: SeededRng, ground: Ground, grid: HeightGrid, infield: Infield, wind: Wind): Field {
+export function ploughRigs (material: LitMaterial, lay: SeededRng, ground: Ground, grid: HeightGrid, infield: Infield, wind: Wind): Field {
   const fall   = fallOf(ground, infield)
   const across = [ -fall[1], fall[0] ] as const
   const out    = { position: [], colour: [], give: [], index: [], ears: []}

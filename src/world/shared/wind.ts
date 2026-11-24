@@ -1,5 +1,9 @@
 // src/world/shared/wind.ts
 import * as THREE from 'three'
+import { dot, float, sin, vec2 } from 'three/tsl'
+import type { Node } from 'three/webgpu'
+
+import { heldVec2 } from './nodes.ts'
 
 /**
  * Edge of the square the weather repeats on, in world units.
@@ -50,38 +54,6 @@ const GUSTS: readonly Gust[] = [
   { x: 8, z: 5, weight: 0.2, phase: 4.1 },
 ]
 
-/**
- * The same signal for a shader: `uWindDrift`, the constants, and `windGust`.
- *
- * Written out from the table above rather than typed twice, so the grass on
- * the GPU and anything that asks `gustAt` on the CPU answer to one wind.
- * Guarded, so two amendments to one material may both ask for it.
- */
-export const WIND_GLSL = /* glsl */ `
-  #ifndef WIND_GLSL
-  #define WIND_GLSL
-
-  uniform vec2 uWindDrift;
-
-  const float WEATHER_SPAN = ${glsl(WEATHER_SPAN)};
-  const vec2  WIND         = vec2(${Math.cos(HEADING)}, ${Math.sin(HEADING)});
-
-  // A place, in the air's own frame: where the air now here started from, as
-  // an angle that goes round once across the span.
-  vec2 windFrame (vec2 at) {
-    return (at - uWindDrift) * ${TAU / WEATHER_SPAN};
-  }
-
-  // 0 in a lull, 1 in a gust.
-  float windGust (vec2 at) {
-    vec2 air = windFrame(at);
-
-    return 0.5 + 0.5 * (${GUSTS.map(gust => `${glsl(gust.weight)} * sin(dot(air, vec2(${glsl(gust.x)}, ${glsl(gust.z)})) + ${glsl(gust.phase)})`).join(' + ')});
-  }
-
-  #endif
-`
-
 interface Gust {
   x:      number
   z:      number
@@ -107,6 +79,9 @@ export interface Wind {
   /** What a shader reads. One object shared by reference: a single write a step reaches every material. */
   readonly uniforms: WindUniforms
 
+  /** The same for a node material: the drift, and the gust at a place. */
+  readonly nodes: WindNodes
+
   /** Put the air where it is at `time` seconds. */
   blow (time: number): void
 
@@ -123,8 +98,46 @@ export interface WindUniforms {
   uWindAloft: { value: THREE.Vector2 }
 }
 
-function glsl (value: number): string {
-  return Number.isInteger(value) ? value.toFixed(1) : String(value)
+/**
+ * The wind for a node material: the same signal `gustAt` answers with on the
+ * CPU, written out from the same table, so the grass on the GPU and the smoke
+ * on the CPU answer to one wind.
+ */
+export interface WindNodes {
+
+  /** How far the air has moved, wrapped to the weather's span. */
+  drift: Node<'vec2'>
+
+  /** How far the air aloft has moved. */
+  aloft: Node<'vec2'>
+
+  /** A place on the ground (`xz`) in the air's own frame: where the air now there started from, as an angle that goes round once across the span. */
+  frame (at: Node<'vec2'>): Node<'vec2'>
+
+  /** 0 in a lull, 1 in a gust, at a place on the ground (`xz`). */
+  gust (at: Node<'vec2'>): Node<'float'>
+}
+
+function createWindNodes (uniforms: WindUniforms): WindNodes {
+  const drift = heldVec2(uniforms.uWindDrift)
+  const frame = (at: Node<'vec2'>): Node<'vec2'> => at.sub(drift).mul(TAU / WEATHER_SPAN)
+
+  return {
+    drift,
+    aloft: heldVec2(uniforms.uWindAloft),
+    frame,
+
+    gust (at) {
+      const air = frame(at)
+
+      let sum: Node<'float'> = float(0)
+
+      for (const gust of GUSTS)
+        sum = sum.add(sin(dot(air, vec2(gust.x, gust.z)).add(gust.phase)).mul(gust.weight))
+
+      return sum.mul(0.5).add(0.5)
+    },
+  }
 }
 
 /** A remainder that is never negative. */
@@ -140,6 +153,7 @@ export function createWind (): Wind {
     direction,
     speed: SPEED,
     uniforms,
+    nodes: createWindNodes(uniforms),
 
     blow (time) {
       const gone = SPEED * (time + HEAD_START)

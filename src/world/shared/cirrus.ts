@@ -1,4 +1,7 @@
 // src/world/shared/cirrus.ts
+import { dot, floor, fract, max, mix, pow, sin, smoothstep, vec2, vec3 } from 'three/tsl'
+import type { Node } from 'three/webgpu'
+
 import { ALOFT } from './wind.ts'
 
 /**
@@ -16,77 +19,68 @@ const STREAK = 1100
 const COVER   = 0.06
 const OPACITY = 0.75
 
+/** A number from 0 to 1 for a cell of the layer, the same every time. */
+function hashAt (at: Node<'vec2'>): Node<'float'> {
+  const p = fract(vec3(at.x, at.y, at.x).mul(0.1031))
+  const q = p.add(dot(p, p.yzx.add(33.33)))
+
+  return fract(q.x.add(q.y).mul(q.z))
+}
+
+/** Value noise: the cells' numbers, eased between. */
+function noiseAt (at: Node<'vec2'>): Node<'float'> {
+  const cell = floor(at)
+  const part = fract(at)
+  const ease = part.mul(part).mul(part.mul(-2).add(3))
+
+  return mix(
+    mix(hashAt(cell), hashAt(cell.add(vec2(1, 0))), ease.x),
+    mix(hashAt(cell.add(vec2(0, 1))), hashAt(cell.add(vec2(1, 1))), ease.x),
+    ease.y,
+  )
+}
+
 /**
  * The high cloud: a thin layer combed into streaks by the wind aloft, and
- * rippled across them, a mackerel sky. For a shader: `cirrusCover(direction)`
- * is how much of the sky that way it veils, from 0 to `OPACITY`, and
- * `cirrusColour(direction)` the colour it takes from the hour.
+ * rippled across them, a mackerel sky. How much of the sky toward
+ * `direction` it veils, from 0 to `OPACITY`; `aloft` is how far the air up
+ * there has moved (`world.wind.nodes.aloft`).
  *
  * It lies on the dome, so it costs no draw call and no triangle: the sky and
- * the stars both ask it, the sky to draw it and the stars to be dimmed by
- * it. It needs `uWindAloft` (`shared/wind.ts`) and the hour's cloud colours.
+ * the stars both ask it, the sky to draw it and the stars to be dimmed by it.
  */
-export const CIRRUS_GLSL = /* glsl */ `
-  #ifndef CIRRUS_GLSL
-  #define CIRRUS_GLSL
+export function cirrusCover (direction: Node<'vec3'>, aloft: Node<'vec2'>): Node<'float'> {
+  // Where this way meets the layer, carried by the wind aloft, and turned
+  // into its frame: along the streaks, and across them. Under the horizon
+  // there is none, and the thinning below takes it there before this could.
+  const at     = direction.xz.div(max(direction.y, 0).add(0.06)).mul(HEIGHT)
+    .sub(aloft)
+  const combed = vec2(dot(at, vec2(ALOFT[0], ALOFT[1])), dot(at, vec2(-ALOFT[1], ALOFT[0])))
 
-  uniform vec2 uWindAloft;
+  // Long bands of it, and the bands broken across into a fish's scales.
+  const bands  = noiseAt(combed.div(vec2(STREAK, RIPPLE * 4))).mul(0.65)
+    .add(noiseAt(combed.div(vec2(STREAK * 0.45, RIPPLE * 1.7)).add(17)).mul(0.35))
+  const ripple = sin(combed.y.div(RIPPLE).mul(6.2832)
+    .add(noiseAt(combed.div(RIPPLE * 2.5)).mul(6))).mul(0.5)
+    .add(0.5)
+  const lumps  = noiseAt(combed.div(vec2(RIPPLE * 0.9, RIPPLE * 0.6)).add(5))
+  const scales = smoothstep(0.25, 0.85, ripple).mul(smoothstep(0.2, 0.7, lumps))
+  const cover  = smoothstep(0.5 - COVER, 0.78 - COVER, bands).mul(mix(0.3, 1, scales))
 
-  const vec2 CIRRUS_ALONG = vec2(${ALOFT[0]}, ${ALOFT[1]});
+  // Thinned toward the horizon, where its ripples would crowd into noise,
+  // and the haze would take it anyway.
+  return cover.mul(smoothstep(0.03, 0.22, direction.y)).mul(OPACITY)
+}
 
-  float cirrusHash (vec2 at) {
-    vec3 p = fract(vec3(at.xyx) * 0.1031);
+/**
+ * Its colour: the low cloud's own two, lit side and shaded side, and the lit
+ * side nearer the light (`body`). High up it catches the light longer.
+ */
+export function cirrusColour (direction: Node<'vec3'>, lit: Node<'vec3'>, shade: Node<'vec3'>, body: Node<'vec3'>): Node<'vec3'> {
+  const toward = pow(max(dot(direction, body), 0), 3)
 
-    p += dot(p, p.yzx + 33.33);
-
-    return fract((p.x + p.y) * p.z);
-  }
-
-  float cirrusNoise (vec2 at) {
-    vec2 cell = floor(at);
-    vec2 part = fract(at);
-    vec2 ease = part * part * (3.0 - 2.0 * part);
-
-    return mix(
-      mix(cirrusHash(cell), cirrusHash(cell + vec2(1.0, 0.0)), ease.x),
-      mix(cirrusHash(cell + vec2(0.0, 1.0)), cirrusHash(cell + vec2(1.0, 1.0)), ease.x),
-      ease.y
-    );
-  }
-
-  float cirrusCover (vec3 direction) {
-    if (direction.y <= 0.0)
-      return 0.0;
-
-    // Where this way meets the layer, carried by the wind aloft, and turned
-    // into its frame: along the streaks, and across them.
-    vec2 at     = direction.xz / (direction.y + 0.06) * ${HEIGHT.toFixed(1)} - uWindAloft;
-    vec2 combed = vec2(dot(at, CIRRUS_ALONG), dot(at, vec2(-CIRRUS_ALONG.y, CIRRUS_ALONG.x)));
-
-    // Long bands of it, and the bands broken across into a fish's scales.
-    float bands  = cirrusNoise(combed / vec2(${STREAK.toFixed(1)}, ${(RIPPLE * 4).toFixed(1)})) * 0.65 +
-      cirrusNoise(combed / vec2(${(STREAK * 0.45).toFixed(1)}, ${(RIPPLE * 1.7).toFixed(1)}) + 17.0) * 0.35;
-    float ripple = 0.5 + 0.5 * sin(combed.y / ${RIPPLE.toFixed(1)} * 6.2832 + cirrusNoise(combed / ${(RIPPLE * 2.5).toFixed(1)}) * 6.0);
-    float lumps  = cirrusNoise(combed / vec2(${(RIPPLE * 0.9).toFixed(1)}, ${(RIPPLE * 0.6).toFixed(1)}) + 5.0);
-    float scales = smoothstep(0.25, 0.85, ripple) * smoothstep(0.2, 0.7, lumps);
-
-    float cover = smoothstep(${(0.5 - COVER).toFixed(3)}, ${(0.78 - COVER).toFixed(3)}, bands) * mix(0.3, 1.0, scales);
-
-    // Thinned toward the horizon, where its ripples would crowd into noise,
-    // and the haze would take it anyway.
-    return cover * smoothstep(0.03, 0.22, direction.y) * ${OPACITY};
-  }
-
-  // Its colour: the low cloud's own two, lit side and shaded side, and the
-  // lit side nearer the light. High up it catches the light longer.
-  vec3 cirrusColour (vec3 direction, vec3 lit, vec3 shade, vec3 body) {
-    float toward = pow(max(dot(direction, body), 0.0), 3.0);
-
-    return mix(shade, lit, 0.7 + 0.3 * toward);
-  }
-
-  #endif
-`
+  return mix(shade, lit, toward.mul(0.3).add(0.7))
+}
 
 // perf: two value noises, and two more for the ripples, a fragment of the
 // sky and a vertex of the stars. No draw call, no triangle, no texture.

@@ -1,7 +1,7 @@
 // src/world/features/starlings/index.ts
 import * as THREE from 'three'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial } from '../../shared/lit.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { PALETTE } from '../../shared/palette.ts'
@@ -120,9 +120,7 @@ export function createStarlingsFeature (world: World): Feature {
     build ({ scene }) {
       const { ground, infield, quality } = world
       const starlings                    = createStarlings({ ground, infield }, world.seed, quality.tier)
-      const material                     = new THREE.MeshStandardMaterial({ name: 'starlings', flatShading: true, roughness: 1, metalness: 0 })
-
-      shadeUnderClouds(material, world)
+      const material                     = createLitMaterial(world, { name: 'starlings' })
 
       const wings = new THREE.InstancedMesh(createWingGeometry(), material, starlings.birds.length * 2)
 

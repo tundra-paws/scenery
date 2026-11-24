@@ -1,5 +1,9 @@
 // src/world/shared/daylight.ts
 import * as THREE from 'three'
+import { dot, exp, length, max, normalize, pow } from 'three/tsl'
+import type { Node } from 'three/webgpu'
+
+import { heldColour, heldFloat, heldVec3 } from './nodes.ts'
 
 import { HOURS } from './palette.ts'
 import type { HourName } from './palette.ts'
@@ -91,23 +95,6 @@ const HIGHEST = STOPS.length - 1
 /** Module-scope scratch, so asking the sun's height allocates nothing. */
 const scratch = new THREE.Vector3()
 
-/**
- * The glow along the horizon for a shader: `skyGlow`, the warm light left low
- * in the sky on the side the sun is on. The dome adds it to its gradient and
- * the sea fades into it, so the two still meet in one colour at the horizon.
- */
-export const SKY_GLOW_GLSL = /* glsl */ `
-  uniform vec3 uSunDirection;
-  uniform vec3 uGlow;
-
-  vec3 skyGlow (vec3 direction) {
-    vec2  ahead  = direction.xz / max(length(direction.xz), 0.0001);
-    float toward = 0.5 + 0.5 * dot(ahead, normalize(uSunDirection.xz));
-
-    return uGlow * pow(toward, 4.0) * exp(-max(direction.y, 0.0) * 5.0);
-  }
-`
-
 /** How high the land on the horizon stands toward a bearing, in degrees; -90 where there is none. */
 export type Skyline = (bearing: number) => number
 
@@ -152,6 +139,31 @@ export interface DaylightUniforms {
   uNight: { value: number }
 }
 
+/** What a node material reads of the hour: every one of `DaylightUniforms`, by its name without the `u`. */
+export interface DaylightNodes {
+  sunDirection:   Node<'vec3'>
+  bodyDirection:  Node<'vec3'>
+  lightDirection: Node<'vec3'>
+  zenith:         Node<'vec3'>
+  horizon:        Node<'vec3'>
+  sunDisc:        Node<'vec3'>
+  glow:           Node<'vec3'>
+  moonDisc:       Node<'vec3'>
+  cloudLit:       Node<'vec3'>
+  cloudShade:     Node<'vec3'>
+  seaTint:        Node<'vec3'>
+  seaSky:         Node<'vec3'>
+  seaGlint:       Node<'vec3'>
+  night:          Node<'float'>
+
+  /**
+   * The glow along the horizon: the warm light left low in the sky on the
+   * side the sun is on, toward a direction. The dome adds it to its gradient
+   * and the sea fades into it, so the two still meet in one colour.
+   */
+  skyGlow (direction: Node<'vec3'>): Node<'vec3'>
+}
+
 /**
  * The hour: where the sun is, and what that makes of the sky, the light on
  * the land and the fill in its shadows. Like the wind it is one signal that
@@ -159,6 +171,9 @@ export interface DaylightUniforms {
  */
 export interface Daylight {
   readonly uniforms: DaylightUniforms
+
+  /** The same for a node material. */
+  readonly nodes: DaylightNodes
 
   /** The one light that casts shadows: the sun, or the moon when the sun is well down. */
   readonly light: { direction: THREE.Vector3, colour: THREE.Color, intensity: number }
@@ -265,6 +280,34 @@ export function createDaylight (skyline: Skyline = () => -90): Daylight {
     uNight:          { value: 0 },
   }
 
+  const sunDirection = heldVec3(uniforms.uSunDirection)
+  const glow         = heldColour(uniforms.uGlow)
+
+  const nodes: DaylightNodes = {
+    sunDirection,
+    bodyDirection:  heldVec3(uniforms.uBodyDirection),
+    lightDirection: heldVec3(uniforms.uLightDirection),
+    zenith:         heldColour(uniforms.uZenith),
+    horizon:        heldColour(uniforms.uHorizon),
+    sunDisc:        heldColour(uniforms.uSunDisc),
+    glow,
+    moonDisc:       heldColour(uniforms.uMoonDisc),
+    cloudLit:       heldColour(uniforms.uCloudLit),
+    cloudShade:     heldColour(uniforms.uCloudShade),
+    seaTint:        heldColour(uniforms.uSeaTint),
+    seaSky:         heldColour(uniforms.uSeaSky),
+    seaGlint:       heldColour(uniforms.uSeaGlint),
+    night:          heldFloat(uniforms.uNight),
+
+    skyGlow (direction) {
+      const ahead  = direction.xz.div(max(length(direction.xz), 0.0001))
+      const toward = dot(ahead, normalize(sunDirection.xz)).mul(0.5)
+        .add(0.5)
+
+      return glow.mul(pow(toward, 4)).mul(exp(max(direction.y, 0).mul(-5)))
+    },
+  }
+
   const light = { direction: uniforms.uLightDirection.value, colour: new THREE.Color(), intensity: 0 }
   const fill  = { sky: uniforms.uSeaSky.value, ground: new THREE.Color(), intensity: 0 }
   const noon  = COLOURS[HIGHEST]!
@@ -273,6 +316,7 @@ export function createDaylight (skyline: Skyline = () => -90): Daylight {
 
   const day: Daylight = {
     uniforms,
+    nodes,
     light,
     fill,
     haze:  uniforms.uHorizon.value,

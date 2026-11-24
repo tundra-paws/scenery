@@ -75,7 +75,7 @@ export function createClouds (world: World): Feature {
       // The lit face is the light's own colour and the far side the sky's,
       // whatever the hour makes of either, so a cloud belongs to the sky it
       // is in (`shared/daylight.ts`).
-      const material = createCloudMaterial(world.wind.uniforms, world.day.uniforms)
+      const material = createCloudMaterial(world.wind.nodes, world.day.nodes)
 
       mesh      = new THREE.InstancedMesh(geometry, material, puffs)
       mesh.name = 'clouds'
@@ -111,7 +111,7 @@ export function createClouds (world: World): Feature {
 
       shadow = createCloudShadowTexture(blots, SHADOW_SIDE[world.quality.tier])
 
-      world.clouds.uniforms.uCloudShadow.value = shadow
+      world.clouds.cover(shadow)
 
       scene.add(mesh)
     },
@@ -120,7 +120,7 @@ export function createClouds (world: World): Feature {
       disposeInstances(mesh)
       shadow?.dispose()
 
-      world.clouds.uniforms.uCloudShadow.value = null
+      world.clouds.cover(null)
 
       mesh   = null
       shadow = null

@@ -1,7 +1,9 @@
 // src/world/shared/wind.test.ts
 import { describe, expect, test } from 'bun:test'
+import * as THREE from 'three'
+import { vec2 } from 'three/tsl'
 
-import { WEATHER_SPAN, WIND_GLSL, createWind } from './wind.ts'
+import { WEATHER_SPAN, createWind } from './wind.ts'
 
 
 describe('wind', () => {
@@ -79,8 +81,20 @@ describe('wind', () => {
   })
 
   test('the shader is written from the same numbers', () => {
-    expect(WIND_GLSL).toContain(`const float WEATHER_SPAN = ${WEATHER_SPAN.toFixed(1)};`)
-    expect(WIND_GLSL).toContain(`vec2(${wind.direction[0]}, ${wind.direction[1]})`)
-    expect(WIND_GLSL).toContain('0.5 * sin(dot(air, vec2(12.0, -31.0)) + 0.0)')
+    // The gust as a node material reads it: every number of the table the
+    // CPU sums is somewhere in what it is built from.
+    const seen: number[] = []
+
+    wind.nodes.gust(vec2(0, 0)).traverse(node => {
+      const { value } = node as { value?: unknown }
+
+      if (typeof value === 'number')
+        seen.push(value)
+      else if (value instanceof THREE.Vector2)
+        seen.push(value.x, value.y)
+    })
+
+    for (const number of [ 12, -31, 28, -52, 8, 5, 0.5, 0.3, 0.2, 1.3, 4.1, Math.PI * 2 / WEATHER_SPAN ])
+      expect(seen).toContain(number)
   })
 })

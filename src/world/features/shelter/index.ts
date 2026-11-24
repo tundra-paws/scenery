@@ -1,7 +1,7 @@
 // src/world/features/shelter/index.ts
 import * as THREE from 'three'
 
-import { shadeUnderClouds } from '../../shared/cloud-shadow.ts'
+import { createLitMaterial, createUnlitMaterial } from '../../shared/lit.ts'
 import { disposeInstances } from '../../shared/instances.ts'
 import { createStoneGeometry } from '../../shared/stone.ts'
 import { STEP } from '../../world.ts'
@@ -9,7 +9,7 @@ import type { Feature, World } from '../../world.ts'
 import { createBodyGeometry } from './body.ts'
 import { createLamp, createLightGeometry, lampGlow, lampReach } from './light.ts'
 import { CHIMNEY, HALF_DEEP, HALF_LONG, RIDGE } from './plan.ts'
-import { createSmoke } from './smoke.ts'
+import { createSmoke, createSmokeMaterial } from './smoke.ts'
 import type { Smoke } from './smoke.ts'
 import { layWalls } from './walls.ts'
 
@@ -54,11 +54,8 @@ export function createShelterFeature (world: World): Feature {
         return ground.heightAt(x, z) - shelter.floor
       }
 
-      const stone = new THREE.MeshStandardMaterial({ name: 'shelter-stone', flatShading: true, roughness: 1, metalness: 0 })
-      const built = new THREE.MeshStandardMaterial({ name: 'shelter-body', vertexColors: true, flatShading: true, roughness: 1, metalness: 0 })
-
-      shadeUnderClouds(stone, world)
-      shadeUnderClouds(built, world)
+      const stone = createLitMaterial(world, { name: 'shelter-stone' })
+      const built = createLitMaterial(world, { name: 'shelter-body', vertexColors: true })
 
       // A phone gets the same stones with fewer facets, as the dykes do:
       // two hundred of them, drawn for the sun's shadow and the sea's mirror
@@ -75,7 +72,7 @@ export function createShelterFeature (world: World): Feature {
       body.castShadow    = true
       body.receiveShadow = true
 
-      light      = new THREE.Mesh(createLightGeometry(), new THREE.MeshBasicMaterial({ name: 'shelter-light', vertexColors: true }))
+      light      = new THREE.Mesh(createLightGeometry(), createUnlitMaterial(world, { name: 'shelter-light', vertexColors: true }))
       light.name = 'shelter-light'
 
       lamp = createLamp()
@@ -89,14 +86,13 @@ export function createShelterFeature (world: World): Feature {
       const top = shelter.place(0, CHIMNEY.along)
 
       smoke = createSmoke({
-        tier: world.quality.tier,
-        seed: rng.fork('shelter:smoke').int(1, 1_000_000),
-        wind: world.wind,
-        from: new THREE.Vector3(top.x, shelter.floor + RIDGE + CHIMNEY.over, top.z),
-        haze: world.day.haze,
+        tier:     world.quality.tier,
+        seed:     rng.fork('shelter:smoke').int(1, 1_000_000),
+        wind:     world.wind,
+        from:     new THREE.Vector3(top.x, shelter.floor + RIDGE + CHIMNEY.over, top.z),
+        material: createSmokeMaterial(world, world.day.haze),
       })
 
-      shadeUnderClouds(smoke.mesh.material as THREE.Material, world)
       smoke.drift(0)
 
       scene.add(house, smoke.mesh)

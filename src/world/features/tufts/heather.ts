@@ -2,7 +2,7 @@
 import * as THREE from 'three'
 import type { QualityTier, SeededRng } from 'threejs-scenes'
 
-import { commitInstances } from '../../shared/instances.ts'
+import { commitInstances, tellReach } from '../../shared/instances.ts'
 import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { MOOR_FOOT } from '../../shared/moor.ts'
 import { PALETTE } from '../../shared/palette.ts'
@@ -171,6 +171,7 @@ export function plantHeather (world: World, rng: SeededRng, material: THREE.Mate
   // A few thousand knee-high bushes: the sea gives back the hill's bloom
   // from the land's own colour under them.
   keepOutOfMirror(mesh)
+  tellReach(mesh)
   commitInstances(mesh)
 
   return mesh
