@@ -124,6 +124,36 @@ describe('applyPayload', () => {
     })).toThrow('different bytes')
   })
 
+  test('a three version already on the site takes the build files it lacks, and keeps the ones it has', () => {
+    const site = tree({})
+
+    applyPayload({ payload: payload('one'), site, repo: 'o/r' })
+
+    // A world that moves to three's node renderer at the same version: the
+    // other entry and its language beside the core the site already holds.
+    const nodes = payload('two', {
+      'vendor/three@0.184.0/three.webgpu.min.js': 'webgpu',
+      'vendor/three@0.184.0/three.tsl.min.js':    'tsl',
+    })
+
+    rmSync(join(nodes, 'vendor/three@0.184.0/three.module.min.js'))
+
+    expect(applyPayload({ payload: nodes, site, repo: 'o/r' }).verdict).toBe('published')
+    expect(readFileSync(join(site, 'v/three@0.184.0/three.webgpu.min.js'), 'utf8')).toBe('webgpu')
+    expect(readFileSync(join(site, 'v/three@0.184.0/three.tsl.min.js'), 'utf8')).toBe('tsl')
+
+    // What the first iteration loads is still there, untouched.
+    expect(readFileSync(join(site, 'v/three@0.184.0/three.module.min.js'), 'utf8')).toBe('module')
+    expect(readFileSync(join(site, 'v/three@0.184.0/three.core.min.js'), 'utf8')).toBe('core')
+
+    // And a file of that version that is already there still may not change.
+    expect(() => applyPayload({
+      payload: payload('three', { 'vendor/three@0.184.0/three.webgpu.min.js': 'not the same' }),
+      site,
+      repo:    'o/r',
+    })).toThrow('different bytes')
+  })
+
   test('a payload with anything unexpected in it is refused', () => {
     const site = tree({})
 

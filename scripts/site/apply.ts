@@ -4,7 +4,7 @@
 // it installs nothing and executes nothing it is handed. It copies files.
 import { createHash } from 'node:crypto'
 import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
-import { join, relative, resolve, sep } from 'node:path'
+import { dirname, join, relative, resolve, sep } from 'node:path'
 import { parseArgs } from '../args.ts'
 
 
@@ -18,7 +18,16 @@ const RESERVED = [ 'i', 'v', 'iterations.json', 'latest.webp', '.git', '.shell-f
 
 const VENDOR_DIR   = /^three@\d+\.\d+\.\d+$/u
 
-const VENDOR_FILES = [ 'three.module.min.js', 'three.core.min.js', 'three.module.js', 'three.core.js' ]
+/**
+ * three's own build files: the core, the WebGL renderer over it, and the
+ * renderer that draws node materials with the language they are written in.
+ * The same list as the gate's contract (`scripts/gate/contract.ts`), which
+ * has already checked each against npm's bytes.
+ */
+const VENDOR_FILES = [
+  'three.module.min.js', 'three.core.min.js', 'three.module.js', 'three.core.js',
+  'three.webgpu.min.js', 'three.tsl.min.js', 'three.webgpu.js', 'three.tsl.js',
+]
 
 /** The shell's file list from the last publish, so files it no longer ships get removed. */
 const SHELL_LIST = '.shell-files'
@@ -195,21 +204,31 @@ function inspect (payload: string): Meta {
   return JSON.parse(readFileSync(join(payload, 'meta.json'), 'utf8')) as Meta
 }
 
-/** Add any three version the site does not hold yet. One already there must be the same bytes. */
+/**
+ * Add what the site does not hold yet of three: a version it has never had,
+ * or a build file of a version it has (a world that moves from one of three's
+ * renderers to the other at the same version needs the other's files beside
+ * the first's). A file already there must be the same bytes: nothing that was
+ * published is ever changed, and nothing is removed, so every older iteration
+ * still finds what it loaded the day it was made.
+ */
 function mergeVendor (payload: string, site: string): void {
   for (const dir of readdirSync(join(payload, 'vendor'))) {
     const from = join(payload, 'vendor', dir)
     const to   = join(site, 'v', dir)
 
-    if (!existsSync(to)) {
-      mkdirSync(join(site, 'v'), { recursive: true })
-      cpSync(from, to, { recursive: true })
-      continue
-    }
+    mkdirSync(to, { recursive: true })
 
-    for (const file of listFiles(from))
-      if (!existsSync(join(to, file)) || digest(join(to, file)) !== digest(join(from, file)))
+    for (const file of listFiles(from)) {
+      if (!existsSync(join(to, file))) {
+        mkdirSync(dirname(join(to, file)), { recursive: true })
+        cpSync(join(from, file), join(to, file))
+        continue
+      }
+
+      if (digest(join(to, file)) !== digest(join(from, file)))
         throw new Error(`v/${dir}/${file} is already on the site with different bytes: published files never change`)
+    }
   }
 }
 
