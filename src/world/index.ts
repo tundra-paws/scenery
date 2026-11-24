@@ -8,6 +8,7 @@ import { createFlockFeature } from './features/flock/index.ts'
 import { createInfieldFeature } from './features/infield/index.ts'
 import { createRocks } from './features/rocks/index.ts'
 import { createShelterFeature } from './features/shelter/index.ts'
+import { createSkerryFeature } from './features/skerry/index.ts'
 import { createStarlingsFeature } from './features/starlings/index.ts'
 import { createTerrain } from './features/terrain/index.ts'
 import { createTufts } from './features/tufts/index.ts'
@@ -44,6 +45,7 @@ export function createFeatures (world: World): Feature[] {
     createWoodFeature(world),
     createFlockFeature(world),
     createBoat(world),
+    createSkerryFeature(world),
     createStarlingsFeature(world),
     createWater(world),
   ]

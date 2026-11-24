@@ -15,7 +15,8 @@ import type { Ground } from './shared/ground.ts'
  * the way up and out to sea; over the summit, and out over the water until
  * the whole island is in the frame; then round it: the western beach, the
  * northern cove, the ridge, across the heather to the cairn on its hill,
- * the eastern shore, in to the edge of the wood where the stumps and the
+ * the eastern shore, down onto the water off the skerry, looking over the
+ * seals on it to the house, in to the edge of the wood where the stumps and the
  * stacked logs are, close under the shelter with
  * the cairn over it, back down to the water beside the boat at its anchor,
  * off the beach below the field, looking up its rigs to the gate and the
@@ -43,6 +44,9 @@ import type { Ground } from './shared/ground.ts'
  * `landing` the same way, on the one leg it splits, and `moor` between
  * `ridge` and `east`. `flock` was given time of its own: the day grew by
  * its stop and its leg, and kept second ten. So was `starlings`, after it.
+ * `skerry` stands between `east` and `wood` on time taken from five legs of
+ * the afternoon (`east`, `wood`, `shelter`, `boat`, `starlings`), so the day
+ * is the length it was and no stop before it has moved from its hour.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },
@@ -56,13 +60,14 @@ export const VIEWS: readonly View[] = [
   { name: 'cove', at: [ -38, -104 ], height: 4.5, look: [ 4, -12 ], lookHeight: 9 },
   { name: 'ridge', at: [ 8, -34 ], height: 13, look: [ 58, 62 ], lookHeight: 3, travel: 5 },
   { name: 'moor', at: [ 66, 0 ], height: 3, look: [ 30, 58 ], lookHeight: 8, travel: 5 },
-  { name: 'east', at: [ 112, 52 ], height: 9, look: [ 18, 50 ], lookHeight: 8, travel: 8 },
-  { name: 'wood', at: [ 74, 66 ], height: 3.2, look: [ 59, 50 ], lookHeight: 3, travel: 7 },
-  { name: 'shelter', at: [ 64, 73 ], height: 7, look: [ 50, 58 ], lookHeight: 4, travel: 10 },
-  { name: 'boat', at: [ 75, 92 ], height: 2.4, look: [ 48, 86.5 ], lookHeight: 6, travel: 5 },
+  { name: 'east', at: [ 112, 52 ], height: 9, look: [ 18, 50 ], lookHeight: 8, travel: 5 },
+  { name: 'skerry', at: [ 83, 84 ], height: 2.6, look: [ 64, 70.5 ], lookHeight: 2.2, travel: 5 },
+  { name: 'wood', at: [ 74, 66 ], height: 3.2, look: [ 59, 50 ], lookHeight: 3, travel: 5 },
+  { name: 'shelter', at: [ 64, 73 ], height: 7, look: [ 50, 58 ], lookHeight: 4, travel: 7 },
+  { name: 'boat', at: [ 75, 92 ], height: 2.4, look: [ 48, 86.5 ], lookHeight: 6, travel: 4 },
   { name: 'infield', at: [ 70, 87 ], height: 4, look: [ 53, 69 ], lookHeight: 4, travel: 5 },
   { name: 'flock', at: [ 27, 99 ], height: 3, look: [ 17, 72 ], lookHeight: 3.5, travel: 4 },
-  { name: 'starlings', at: [ 40, 112 ], height: 2.5, look: [ -11, 62 ], lookHeight: 22, travel: 6 },
+  { name: 'starlings', at: [ 40, 112 ], height: 2.5, look: [ -11, 62 ], lookHeight: 22, travel: 5 },
 ]
 
 /**

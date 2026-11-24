@@ -22,6 +22,8 @@ import { createPath, findSummit } from './shared/path.ts'
 import type { Path, Waypoint } from './shared/path.ts'
 import { createShelter } from './shared/shelter.ts'
 import type { Shelter } from './shared/shelter.ts'
+import { createSkerry } from './shared/skerry.ts'
+import type { Skerry } from './shared/skerry.ts'
 import { createWash } from './shared/wash.ts'
 import type { Wash } from './shared/wash.ts'
 import { createWind } from './shared/wind.ts'
@@ -67,7 +69,8 @@ export type Feature = AppModule<WorldState>
  * worked from it. And for what grows on it: the wood beside the shelter,
  * and the heather on the hill.
  * And for what stands in the sea, which the sea breaks round, and what lies
- * loose on the land, which the flock grazes round.
+ * loose on the land, which the flock grazes round. And for the reef off
+ * the east shore, its mark and its seals.
  */
 export interface World {
   seed:    number
@@ -94,6 +97,9 @@ export interface World {
 
   /** The heather on the hill above the worked ground, for the land's colour and the clumps on it. */
   moor: Moor
+
+  /** The reef off the east shore, the mark on it and the seals hauled out there. */
+  skerry: Skerry
 
   /** What stands in the sea and what floats on it, for the sea to break round. Filled in as the features are built. */
   wash: Wash
@@ -129,6 +135,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     infield: createInfield(shelter),
     wood:    createWood({ ground, summit, path, shelter }, seed),
     moor:    createMoor(ground, seed),
+    skerry:  createSkerry(ground, seed, quality.tier),
     wash:    createWash(),
     clutter: createClutter(),
   }
