@@ -14,10 +14,11 @@ import type { Ground } from './shared/ground.ts'
  * water until the whole island is in the frame; then round it: the summit, the
  * western beach, the northern cove, the ridge, the eastern shore, where the
  * island stands against the sun, and last in close under the shelter, with
- * its lamp lit and the cairn over it. The tour lifts itself over the land between two
- * views, but it looks best when neighbours in this list are neighbours on the
- * island too, and when no leg has to turn the camera right round: a view
- * looking east followed by one looking west wants a third between them.
+ * its lamp lit and the cairn over it. The tour lifts itself over the land
+ * between two views, but it looks best when neighbours in this list are
+ * neighbours on the island too, and when no leg has to turn the camera right
+ * round: a view looking east followed by one looking west wants a third
+ * between them.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12 },

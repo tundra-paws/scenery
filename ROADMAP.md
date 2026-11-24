@@ -7,15 +7,16 @@ this short: a plan nobody can read in a minute is not a plan.
 
 Each item is one day: a whole chapter, built complete (both tiers, a postcard, the tour).
 
-1. **A shelter and a light.** The first built things: low walls of placed stone and a roof, a
-   lamp that shows as the light goes. The palette's one warm note is reserved for it. Smoke or
-   a rag on a pole would be the first thing to read the wind on the CPU (`wind.gustAt`). Put
-   it on the way up (`world.path.at(distance)`): the shoulder at the first hairpin, 24 units
-   up, is in the `hero` frame and the walk passes it.
-2. **A boat at the landing.** The slip has two rows of stones and nothing between them. A small
-   boat drawn up there, or riding off it, says someone came. It needs a colour with a job.
-3. **Beyond.** A second landmass on the horizon, and the light turning toward evening over the
-   tour.
+1. **A boat at the landing.** The slip has two rows of stones and nothing between them. A small
+   boat drawn up there, or riding off it, says how whoever lit the lamp came. It needs a colour
+   with a job. A pennant on it could read the wind the way the smoke does (`shelter/smoke.ts`).
+2. **Evening.** The light turning over the tour, which the lamp and the window are waiting for:
+   by day they are two orange points. `SUN` is one constant that the light, the sky, the sea's
+   glint and the clouds' shadow all read, and the shadow's slant is written into GLSL as a
+   number (`cloud-shadow.ts`): moving the sun means making that a uniform first.
+3. **Beyond.** A second landmass on the horizon.
+4. **Inside.** The shelter is a shell. A floor, a hearth with the fire in it, a bench, and a rig
+   that knows a wall from a door, for the visitor who walks in.
 
 ## Known problems
 
@@ -39,11 +40,20 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - The path follows the land, but two views do not follow the path: `landing` and `climb` are
   typed in at its foot and 68 units up it. Reshape the land or move `LANDING_BEARING`
   (`shared/path.ts`) and they must be moved too; the tour test says when the walk has left it.
+- The shelter has no inside and the walk knows only `ground`: an exploring visitor can walk
+  through its walls and sees the stones from behind. Its lamp casts no shadow, so a little of
+  its light reaches the grass behind the gable.
+- The shelter's site (`shared/shelter.ts`) and the `shelter` postcard are typed in. The floor,
+  the facing and the way to the door are read from the land and the path, and the land is not
+  benched for it: the walls simply start where the hill is. Reshape the land and look again.
+- The smoke is opaque puffs that shade nothing. From `hero` at second ten the top of the plume
+  stands against a cloud of the same colours.
 - The clouds' shadow and the sun's shadow map do not know about each other: a boulder's own
   shadow is as dark under a cloud as in the open.
 - `HEAD_START` in `shared/wind.ts` was picked by looking at second ten of this layout of
   clouds. Changing their count, their layout, the wind's speed or its heading moves every
   shadow, and the `hero` thumbnail with it: pick it again. Today the lower path lies under one.
+  The same clock decides the gusts the smoke at second ten left the chimney in, and so its bend.
 
 ## Ideas
 
@@ -55,3 +65,6 @@ Parts for a chapter, never a day by themselves.
 - Flat stones set as steps into the steepest stretch of the path.
 - A high, thin layer of cloud on the dome itself, combed by the wind, for evenings.
 - Whitecaps far out where a gust crosses deep water; today a gust only darkens it.
+- A low wall running off from the shelter's gable, or a fold beside it: `shelter/walls.ts` lays
+  any course from a line and the land under it.
+- A stack of cut turf or driftwood by the door, which would want a colour for wood.

@@ -55,8 +55,8 @@ function solid (geometry: THREE.BufferGeometry, colour: THREE.Color, place: (geo
  * the shelter's own frame: the dark of the doorway, the lamp hung in it, and
  * the window with the fire behind it.
  *
- * Unlit, because none of it is a surface the sun describes. The lamp's colour
- * is the palette's one warm note at its strongest.
+ * Unlit, because none of it is a surface the sun describes. The colour is the
+ * palette's `lamp`, the amber of a flame, and nothing else in the world has it.
  */
 export function createLightGeometry (): THREE.BufferGeometry {
   const wide  = WINDOW.to - WINDOW.from
