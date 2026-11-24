@@ -24,8 +24,8 @@ import type { Wood } from './wood.ts'
  * from the land, the walls, the path, the trees and the boulders.
  */
 export const HEFTS: readonly Heft[] = [
-  { name: 'brae', x: 21, z: 72, reach: 11, count: { mobile: 9, desktop: 16, highEnd: 20 }},
-  { name: 'inbye', x: 24, z: 88, reach: 10, count: { mobile: 7, desktop: 12, highEnd: 14 }},
+  { name: 'brae', x: 21, z: 72, reach: 12, count: { mobile: 11, desktop: 20, highEnd: 24 }},
+  { name: 'inbye', x: 22, z: 88, reach: 11, count: { mobile: 9, desktop: 16, highEnd: 18 }},
   { name: 'dooryard', x: 64.5, z: 64.5, reach: 3.6, count: { mobile: 3, desktop: 4, highEnd: 4 }},
   { name: 'fold', x: 0, z: 0, reach: 0, count: { mobile: 3, desktop: 4, highEnd: 4 }, penned: true },
   { name: 'north', x: -20, z: -82, reach: 13, count: { mobile: 5, desktop: 9, highEnd: 12 }},

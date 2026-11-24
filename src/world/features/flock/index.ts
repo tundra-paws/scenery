@@ -178,7 +178,7 @@ export function createFlockFeature (world: World): Feature {
 
       herd = {
         flock,
-        fleece: herdMesh(world, 'fleece', createFleeceGeometry(seed, quality.tier === 'mobile' ? 0 : 1), count, true),
+        fleece: herdMesh(world, 'fleece', createFleeceGeometry(seed, quality.tier === 'mobile' ? 1 : 0), count, true),
         heads:  herdMesh(world, 'sheep-heads', createHeadGeometry(), count, true),
         legs:   herdMesh(world, 'sheep-legs', createLegGeometry(), count * 4, false),
       }
@@ -207,7 +207,8 @@ export function createFlockFeature (world: World): Feature {
 }
 
 // perf: cheap — three draw calls, two shadow passes and three more in the
-// sea's reflection (none there on a phone): some 60 sheep at 80 + 44 + 4 × 8
-// triangles, 9k all told on desktop. A step is the sun's height once, and for
+// sea's reflection (none there on a phone): some 70 sheep on desktop and 40
+// on a phone, at 36 + 44 + 4 × 8 triangles (20 for a phone's fleece): 8k a
+// pass, 22k all told on desktop. A step is the sun's height once, and for
 // each sheep a short walk round her places, three ground samples and six
 // matrices.

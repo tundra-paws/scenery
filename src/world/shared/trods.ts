@@ -9,7 +9,7 @@ import type { Shelter } from './shelter.ts'
 
 
 /** Trods looked for on each heft, and the tries for where one starts. */
-const COUNT = 6
+const COUNT = 8
 const TRIES = 30
 
 /** The least reach of a heft that has trods: a hill, not a yard. */

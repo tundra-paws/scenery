@@ -21,11 +21,13 @@ const HEAD_LONG   = 0.56
 export const SINK = 0.38
 
 /**
- * The fleece: a stone's icosahedron, stretched long and pushed into lumps,
- * so the faceting reads as wool. Eighty triangles; twenty at `detail` 0.
+ * The fleece: a woolsack, a ball of six sides and four rings laid along the
+ * sheep and stretched long, its back flattened and its rump fuller, pushed
+ * into lumps so the facets read as wool. Thirty-six triangles; twenty at
+ * `detail` 1, with a side and a ring fewer.
  */
 export function createFleeceGeometry (seed: number, detail: number): THREE.BufferGeometry {
-  const geometry = new THREE.IcosahedronGeometry(0.5, detail)
+  const geometry = new THREE.SphereGeometry(0.5, 6 - detail, 4 - detail).rotateZ(Math.PI / 2)
   const noise    = createNoise3D(seed)
   const position = geometry.getAttribute('position')
 
@@ -104,4 +106,4 @@ export function createLegGeometry (): THREE.BufferGeometry {
 }
 
 // perf: cheap, once — three small geometries, shared by every sheep:
-// a fleece of 80 triangles (20 on a phone), a head of 44, a leg of 8.
+// a fleece of 36 triangles (20 on a phone), a head of 44, a leg of 8.

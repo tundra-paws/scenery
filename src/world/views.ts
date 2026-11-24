@@ -17,8 +17,9 @@ import type { Ground } from './shared/ground.ts'
  * northern cove, the ridge, the eastern shore, in to the edge of the wood
  * where the stumps and the stacked logs are, close under the shelter with
  * the cairn over it, back down to the water beside the boat at its anchor,
- * and last off the beach below the field, looking up its rigs to the gate
- * and the house, each stop a little further out until `hero` again.
+ * off the beach below the field, looking up its rigs to the gate and the
+ * house, and last along the shore to the inbye, low among the sheep, looking
+ * up over the head-dyke to the brae and the cairn, until `hero` again.
  *
  * The loop is also a day (`shared/daylight.ts`), so the order is the hours
  * too. `hero` is the last of the afternoon, the landing is sunset, the walk
@@ -37,7 +38,8 @@ import type { Ground } from './shared/ground.ts'
  * on time taken from the three legs round it, and `infield` between `boat`
  * and `hero` on the one leg it splits, so the day is the length it was and
  * every stop before them keeps its hour. `mirror` stands between `hero` and
- * `landing` the same way, on the one leg it splits.
+ * `landing` the same way, on the one leg it splits. `flock` was given time
+ * of its own: the day grew by its stop and its leg, and kept second ten.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },
