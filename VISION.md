@@ -32,8 +32,9 @@ thrashes. Calm, a little lonely, never bleak.
 **Palette.** A handful, all in `src/world/shared/palette.ts`. Cool sky blues and a pale horizon
 for distance. Moss and dry-straw greens for the living ground. Warm sand at the edge. Grey stone:
 darker for what lies where it fell (`rock`), paler for what a hand has placed (`cairn`). One cold
-white (`foam`), only where the sea runs out on the land. One warm note, the sun's cream, reserved
-for light itself. Clouds have no colour of their own: the sun's cream where they are lit, the
+white (`foam`), only where the sea runs out on the land. Bare earth (`path`), sand's duller kin,
+only where feet have worn the grass away. One warm note, the sun's cream, reserved for light
+itself. Clouds have no colour of their own: the sun's cream where they are lit, the
 sky's blues where they are not. A new colour needs a job none of these does.
 
 **Motifs.**
@@ -48,11 +49,11 @@ ruins of anything grand, no magic glow. Not busy: every added thing must leave t
 quiet as it found it. Not photoreal: no texture maps chasing realism.
 
 **The chapters ahead.** Each is one day's major update, not a week's. Done: the summit cairn, a
-shoreline that reads as one, water with depth, and wind: in the grass, on the sea, and in a sky
-of clouds whose shadows cross the island. Next: a landing on the shore and a worn path from it
-to the cairn, with small waymarkers and the tour following it. Then a shelter and a light, the
-first built things. Then a second landmass on the horizon and the light turning toward evening
-over the tour.
+shoreline that reads as one, water with depth, wind (in the grass, on the sea, and in a sky of
+clouds whose shadows cross the island), and the way up: a landing on the near shore and a worn
+path from it to the cairn, waymarked, which the tour walks. Next: a shelter and a light, the
+first built things, somewhere on that path. Then a boat at the landing, a second landmass on
+the horizon, and the light turning toward evening over the tour.
 
 ## Where it starts
 
