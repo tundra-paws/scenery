@@ -33,6 +33,7 @@ const prev          = pick('#prev', HTMLButtonElement)
 const next          = pick('#next', HTMLButtonElement)
 const strip         = pick('#strip', HTMLOListElement)
 const status        = pick('#status', HTMLOutputElement)
+const bar           = pick('main > progress', HTMLProgressElement)
 
 /** @type {Iteration[]} */
 let items = []
@@ -53,10 +54,26 @@ function current () {
   return items[index]
 }
 
+/**
+ * Where the first picture is on its way to the screen. The stylesheet draws the
+ * bar from this alone: `gallery` is set by the page's head, before this module.
+ *
+ * @param {'world' | 'done' | null} stage  null when there is nothing to wait for
+ */
+function setLoading (stage) {
+  if (stage)
+    document.documentElement.dataset.loading = stage
+  else
+    delete document.documentElement.dataset.loading
+}
+
 /** @param {Verdict} verdict */
 function onVerdict (verdict) {
-  if (verdict === 'ready')
+  if (verdict === 'ready') {
+    setLoading('done')
     return hideFallback()
+  }
+  setLoading(null)
   showFallback(verdict)
 }
 
@@ -128,6 +145,15 @@ function loadFrame (iteration, { fresh = false } = {}) {
   const url = new URL(iteration.dir, document.baseURI).href
   hideFallback()
   frame.title = `Scenery iteration ${iteration.id}: ${iteration.title}`
+
+  // The first world carries the bar on from where the gallery's stretch left
+  // it. Any later one starts it again from nothing: cleared, then measured so
+  // the browser has seen it empty before it is asked to grow.
+  if (document.documentElement.dataset.loading !== 'gallery') {
+    setLoading(null)
+    bar.getBoundingClientRect()
+  }
+  setLoading('world')
   navigateFrame(url, fresh)
   watcher.start(url)
 }
@@ -312,6 +338,7 @@ function showNotice (title, message) {
   pick('p', HTMLParagraphElement, notice).textContent = message
   notice.hidden                                       = false
   panel.hidden                                        = true
+  setLoading(null)
 }
 
 async function start () {
