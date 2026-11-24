@@ -24,7 +24,9 @@ The curator works within these and does not rewrite this section.
 **What this place is.** A small northern island that someone walked before you. Nobody is ever
 seen on it, only what they left: stones stacked on the summit, later a path, a shelter, a light.
 A stranger should know it as "the island with the cairn", and now there is a house under it
-with the lamp lit and the fire in, a boat at anchor off the landing, and still nobody.
+with the lamp lit and the fire in, a boat at anchor off the landing, and still nobody. It lies
+off a mountain coast: a high fell and a long range in the haze to the north-west, which nobody
+goes to, and which the sun goes down behind.
 
 **Mood and light.** One summer's day in the north, turning once in the time the tour takes, so
 every stop has its hour. The visit opens on the last of a clear, cool afternoon: a low sun over
@@ -60,6 +62,8 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
   keeps a colour of the sky for itself. Sun and moon are one light that is out as it changes
   hands; the lamp is the only light that is somebody's.
 - *The line between.* Shore, ridge and horizon: edges are where the detail goes.
+- *Distance.* What is far is seen through air: fainter, bluer, and fading into the sky's own
+  colour on that side, glow and all. Layers (stacks, headland, range) say how far.
 - *Low-poly, flat-shaded, few colours.* Facets are the style, not a shortcut to hide.
 
 **What it is not.** Not a game: no score, no quest, no characters. Not tropical, not fantasy, no
@@ -70,9 +74,9 @@ quiet as it found it. Not photoreal: no texture maps chasing realism.
 shoreline that reads as one, water with depth, wind (in the grass, on the sea, and in a sky of
 clouds whose shadows cross the island), the way up (a landing, a worn and waymarked path to the
 cairn, which the tour walks), the shelter with its lamp, its fire and its smoke, the boat at
-anchor off the landing, and the day itself: evening, night with a moon and stars, and morning,
-once round in a visit. Next: a second landmass on the horizon, for the sun to go down behind;
-the inside of the shelter; and a sea that answers to what stands in it.
+anchor off the landing, the day itself (evening, night with a moon and stars, and morning,
+once round in a visit), and the land beyond, which the sun goes down behind. Next: the inside
+of the shelter, and a sea that answers to what stands in it.
 
 ## Where it starts
 

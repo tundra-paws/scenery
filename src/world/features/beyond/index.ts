@@ -108,6 +108,6 @@ export function createBeyond (world: World): Feature {
 }
 
 // perf: cheap — one draw call, no shadow pass (it neither casts nor takes
-// one: it is far outside the light's frustum). About 12k triangles on desktop,
-// 5k on mobile. The haze is a length, two exponentials and the sky's glow a
+// one: it is far outside the light's frustum). 9k triangles on desktop, 3k on
+// mobile, 16k on highEnd. The haze is a length, two exponentials and the sky's glow a
 // fragment, and the land is a thin band of the screen. Nothing per frame.

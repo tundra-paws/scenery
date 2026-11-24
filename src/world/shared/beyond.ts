@@ -12,18 +12,19 @@ import { PALETTE } from './palette.ts'
  * island and distances from its middle. A bearing is an angle on the ground
  * from -z toward +x, the way `NORTH` in `shared/daylight.ts` is measured.
  *
- * `mainland` is a long mountain coast across the north-west, where `hero`
- * looks and the summer sun goes down: from the first view it stands to the
- * left of the cairn with the low sun just over it, and the sun sets behind
- * its peaks rather than into the sea. `holm` is a lower island to the north,
- * for the summit's view and the morning. `stacks` are a few rocks off the
- * mainland's southern end, nearer and so a little clearer, that say how far
- * away the rest is.
+ * `mainland` is a long mountain coast across the north-west, where the
+ * summer sun goes down behind its peaks rather than into the sea. `headland`
+ * is a high fell nearer in at its southern end: from `hero` it stands on the
+ * left of the frame with the low sun just clear of its shoulder (a test holds
+ * that). `holm` is a lower island to the north, for the summit's view, and
+ * `stacks` a few rocks off the headland, nearer and so clearer, that say how
+ * far away the rest is.
  */
 export const REACHES: readonly Reach[] = [
-  { name: 'mainland', from: -124, to: -38, near: 540, far: 1000, height: 182, peak: -96, grain: 0.0045, seed: 1 },
-  { name: 'holm', from: -16, to: 22, near: 900, far: 1180, height: 52, peak: 2, grain: 0.009, seed: 2 },
-  { name: 'stacks', from: -106, to: -92, near: 300, far: 360, height: 40, peak: -99, grain: 0.05, seed: 3 },
+  { name: 'mainland', from: -124, to: -38, near: 540, far: 1000, height: 182, peak: -96, breadth: 0.42, grain: 0.0045, seed: 1 },
+  { name: 'headland', from: -120, to: -78, near: 360, far: 620, height: 240, peak: -96, breadth: 1, grain: 0.0042, seed: 4 },
+  { name: 'holm', from: -16, to: 22, near: 900, far: 1180, height: 52, peak: 2, breadth: 0.42, grain: 0.009, seed: 2 },
+  { name: 'stacks', from: -106, to: -92, near: 300, far: 360, height: 40, peak: -99, breadth: 0.42, grain: 0.05, seed: 3 },
 ]
 
 /** Grid cells along and across each reach, by tier: about six units a cell along on desktop. */
@@ -37,6 +38,9 @@ const SHELF = 0.22
 /** The skyline is measured every this many degrees of bearing, and this many units out along each. */
 const SKYLINE_STEP  = 0.5
 const SKYLINE_REACH = 4
+
+/** How far an end of a reach runs out into the sea, in multiples of its height. */
+const TAPER = 1.4
 
 /** Cells whose every corner is this far under the water are left out: the sea is opaque out there. */
 const SUNK = -3
@@ -64,8 +68,9 @@ export interface Reach {
   /** Its tallest ground, above the water. */
   height: number
 
-  /** The bearing its highest ground stands at. */
-  peak: number
+  /** The bearing its highest ground stands at, and how much of its length that high ground spreads over. */
+  peak:    number
+  breadth: number
 
   /** How fine its hills are: noise cycles a world unit. */
   grain: number
@@ -106,10 +111,14 @@ export function landHeight ({ reach, noise }: Land, bearing: number, distance: n
     return -reach.height * SHELF
 
   // World units along the arc and across it, so the noise is round.
-  const arc  = THREE.MathUtils.degToRad(bearing) * (reach.near + reach.far) / 2
-  const ends = smoothstep(0, 0.14, along) * (1 - smoothstep(0.86, 1, along))
-  const side = Math.pow(Math.sin(Math.PI * across), 0.7) * (1 - 0.35 * across)
-  const peak = Math.exp(-(((bearing - reach.peak) / ((reach.to - reach.from) * 0.42)) ** 2))
+  // The ends go down into the sea over a reach that grows with the height,
+  // so that a tall headland ends in a shoulder and not a wall.
+  const middle = (reach.near + reach.far) / 2
+  const arc    = THREE.MathUtils.degToRad(bearing) * middle
+  const taper  = Math.min(0.45, reach.height * TAPER / (THREE.MathUtils.degToRad(reach.to - reach.from) * middle))
+  const ends   = smoothstep(0, taper, along) * (1 - smoothstep(1 - taper, 1, along))
+  const side   = Math.pow(Math.sin(Math.PI * across), 0.7) * (1 - 0.35 * across)
+  const peak   = Math.exp(-(((bearing - reach.peak) / ((reach.to - reach.from) * reach.breadth)) ** 2))
 
   const crest = noise.ridged(arc * reach.grain, distance * reach.grain, 3, 2, 0.4)
   const hills = noise.fbm(arc * reach.grain * 2.3 + 11, distance * reach.grain * 2.3, 3)
@@ -223,5 +232,7 @@ export function createBeyondGeometry (lands: readonly Land[], tier: QualityTier)
   return geometry
 }
 
-// perf: built once. About 2.4k grid corners and 4k triangles a reach on
-// desktop, half that on mobile: the cells under the sea are left out.
+// perf: built once, at boot. 3k triangles on mobile, 9k on desktop, 16k on
+// highEnd for all four reaches; the cells under the sea are left out. The
+// skyline is a table of a few hundred bearings, marched once; asking it is a
+// lookup and a lerp, once a step.

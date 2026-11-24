@@ -7,15 +7,13 @@ this short: a plan nobody can read in a minute is not a plan.
 
 Each item is one day: a whole chapter, built complete (both tiers, a postcard, the tour).
 
-1. **Beyond.** A second landmass on the horizon, to the north-west where `hero` looks, for the
-   sun to go down behind. The haze and the sea's far glow (`skyGlow`) are there to sit it in.
-2. **Inside.** The shelter is a shell. A floor, a hearth with the fire in it, a bench, and a rig
+1. **Inside.** The shelter is a shell. A floor, a hearth with the fire in it, a bench, and a rig
    that knows a wall from a door, for the visitor who walks in.
-3. **The sea answers.** The sea takes nothing from what stands in it: no shadow under the boat,
+2. **The sea answers.** The sea takes nothing from what stands in it: no shadow under the boat,
    no foam at its waterline or round the landing's stones, no wake when it sheers. The water is
    a shader of its own with one height map of the land (`water/index.ts`); a second small map
-   of what floats and stands in it would give all three.
-4. **A night worth staying up for.** The night is a moon, stars and one lamp. A lantern at the
+   of what floats and stands in it would give all three. The land beyond has no surf either.
+3. **A night worth staying up for.** The night is a moon, stars and one lamp. A lantern at the
    boat's masthead, the window's light falling on the grass, and something in the sky that
    moves: thin high cloud combed by the wind, or a meteor now and then.
 
@@ -90,17 +88,27 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - At the handover (sun seven degrees down) nothing casts a shadow for a few seconds and the
   land is lit by the sky alone. The light on the land never comes from lower than seven
   degrees (`LOWEST`), so at sunset the shadows are shorter than the sun says.
-- The haze on the land is one colour, the horizon's. Only the sea fades into the glow on the
-  sun's side, so a far headland in front of a sunset greys where it should warm.
+- The haze on the island is one colour, the horizon's. The sea and the land beyond fade into
+  the glow on the sun's side (`features/beyond` does it by hand); the island's own far slopes
+  still grey toward a sunset. Doing it for every built-in material is one `fog_fragment`.
 - The lamp's light grows at night (`DARK_GAIN`) because the picture is exposed for the dark,
   not because the flame does. The window still lights nothing but itself.
 - Stars are points of a fixed size in pixels; on a very dense screen they are small.
+
+- **The land beyond is typed in to fit `hero`** (`REACHES` in `shared/beyond.ts`). The
+  headland's shoulder stops just short of the sun at second ten, and a test fails when it does
+  not. Move the sun's place at second ten (`OPENING`, `NORTH`) or `hero`, and retune it by
+  printing the skyline from `hero` bearing by bearing, as the test does.
+- The skyline the sun goes behind is measured from the island's middle. From the far side of
+  the island the sun disappears a little before or after its light goes.
+- The sun goes behind the land some eight seconds before it reaches the sea, and from then
+  until the moon takes over (`HANDOVER`) the island has no direct light. The sky's colours
+  still go by the sun's height alone.
 
 ## Ideas
 
 Parts for a chapter, never a day by themselves.
 
-- Re-aim the `shore` postcard along the waterline: it shows a sliver of sea in one corner.
 - Wet sand: a darker band just above the waterline, from the same height map.
 - Fainter tracks contouring the hills, from a second channel of the path's texture (`wear.ts`).
 - Flat stones set as steps into the steepest stretch of the path.
