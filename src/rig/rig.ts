@@ -6,9 +6,9 @@ import type { Pose } from '../world/views.ts'
 import { STEP } from '../world/world.ts'
 import type { Feature, World } from '../world/world.ts'
 import { attachInput, clearInput, createInput } from './input.ts'
+import { createWorldTour } from './route.ts'
 import { createRigState, stepRig } from './step.ts'
 import type { RigEnv, RigMode } from './step.ts'
-import { TOUR_CLEARANCE, createTour } from './tour.ts'
 
 
 /** Where the camera is, in the form a test or a capture tool can compare. */
@@ -54,8 +54,7 @@ interface RigOptions {
  */
 export function createRig ({ world, canvas, stick = null, interactive, onMove }: RigOptions): Rig {
   const { ground }  = world
-  const surface     = (x: number, z: number): number => Math.max(ground.heightAt(x, z), ground.waterLevel)
-  const tour        = createTour(VIEWS.map(view => resolveView(view, ground)), { floor: { surface, clearance: TOUR_CLEARANCE }})
+  const tour        = createWorldTour(ground, world.path)
   const state       = createRigState()
   const input       = createInput()
   const env: RigEnv = { tour, ground, explore: false }

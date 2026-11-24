@@ -1,5 +1,7 @@
 // src/rig/tour.ts
 import type { Pose } from '../world/views.ts'
+import { createWalk, walkAt } from './walk.ts'
+import type { Walk, WalkOptions } from './walk.ts'
 
 
 /** Air the world's tour keeps under the camera on its way from one view to the next. */
@@ -16,6 +18,9 @@ const SAMPLES = 64
  * camera's arc has reached this fraction of its height.
  */
 const EASE_IN = 0.3
+
+/** The part of a walk, at each end, in which the eyes leave the view it began at, and find the one it ends at. */
+const SETTLE = 0.14
 
 /**
  * The cinematic camera path: a closed loop through the postcard views.
@@ -38,6 +43,12 @@ export interface Tour {
    * to the next goes over whatever lies between them and not through it.
    */
   rise: readonly number[]
+
+  /** The legs taken on foot, by the view they leave. The others fly. */
+  walks: readonly (Walk | null)[]
+
+  /** When each leg begins, in seconds into the loop, and after the last of them the length of the loop. */
+  starts: readonly number[]
 }
 
 /** What the camera must stay above on its way between views. */
@@ -56,6 +67,9 @@ interface TourOptions {
 
   /** Without one the camera goes straight from view to view, whatever is in the way. */
   floor?: Floor
+
+  /** A walk for each leg that has one, by the index of the view it leaves. */
+  walks?: readonly (WalkOptions | null)[]
 }
 
 /** Catmull-Rom through `b` and `c`, shaped by their neighbours. */
@@ -110,16 +124,37 @@ function riseOver (poses: readonly Pose[], index: number, floor: Floor): number 
   return rise
 }
 
-export function createTour (poses: readonly Pose[], { dwell = 5, travel = 15, floor }: TourOptions = {}): Tour {
+export function createTour (poses: readonly Pose[], { dwell = 5, travel = 15, floor, walks = []}: TourOptions = {}): Tour {
   if (poses.length === 0)
     throw new Error('a tour needs at least one view')
 
-  return { poses, dwell, travel, rise: poses.map((_, index) => floor ? riseOver(poses, index, floor) : 0) }
+  const afoot = poses.map((from, index) => {
+    const walk = walks[index]
+    const to   = poses[(index + 1) % poses.length]!
+
+    return walk ? createWalk(from.position, to.position, to.target, walk) : null
+  })
+
+  const starts = [ 0 ]
+
+  for (const walk of afoot)
+    starts.push(starts.at(-1)! + dwell + (walk?.travel ?? travel))
+
+  return {
+    poses,
+    dwell,
+    travel,
+    starts,
+    walks: afoot,
+
+    // A walk keeps to the ground by being laid on it: it needs no lift.
+    rise: poses.map((_, index) => floor && !afoot[index] ? riseOver(poses, index, floor) : 0),
+  }
 }
 
 /** Seconds for one full loop. */
 export function tourDuration (tour: Tour): number {
-  return tour.poses.length * (tour.dwell + tour.travel)
+  return tour.starts.at(-1)!
 }
 
 /** Ease that starts and ends with zero velocity and zero acceleration. */
@@ -130,24 +165,58 @@ export function smootherstep (value: number): number {
 }
 
 /**
+ * Where a walked leg is when `part` (0 to 1) of its time has gone.
+ *
+ * The walk says where the camera is and what lies ahead of it. At each end
+ * the eyes are on what the view there looks at, so the camera rests at both
+ * views exactly as it would on a leg that flies.
+ */
+function walkPose (tour: Tour, index: number, walk: Walk, part: number, out: Pose): Pose {
+  const from   = tour.poses[index]!
+  const to     = tour.poses[(index + 1) % tour.poses.length]!
+  const leave  = 1 - smootherstep(part / SETTLE)
+  const arrive = smootherstep((part - 1 + SETTLE) / SETTLE)
+
+  walkAt(walk, part * walk.travel, out.position, out.target)
+
+  for (let axis = 0; axis < 3; axis += 1) {
+    out.target[axis]! += (from.target[axis]! - out.target[axis]!) * leave
+    out.target[axis]! += (to.target[axis]! - out.target[axis]!) * arrive
+  }
+
+  return out
+}
+
+/**
  * The camera pose at time `t`, written into `out`.
  *
  * Each leg rests at its view for `dwell` seconds, then eases along a spline to
- * the next one, lifted over the land in between. A slow drift is added
- * throughout so a resting camera is never perfectly still, which reads as a
- * frozen page.
+ * the next one, lifted over the land in between, or walks there if the leg has
+ * a walk. A slow drift is added throughout so a resting camera is never
+ * perfectly still, which reads as a frozen page.
  */
 export function tourPose (tour: Tour, t: number, out: Pose): Pose {
   const count = tour.poses.length
-  const leg   = tour.dwell + tour.travel
-  const loop  = count * leg
+  const loop  = tour.starts[count]!
   const time  = (t % loop + loop) % loop
-  const index = Math.min(count - 1, Math.floor(time / leg))
-  const along = smootherstep((time - index * leg - tour.dwell) / tour.travel)
 
-  legPose(tour.poses, index, along, out)
+  let index = 0
 
-  out.position[1] += tour.rise[index]! * arc(along)
+  while (index < count - 1 && time >= tour.starts[index + 1]!)
+    index += 1
+
+  const walk = tour.walks[index]
+  const part = (time - tour.starts[index]! - tour.dwell) / (walk?.travel ?? tour.travel)
+
+  if (walk)
+    walkPose(tour, index, walk, Math.min(1, Math.max(0, part)), out)
+  else {
+    const along = smootherstep(part)
+
+    legPose(tour.poses, index, along, out)
+
+    out.position[1] += tour.rise[index]! * arc(along)
+  }
 
   out.position[0] += Math.sin(t * 0.21) * 0.6
   out.position[1] += Math.sin(t * 0.17) * 0.3
@@ -157,4 +226,4 @@ export function tourPose (tour: Tour, t: number, out: Pose): Pose {
 }
 
 // perf: trivial — a few dozen multiplies per step, no allocation. The rise of
-// each leg is found once, at 64 ground samples a leg.
+// each leg is found once, at 64 ground samples a leg. A walked leg is `walk.ts`.
