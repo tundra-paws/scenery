@@ -45,8 +45,8 @@ mottled turf, clumped heather and cracked reef; close to (`shelter`, `wood`, `sk
 (a new dependency is the owner's to add), no photographed maps (made from code, nothing
 fetched, 400 KB a file), and no displacement finer than the land's own grid (triangles).
 
-**Cost, from the gate.** Desktop 67 draws and 633,216 triangles before; 72 and 606,130 after
-(76% of 800,000). Mobile 59 and 229,922 before; 63 and 237,803 after (79% of 300,000).
+**Cost, from the gate.** Desktop 67 draws and 633,216 triangles before; 72 and 606,235 after
+(76% of 800,000). Mobile 59 and 229,922 before; 63 and 237,821 after (79% of 300,000).
 Programs 20 to 29 of 40, textures 9 to 10. Room was made by cutting the dykes' stones with
 twenty facets on every tier, and the waymarks' on a phone: the grain carries them. No lookup
 was added to a fragment: a textured surface is three to six noises. `hero` is over water, so
