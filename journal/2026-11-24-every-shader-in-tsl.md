@@ -45,8 +45,8 @@ was loosened; one test that read the GLSL text now reads the node graph for the 
 
 **What it cost**, from the gate, `hero`: desktop 67 draws before and after; 630k triangles
 before, 633k after (the stars' triangles; 79%). Mobile 59 draws, 229k then 230k. Live programs
-31 then 20, textures 12 then 9, framebuffers 5 then 2, buffers 125 then 378 (uniform blocks),
-vertex arrays 67 then 80. Still deterministic, no leak. Ready in 9.8 s where it was 9.2 under
+31 then 20, textures 12 then 9, framebuffers 5 then 2, buffers 125 then 376 (uniform blocks),
+vertex arrays 67 then 80. Still deterministic, no leak. Ready in about 10 s where it was about 9 under
 the gate's software renderer. Bytes: the iteration is 20 KB smaller; three's node build is
 660 KB, once.
 
