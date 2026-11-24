@@ -55,11 +55,18 @@ interface Laid {
   colour: THREE.Color
 }
 
-/** What laying a stone needs: where they all go, the hand that sets them out of true, and the land. */
+/** What laying a stone needs: where the walling stones and the cope go, the hand that sets them out of true, and the land. */
 interface Waller {
   laid:   Laid[]
+  cope:   Laid[]
   lay:    SeededRng
   ground: Ground
+}
+
+/** The walls as two instanced meshes: the walling stones and posts, and the thin cope along their tops. */
+export interface Dyke {
+  stones: THREE.InstancedMesh
+  cope:   THREE.InstancedMesh
 }
 
 /** Lengths along a line of wall at each of its points, from its start. */
@@ -88,7 +95,7 @@ function stationAt (line: readonly Waypoint[], lengths: readonly number[], dista
 }
 
 /** Set one stone, a little out of true, the way a hand leaves it. */
-function set (waller: Waller, at: Station, base: number, size: Size): void {
+function set (waller: Waller, at: Station, base: number, size: Size, into: Laid[] = waller.laid): void {
   const { lay } = waller
 
   dummy.position.set(at.x + lay.range(-0.04, 0.04), base + size.thick * 0.55, at.z + lay.range(-0.04, 0.04))
@@ -98,7 +105,7 @@ function set (waller: Waller, at: Station, base: number, size: Size): void {
 
   tint.set(PALETTE.cairn).lerp(rock, lay.range(0, PICKED))
     .offsetHSL(0, 0, lay.range(-0.05, 0.04))
-  waller.laid.push({ matrix: dummy.matrix.clone(), colour: tint.clone() })
+  into.push({ matrix: dummy.matrix.clone(), colour: tint.clone() })
 }
 
 /**
@@ -128,35 +135,20 @@ function raise (waller: Waller, line: readonly Waypoint[]): void {
   for (let distance = COPE.every / 2; distance < length; distance += COPE.every * waller.lay.range(0.92, 1.1)) {
     const at = stationAt(line, lengths, distance)
 
-    set(waller, at, land(at) + top, { half: COPE.half, thick: COPE.thick * waller.lay.range(0.85, 1.1), depth: COPE.depth })
+    set(waller, at, land(at) + top, { half: COPE.half, thick: COPE.thick * waller.lay.range(0.85, 1.1), depth: COPE.depth }, waller.cope)
   }
 }
 
-/**
- * Every wall of the infield as one instanced mesh: the field's dyke, the
- * fold, the head-dyke, and the posts at their gaps and ends.
- *
- * Dry stone in the boulders' shape, the cairn's paler grey with some of the
- * rock's in it. The same stones on every tier; a phone gets them cut with
- * fewer facets (`geometry`).
- */
-export function layDyke (geometry: THREE.BufferGeometry, material: THREE.Material, lay: SeededRng, ground: Ground, { runs, posts }: Pick<Infield, 'runs' | 'posts'>): THREE.InstancedMesh {
-  const waller: Waller = { laid: [], lay, ground }
+/** Stones as one instanced mesh, each with its own place and grey. */
+function build (laid: readonly Laid[], geometry: THREE.BufferGeometry, material: THREE.Material, name: string): THREE.InstancedMesh {
+  const mesh = new THREE.InstancedMesh(geometry, material, laid.length)
 
-  for (const run of runs)
-    raise(waller, run)
-
-  for (const post of posts)
-    set(waller, { ...post }, ground.heightAt(post.x, post.z) - 0.5, POST)
-
-  const mesh = new THREE.InstancedMesh(geometry, material, waller.laid.length)
-
-  waller.laid.forEach((stone, index) => {
+  laid.forEach((stone, index) => {
     mesh.setMatrixAt(index, stone.matrix)
     mesh.setColorAt(index, stone.colour)
   })
 
-  mesh.name          = 'infield-dyke'
+  mesh.name          = name
   mesh.castShadow    = true
   mesh.receiveShadow = true
 
@@ -165,6 +157,33 @@ export function layDyke (geometry: THREE.BufferGeometry, material: THREE.Materia
   return mesh
 }
 
-// perf: cheap — one draw call (two with its shadow pass). Some five hundred
-// stones: 80 triangles each on desktop, 20 on the phone. Laid once; nothing
-// per frame.
+/**
+ * Every wall of the infield as two instanced meshes: the field's dyke, the
+ * fold, the head-dyke, and the posts at their gaps and ends; and the cope.
+ *
+ * Dry stone in the boulders' shape, the cairn's paler grey with some of the
+ * rock's in it. The same stones on every tier. The walling stones are cut
+ * with fewer facets on a phone (`stone`); the cope, half the stones and each
+ * a thin slab on edge, is cut with fewer everywhere (`slab`): its facets
+ * were a sixth of the island's triangles, drawn three times, and from any
+ * view they are a few pixels across.
+ */
+export function layDyke (stone: THREE.BufferGeometry, slab: THREE.BufferGeometry, material: THREE.Material, lay: SeededRng, ground: Ground, { runs, posts }: Pick<Infield, 'runs' | 'posts'>): Dyke {
+  const waller: Waller = { laid: [], cope: [], lay, ground }
+
+  for (const run of runs)
+    raise(waller, run)
+
+  for (const post of posts)
+    set(waller, { ...post }, ground.heightAt(post.x, post.z) - 0.5, POST)
+
+  return {
+    stones: build(waller.laid, stone, material, 'infield-dyke'),
+    cope:   build(waller.cope, slab, material, 'infield-cope'),
+  }
+}
+
+// perf: cheap — two draw calls (four with the shadow pass, six with the
+// sea's). Some five hundred stones: the 250 walling stones and posts at 80
+// triangles on desktop and 20 on the phone, the 280 slabs of the cope at 20.
+// Laid once; nothing per frame.

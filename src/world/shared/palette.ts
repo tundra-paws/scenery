@@ -24,6 +24,7 @@ export const PALETTE = {
   bark:         '#d9d3c3',
   pennant:      '#a8483a',
   barley:       '#c4b56e',
+  heather:      '#86607a',
   fleece:       '#e2dccb',
   moorit:       '#7a5840',
   face:         '#2e2926',

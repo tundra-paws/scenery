@@ -14,8 +14,9 @@ import type { Ground } from './shared/ground.ts'
  * the path on foot, past the shelter, to the cairn; round to look back over
  * the way up and out to sea; over the summit, and out over the water until
  * the whole island is in the frame; then round it: the western beach, the
- * northern cove, the ridge, the eastern shore, in to the edge of the wood
- * where the stumps and the stacked logs are, close under the shelter with
+ * northern cove, the ridge, across the heather to the cairn on its hill,
+ * the eastern shore, in to the edge of the wood where the stumps and the
+ * stacked logs are, close under the shelter with
  * the cairn over it, back down to the water beside the boat at its anchor,
  * off the beach below the field, looking up its rigs to the gate and the
  * house, and last along the shore to the inbye, low among the sheep, looking
@@ -38,8 +39,9 @@ import type { Ground } from './shared/ground.ts'
  * on time taken from the three legs round it, and `infield` between `boat`
  * and `hero` on the one leg it splits, so the day is the length it was and
  * every stop before them keeps its hour. `mirror` stands between `hero` and
- * `landing` the same way, on the one leg it splits. `flock` was given time
- * of its own: the day grew by its stop and its leg, and kept second ten.
+ * `landing` the same way, on the one leg it splits, and `moor` between
+ * `ridge` and `east`. `flock` was given time of its own: the day grew by
+ * its stop and its leg, and kept second ten.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },
@@ -51,7 +53,8 @@ export const VIEWS: readonly View[] = [
   { name: 'island', at: [ 150, 150 ], height: 40, look: [ 10, 20 ], lookHeight: 10, travel: 22 },
   { name: 'shore', at: [ -86, 40 ], height: 2.6, look: [ -184, 14 ], lookHeight: 9 },
   { name: 'cove', at: [ -38, -104 ], height: 4.5, look: [ 4, -12 ], lookHeight: 9 },
-  { name: 'ridge', at: [ 8, -34 ], height: 13, look: [ 58, 62 ], lookHeight: 3 },
+  { name: 'ridge', at: [ 8, -34 ], height: 13, look: [ 58, 62 ], lookHeight: 3, travel: 5 },
+  { name: 'moor', at: [ 66, 0 ], height: 3, look: [ 30, 58 ], lookHeight: 8, travel: 5 },
   { name: 'east', at: [ 112, 52 ], height: 9, look: [ 18, 50 ], lookHeight: 8, travel: 8 },
   { name: 'wood', at: [ 74, 66 ], height: 3.2, look: [ 59, 50 ], lookHeight: 3, travel: 7 },
   { name: 'shelter', at: [ 64, 73 ], height: 7, look: [ 50, 58 ], lookHeight: 4, travel: 10 },

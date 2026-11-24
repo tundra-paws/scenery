@@ -80,8 +80,9 @@ export function createWoodFeature (world: World): Feature {
       const grow   = rng.fork('wood:grow')
 
       // The ball every lump of leaves is cut from. Unindexed, so each face
-      // has corners of its own and is shaded flat.
-      const sphere = new THREE.IcosahedronGeometry(1, 1)
+      // has corners of its own and is shaded flat. A phone cuts it with a
+      // quarter of the facets: the crowns were its costliest triangles.
+      const sphere = new THREE.IcosahedronGeometry(1, quality.tier === 'mobile' ? 0 : 1)
       const ball   = sphere.getAttribute('position').array
 
       for (const tree of [ ...wood.trees, ...wood.outliers ])
@@ -129,7 +130,7 @@ export function createWoodFeature (world: World): Feature {
 }
 
 // perf: medium — one draw call and one shadow pass for all of it: 72 birches
-// (the wood's 52 and the island's 20) and the cut wood, 28k triangles on the
-// mobile tier and 43k on desktop, drawn twice. The sway is five sines a
+// (the wood's 52 and the island's 20) and the cut wood, 11k triangles on the
+// mobile tier (crowns of twenty-faced balls) and 43k on desktop, drawn twice. The sway is five sines a
 // vertex in the shader, from the wind's one uniform; nothing per frame on
 // the CPU.

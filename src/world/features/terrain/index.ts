@@ -18,6 +18,10 @@ const SAND  = new THREE.Color(PALETTE.sand)
 const GRASS = new THREE.Color(PALETTE.grass)
 const DRY   = new THREE.Color(PALETTE.grassDry)
 const ROCK  = new THREE.Color(PALETTE.rock)
+const LING  = new THREE.Color(PALETTE.heather)
+
+/** How far the land under the heather goes to its bloom: the bushes on it carry the rest. */
+const BLOOM = 0.75
 
 const scratch = new THREE.Color()
 
@@ -27,13 +31,14 @@ const scratch = new THREE.Color()
  * Height picks the band (sand at the water, grass above it, straw toward the
  * tops) and steepness overrides it with rock, because nothing grows on a cliff.
  */
-function colourAt (world: World, slope: number, height: number, out: THREE.Color): THREE.Color {
+function colourAt (world: World, x: number, z: number, slope: number, height: number, out: THREE.Color): THREE.Color {
   const { ground } = world
   const above      = height - ground.waterLevel
 
   out.copy(SAND)
   out.lerp(GRASS, smoothstep(0.7, 2.4, above))
   out.lerp(DRY, smoothstep(0.35, 0.6, above / ground.relief))
+  out.lerp(LING, world.moor.heatherAt(x, z, height, slope) * BLOOM)
   out.lerp(ROCK, smoothstep(0.16, 0.34, slope))
 
   return out
@@ -87,7 +92,7 @@ export function createTerrain (world: World): Feature {
         const height = grid.heights[index]!
 
         position.setY(index, height)
-        colourAt(world, grid.slopeAt(column, (index - column) / grid.side), height, scratch).toArray(colours, index * 3)
+        colourAt(world, position.getX(index), position.getZ(index), grid.slopeAt(column, (index - column) / grid.side), height, scratch).toArray(colours, index * 3)
       }
 
       geometry.setAttribute('color', new THREE.BufferAttribute(colours, 3))

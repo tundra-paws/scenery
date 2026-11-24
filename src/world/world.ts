@@ -16,6 +16,8 @@ import { GRID_SEGMENTS, createHeightGrid } from './shared/height-grid.ts'
 import type { HeightGrid } from './shared/height-grid.ts'
 import { createInfield } from './shared/infield.ts'
 import type { Infield } from './shared/infield.ts'
+import { createMoor } from './shared/moor.ts'
+import type { Moor } from './shared/moor.ts'
 import { createPath, findSummit } from './shared/path.ts'
 import type { Path, Waypoint } from './shared/path.ts'
 import { createShelter } from './shared/shelter.ts'
@@ -62,7 +64,8 @@ export type Feature = AppModule<WorldState>
  * horizon with land on it.
  * And for what was made on it: the summit the cairn stands on, the one path
  * up to it, the shelter beside that path, and the walls round the ground
- * worked from it. And for what grows on it: the wood beside the shelter.
+ * worked from it. And for what grows on it: the wood beside the shelter,
+ * and the heather on the hill.
  * And for what stands in the sea, which the sea breaks round, and what lies
  * loose on the land, which the flock grazes round.
  */
@@ -88,6 +91,9 @@ export interface World {
   /** The field below the shelter, its dyke and gate, and the fold across the path. */
   infield: Infield
   wood:    Wood
+
+  /** The heather on the hill above the worked ground, for the land's colour and the clumps on it. */
+  moor: Moor
 
   /** What stands in the sea and what floats on it, for the sea to break round. Filled in as the features are built. */
   wash: Wash
@@ -122,6 +128,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     shelter,
     infield: createInfield(shelter),
     wood:    createWood({ ground, summit, path, shelter }, seed),
+    moor:    createMoor(ground, seed),
     wash:    createWash(),
     clutter: createClutter(),
   }

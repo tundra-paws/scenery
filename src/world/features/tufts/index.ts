@@ -13,6 +13,7 @@ import { scatterOnGround } from '../../shared/scatter.ts'
 import { WIND_GLSL } from '../../shared/wind.ts'
 import type { Wind } from '../../shared/wind.ts'
 import type { Feature, World } from '../../world.ts'
+import { plantHeather } from './heather.ts'
 
 
 const COUNT: Record<QualityTier, number> = { mobile: 900, desktop: 2600, highEnd: 4200 }
@@ -21,6 +22,9 @@ const COUNT: Record<QualityTier, number> = { mobile: 900, desktop: 2600, highEnd
 const OFF_PATH    = 1.9
 const OFF_SHELTER = 0.9
 const OFF_SPUR    = 1.1
+
+/** How much of the ground may be heather before the grass gives it up. */
+const IN_HEATHER = 0.4
 
 /** How far from the middle of a field wall the grass is kept: its foot, and the strip a scythe misses. */
 const OFF_DYKE = 0.6
@@ -110,9 +114,10 @@ function swayInWind (material: THREE.Material, wind: Wind): void {
   })
 }
 
-/** Grass tufts on the gentle, low ground: one instanced mesh, in patches, leaning with the wind. */
+/** Grass tufts on the gentle, low ground, in patches, and the heather on the hill above it (`heather.ts`): two instanced meshes in one material, leaning with the wind. */
 export function createTufts (world: World): Feature {
-  let mesh: THREE.InstancedMesh | null = null
+  let mesh: THREE.InstancedMesh | null    = null
+  let heather: THREE.InstancedMesh | null = null
 
   return {
     name: 'tufts',
@@ -137,7 +142,8 @@ export function createTufts (world: World): Feature {
           return above > 1.1 &&
             above < ground.relief * 0.5 &&
             patches.fbm(spot.x * 0.03, 9.1, spot.z * 0.03, 2) > -0.08 &&
-            spot.slope < 0.2
+            spot.slope < 0.2 &&
+            world.moor.heatherAt(spot.x, spot.z, spot.height, spot.slope) < IN_HEATHER
         },
       })
 
@@ -192,16 +198,23 @@ export function createTufts (world: World): Feature {
       mesh.count = kept
 
       commitInstances(mesh)
-      scene.add(mesh)
+
+      // The hill's heather shares the grass's material, and so its program.
+      heather = plantHeather(world, rng, material)
+      scene.add(mesh, heather)
     },
 
     dispose () {
+      heather?.geometry.dispose()
+      heather?.removeFromParent()
+      heather?.dispose()
       disposeInstances(mesh)
-      mesh = null
+      mesh    = null
+      heather = null
     },
   }
 }
 
-// perf: cheap — one draw call, no shadow pass. Nine triangles a tuft: 8k on the
-// mobile tier, 23k on desktop. Placed once; the sway is four sines a vertex in
+// perf: cheap — two draw calls, no shadow pass. Nine triangles a tuft: 7k on
+// the mobile tier, 20k on desktop, and the heather's bushes (`heather.ts`). Placed once; the sway is four sines a vertex in
 // the shader, from the wind's one uniform, and nothing per frame on the CPU.

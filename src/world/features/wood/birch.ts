@@ -149,5 +149,6 @@ export function growBirch (timber: Timber, tree: Tree, { tier, lee, rng, ball }:
 }
 
 // perf: cheap — a tree is its trunk (two triangles a side a span), and for
-// each lump of its crown a limb of three triangles and the ball's eighty:
-// 380 triangles on the mobile tier, 590 on desktop. Built once.
+// each lump of its crown a limb of three triangles and the ball's eighty
+// (twenty on a phone): 140 triangles on the mobile tier, 590 on desktop.
+// Built once.

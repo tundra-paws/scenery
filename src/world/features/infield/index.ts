@@ -9,6 +9,7 @@ import { createStoneGeometry } from '../../shared/stone.ts'
 import type { Feature, World } from '../../world.ts'
 import { sowBarley } from './barley.ts'
 import { layDyke } from './dyke.ts'
+import type { Dyke } from './dyke.ts'
 import { hangGate } from './gate.ts'
 import { ploughRigs } from './rigs.ts'
 
@@ -62,7 +63,7 @@ function wade (world: World): void {
  * shape, placed, like the cairn and the house.
  */
 export function createInfieldFeature (world: World): Feature {
-  let dyke: THREE.InstancedMesh | null   = null
+  let dyke: Dyke | null                  = null
   let rigs: THREE.Mesh | null            = null
   let gate: THREE.Mesh | null            = null
   let barley: THREE.InstancedMesh | null = null
@@ -93,7 +94,9 @@ export function createInfieldFeature (world: World): Feature {
       // A phone gets the same stones with fewer facets: there are hundreds of them.
       const detail = world.quality.tier === 'mobile' ? 0 : 1
 
-      dyke = layDyke(createStoneGeometry(rng.fork('infield:shape').int(1, 1_000_000), detail), stone, rng.fork('infield:lay'), ground, infield)
+      const shape = rng.fork('infield:shape').int(1, 1_000_000)
+
+      dyke = layDyke(createStoneGeometry(shape, detail), createStoneGeometry(shape, 0), stone, rng.fork('infield:lay'), ground, infield)
 
       const field = ploughRigs(earth, rng.fork('infield:rigs'), ground, grid, infield, wind)
       const ears  = new THREE.MeshStandardMaterial({ name: 'infield-barley', roughness: 1, metalness: 0, side: THREE.DoubleSide })
@@ -108,15 +111,18 @@ export function createInfieldFeature (world: World): Feature {
       // A phone leaves the walls' hundreds of stones out of it too.
       keepOutOfMirror(barley)
 
-      if (world.quality.tier === 'mobile')
-        keepOutOfMirror(dyke)
+      if (world.quality.tier === 'mobile') {
+        keepOutOfMirror(dyke.stones)
+        keepOutOfMirror(dyke.cope)
+      }
 
       wade(world)
-      scene.add(dyke, rigs, barley, gate)
+      scene.add(dyke.stones, dyke.cope, rigs, barley, gate)
     },
 
     dispose () {
-      disposeInstances(dyke)
+      disposeInstances(dyke?.stones ?? null)
+      disposeInstances(dyke?.cope ?? null)
       disposeInstances(barley)
       free(rigs)
       free(gate)
@@ -129,6 +135,6 @@ export function createInfieldFeature (world: World): Feature {
   }
 }
 
-// perf: cheap — four draw calls and two shadow passes: the dyke's stones
-// (`dyke.ts`), the rigs (`rigs.ts`), the barley on them (`barley.ts`) and
+// perf: cheap — five draw calls and three shadow passes: the dyke's stones
+// and its cope (`dyke.ts`), the rigs (`rigs.ts`), the barley on them (`barley.ts`) and
 // the gate (`gate.ts`). Built once; the barley's sway is in its shaders.
