@@ -18,13 +18,15 @@ const COUNT: Record<QualityTier, number> = { mobile: 60, desktop: 140, highEnd: 
  * Clear ground kept round a boulder, on top of its own size: from the middle of
  * the path, far enough that it never leans on a waymark, from the summit,
  * where the cairn and its spill stand, from the shelter's walls and the way
- * to its door, from the foot of a tree, and from a wall.
+ * to its door, from the foot of a tree, from a wall, and from the middle of
+ * the burn, which has stones of its own.
  */
 const OFF_PATH    = 3
 const OFF_SUMMIT  = 4
 const OFF_SHELTER = 2
 const OFF_TREE    = 0.8
 const OFF_DYKE    = 1
+const OFF_BURN    = 1.6
 
 /** A boulder whose foot is lower than this over the water stands in it, and the sea breaks round it. */
 const STANDING = 0.25
@@ -41,7 +43,7 @@ export function createRocks (world: World): Feature {
     name: 'rocks',
 
     build ({ scene, rng }) {
-      const { ground, summit, path, shelter, wood, infield } = world
+      const { ground, summit, path, shelter, wood, infield, burn } = world
 
       const place = rng.fork('rocks:place')
       const shape = rng.fork('rocks:shape')
@@ -87,6 +89,7 @@ export function createRocks (world: World): Feature {
         const taken = path.distanceTo(spot.x, spot.z) < size + OFF_PATH ||
           infield.inField(spot.x, spot.z) ||
           infield.distanceTo(spot.x, spot.z) < size + OFF_DYKE ||
+          burn.distanceTo(spot.x, spot.z) < size + OFF_BURN ||
           Math.hypot(spot.x - summit.x, spot.z - summit.z) < size + OFF_SUMMIT ||
           Math.min(shelter.distanceTo(spot.x, spot.z), shelter.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
           wood.distanceTo(spot.x, spot.z) < size + OFF_TREE

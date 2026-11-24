@@ -4,6 +4,8 @@ import type { AppModule } from 'threejs-scenes/core'
 
 import { createLands, createSkyline } from './shared/beyond.ts'
 import type { Land } from './shared/beyond.ts'
+import { createBurn } from './shared/burn.ts'
+import type { Burn } from './shared/burn.ts'
 import { createCloudShadow } from './shared/cloud-shadow.ts'
 import { createClutter } from './shared/clutter.ts'
 import type { Clutter } from './shared/clutter.ts'
@@ -70,7 +72,8 @@ export type Feature = AppModule<WorldState>
  * and the heather on the hill.
  * And for what stands in the sea, which the sea breaks round, and what lies
  * loose on the land, which the flock grazes round. And for the reef off
- * the east shore, its mark and its seals.
+ * the east shore, its mark and its seals. And for the water that runs off
+ * it: the burn, which everything on the brae keeps out of.
  */
 export interface World {
   seed:    number
@@ -90,6 +93,9 @@ export interface World {
   summit:  Waypoint
   path:    Path
   shelter: Shelter
+
+  /** The island's one stream, from its spring under the cairn to the sea by the landing. */
+  burn: Burn
 
   /** The field below the shelter, its dyke and gate, and the fold across the path. */
   infield: Infield
@@ -133,6 +139,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     beyond,
     day:     createDaylight(createSkyline(beyond)),
     shelter,
+    burn:    createBurn(ground, path),
     infield: createInfield(shelter),
     wood:    createWood({ ground, summit, path, shelter }, seed),
     moor:    createMoor(ground, seed),

@@ -3,6 +3,7 @@ import type { QualityTier, SeededRng } from 'threejs-scenes'
 import { createSeededRng, smoothstep } from 'threejs-scenes/primitives'
 
 import { VIEWS, resolveView } from '../views.ts'
+import type { Burn } from './burn.ts'
 import { DAY, elevationAt } from './daylight.ts'
 import type { Ground } from './ground.ts'
 import type { Infield } from './infield.ts'
@@ -32,7 +33,7 @@ export const HEFTS: readonly Heft[] = [
   { name: 'west', x: -70, z: 0, reach: 16, count: { mobile: 4, desktop: 8, highEnd: 10 }},
 ]
 
-/** Clear ground kept from the middle of the path (its waymarks stand beside it), a wall, a trunk, the house, the way to its door, the cairn, and a boulder's edge. */
+/** Clear ground kept from the middle of the path (its waymarks stand beside it), a wall, a trunk, the house, the way to its door, the cairn, a boulder's edge, and the middle of the burn. */
 const OFF_PATH    = 4.4
 const OFF_WALL    = 1.3
 const OFF_TREE    = 1.2
@@ -40,6 +41,7 @@ const OFF_SHELTER = 2.8
 const OFF_SPUR    = 1.8
 const OFF_SUMMIT  = 6
 const OFF_STONE   = 0.7
+const OFF_BURN    = 2.1
 
 /** How far a sheep keeps from where a postcard's camera stands, and from the fold's wall inside it. */
 const OFF_CAMERA = 5
@@ -163,6 +165,9 @@ interface Site {
   shelter: Shelter
   infield: Infield
   wood:    Wood
+
+  /** The burn, where there is one: no sheep stands in it. */
+  burn?: Burn
 }
 
 /** Whether a sheep may stand at a place: penned in the fold, or out on the island. */
@@ -181,9 +186,10 @@ export interface Flock {
 
 /** The rule for a place a sheep may graze: on the island's open grass, clear of everything that stands on it. */
 function makeRule (site: Site, clear: (x: number, z: number) => number): Rule {
-  const { ground, summit, path, shelter, infield, wood } = site
-  const cameras                                          = VIEWS.map(view => resolveView(view, ground).position)
-  const fold                                             = infield.fold
+  const { ground, summit, path, shelter, infield, wood, burn } = site
+  const cameras                                                = VIEWS.map(view => resolveView(view, ground).position)
+  const fold                                                   = infield.fold
+  const dry                                                    = (x: number, z: number): boolean => burn === undefined || burn.distanceTo(x, z) > OFF_BURN
 
   return (x, z, penned) => {
     const height = ground.heightAt(x, z)
@@ -200,6 +206,7 @@ function makeRule (site: Site, clear: (x: number, z: number) => number): Rule {
       shelter.distanceToSpur(x, z) > OFF_SPUR &&
       Math.hypot(x - summit.x, z - summit.z) > OFF_SUMMIT &&
       clear(x, z) > OFF_STONE &&
+      dry(x, z) &&
       cameras.every(([ cx, , cz ]) => Math.hypot(x - cx, z - cz) > OFF_CAMERA)
   }
 }

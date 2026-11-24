@@ -30,6 +30,7 @@ const OFF_PATH  = 2.2
 const OFF_HOUSE = 1.4
 const OFF_DYKE  = 0.8
 const OFF_CAIRN = 5
+const OFF_BURN  = 0.7
 
 /** A bush's width, from the smallest to the largest. */
 const WIDTH = [ 0.6, 1.25 ] as const
@@ -102,12 +103,13 @@ export function createBushGeometry (): THREE.BufferGeometry {
 
 /** Whether a bush may stand here: off every way and wall, and clear of the cairn. */
 function clear (world: World, x: number, z: number): boolean {
-  const { path, shelter, infield, summit } = world
+  const { path, shelter, infield, summit, burn } = world
 
   return path.distanceTo(x, z) > OFF_PATH &&
     shelter.distanceTo(x, z) > OFF_HOUSE &&
     shelter.distanceToSpur(x, z) > OFF_HOUSE &&
     infield.distanceTo(x, z) > OFF_DYKE &&
+    burn.distanceTo(x, z) > burn.pool.half + OFF_BURN &&
     !infield.inField(x, z) &&
     Math.hypot(x - summit.x, z - summit.z) > OFF_CAIRN
 }

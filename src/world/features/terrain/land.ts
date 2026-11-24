@@ -2,8 +2,9 @@
 import * as THREE from 'three'
 import { clamp, mix, mx_noise_float, normalLocal, positionLocal, positionWorld, smoothstep, uniform } from 'three/tsl'
 import type { Node } from 'three/webgpu'
+import { smoothstep as eased } from 'threejs-scenes/primitives'
 
-import { vec3Attribute } from '../../shared/nodes.ts'
+import { vec4Attribute } from '../../shared/nodes.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { grain, grit, ripples, seenAt, vein } from '../../shared/surface.ts'
 import type { Surface } from '../../shared/surface.ts'
@@ -28,6 +29,10 @@ const SCREE = [ 0.19, 0.31 ] as const
 const CRAG       = 0.85
 const CRAG_PITCH = 0.14
 
+/** The slope from which a vertex is pushed, and by which it is pushed all the way; and the distance from the burn between which that comes back. */
+const CRAGGY   = [ 0.24, 0.42 ] as const
+const BURN_BED = [ 2, 5 ] as const
+
 /** What the land's material is given: the texture, the place its vertices go, and the grain the worn path wears. */
 export interface Land {
   surface:  Surface
@@ -42,13 +47,16 @@ function ink (name: keyof typeof PALETTE): Node<'vec3'> {
 
 /**
  * What a vertex of the land says of itself, for `aLand`: how high it stands
- * over the water, how steep the drawn land is there, and how much heather
- * grows on it.
+ * over the water, how steep the drawn land is there, how much heather grows
+ * on it, and how much of a crag's push it takes: all of it on a cliff, none
+ * on ground gentle enough to stand on, and none near the burn, whose water
+ * lies on the land where the land's own function says it is.
  */
 export function describeLand (world: World, x: number, z: number, slope: number, height: number, out: number[] | Float32Array, at: number): void {
   out[at]     = height - world.ground.waterLevel
   out[at + 1] = slope
   out[at + 2] = world.moor.heatherAt(x, z, height, slope)
+  out[at + 3] = eased(CRAGGY[0], CRAGGY[1], slope) * eased(BURN_BED[0], BURN_BED[1], world.burn.distanceTo(x, z))
 }
 
 /**
@@ -67,7 +75,7 @@ export function describeLand (world: World, x: number, z: number, slope: number,
  */
 export function textureLand (world: World): Land {
   const seen  = seenAt(positionWorld, world.quality.tier)
-  const land  = vec3Attribute('aLand')
+  const land  = vec4Attribute('aLand')
   const sand  = ink('sand')
   const grass = ink('grass')
   const straw = ink('grassDry')
@@ -134,7 +142,7 @@ export function textureLand (world: World): Land {
     },
 
     position: positionLocal.add(normalLocal.mul(mx_noise_float(positionLocal.mul(CRAG_PITCH)).mul(CRAG)
-      .mul(smoothstep(SCREE[0], SCREE[1] + 0.1, land.y)))),
+      .mul(land.w))),
 
     grit: fine.mul(0.6).add(finest.mul(0.4)),
   }

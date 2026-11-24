@@ -52,7 +52,7 @@ export function createTerrain (world: World): Feature {
       geometry.rotateX(-Math.PI / 2)
 
       const position = geometry.getAttribute('position')
-      const said     = new Float32Array(position.count * 3)
+      const said     = new Float32Array(position.count * 4)
 
       // The plane's vertices are the grid's corners, in the grid's order, so
       // each takes its height by index and its slope from its neighbours.
@@ -61,10 +61,10 @@ export function createTerrain (world: World): Feature {
         const height = grid.heights[index]!
 
         position.setY(index, height)
-        describeLand(world, position.getX(index), position.getZ(index), grid.slopeAt(column, (index - column) / grid.side), height, said, index * 3)
+        describeLand(world, position.getX(index), position.getZ(index), grid.slopeAt(column, (index - column) / grid.side), height, said, index * 4)
       }
 
-      geometry.setAttribute('aLand', new THREE.BufferAttribute(said, 3))
+      geometry.setAttribute('aLand', new THREE.BufferAttribute(said, 4))
       geometry.setIndex(cellsAbove(geometry, ground.waterLevel - DEEP_WATER))
       geometry.computeVertexNormals()
       geometry.computeBoundingBox()

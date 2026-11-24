@@ -30,6 +30,9 @@ const IN_HEATHER = 0.4
 /** How far from the middle of a field wall the grass is kept: its foot, and the strip a scythe misses. */
 const OFF_DYKE = 0.6
 
+/** How far past the burn's own water its stones and its wet reach: no grass in either. */
+const OFF_BURN = 0.55
+
 /** Length of a blade before it is leant and scaled. */
 const BLADE = 0.8
 
@@ -168,6 +171,7 @@ export function createTufts (world: World): Feature {
           world.shelter.distanceTo(spot.x, spot.z) < OFF_SHELTER ||
           world.shelter.distanceToSpur(spot.x, spot.z) < OFF_SPUR ||
           world.infield.distanceTo(spot.x, spot.z) < OFF_DYKE ||
+          world.burn.distanceTo(spot.x, spot.z) < world.burn.pool.half + OFF_BURN ||
           world.infield.inField(spot.x, spot.z)
 
         if (trodden)

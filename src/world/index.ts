@@ -1,6 +1,7 @@
 // src/world/index.ts
 import { createBeyond } from './features/beyond/index.ts'
 import { createBoat } from './features/boat/index.ts'
+import { createBurnFeature } from './features/burn/index.ts'
 import { createCairn } from './features/cairn/index.ts'
 import { createClouds } from './features/clouds/index.ts'
 import { createEnvironment } from './features/environment/index.ts'
@@ -40,6 +41,7 @@ export function createFeatures (world: World): Feature[] {
     createTufts(world),
     createCairn(world),
     createWaymarks(world),
+    createBurnFeature(world),
     createShelterFeature(world),
     createInfieldFeature(world),
     createWoodFeature(world),
