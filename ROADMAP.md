@@ -196,7 +196,7 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   opening. Rain is opaque streaks a pixel wide: it wets nothing and falls through roofs.
 - **The far tops' snow is a rule on height** (`SNOWLINE` in `shared/beyond.ts`): the
   mountain coast only. Backlit at second ten, it is a paler crest, not a white one.
-- Triangles: desktop 75%, mobile 80%; a phone's draws 79 of 100. Its clouds are 27k, twice
+- Triangles: desktop 74%, mobile 80%; a phone's draws 79 of 100. Its clouds are 27k, twice
   (the mirror): the next room is there. Crowns are 36 facets on desktop (20 on a phone),
   drawn three times; walls' stones 20 on every tier. On a phone no building's stones throw
   a shadow (the dark block inside does), nor the dykes' cope, and none is in the mirror.

@@ -107,8 +107,8 @@ export function createNets (world: World, ground: Ground, lay: SeededRng, colour
   const material = createLitMaterial(world, { name: 'nets', color: colour, side: THREE.DoubleSide })
   const mesh     = new THREE.Mesh(geometry, material)
 
-  mesh.name          = 'pier-nets'
-  mesh.receiveShadow = true
+  // Like the pennant it takes no shadow from the map: that would be a program of its own.
+  mesh.name = 'pier-nets'
 
   return {
     mesh,
