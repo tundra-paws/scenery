@@ -103,6 +103,10 @@ export function createYardFeature (world: World): Feature {
 
       smoke.drift(0)
 
+      // The kiln's thin smoke, far up the hill, is not in a phone's sea either.
+      if (quality.tier === 'mobile')
+        keepOutOfMirror(smoke.mesh)
+
       scene.add(stones, body, boards, smoke.mesh)
     },
 

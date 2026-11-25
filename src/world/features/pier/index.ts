@@ -9,7 +9,10 @@ import { createStoneGeometry } from '../../shared/stone.ts'
 import { inItself, inWorld, stone as stonework, timber } from '../../shared/surface.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
+import { createGulls } from '../../shared/gulls.ts'
 import { BARKED, createGear } from './gear.ts'
+import { createFlight, findPerches } from './gulls.ts'
+import type { Flight } from './gulls.ts'
 import { createNets } from './nets.ts'
 import type { Nets } from './nets.ts'
 import { WALL } from './plan.ts'
@@ -27,8 +30,10 @@ import type { Tender } from './tender.ts'
  * box of the catch stand by its root. Along the top of the beach, under the
  * field's dyke, the nets hang drying on a row of poles and stir in the wind
  * off the sea, and on the green west of the landing split fish dry on a
- * rack. Still nobody. Everything is built in the world's own frame; only
- * the nets and the small boat move.
+ * rack. Still nobody: only the gulls that follow the fishing, a few riding
+ * the wind in rounds over the water off the pier and a couple standing on a
+ * post and a pole, all of them down on a perch by dark. Everything is built
+ * in the world's own frame; only the nets, the small boat and the gulls move.
  */
 export function createPierFeature (world: World): Feature {
   let stones: THREE.InstancedMesh | null = null
@@ -36,6 +41,7 @@ export function createPierFeature (world: World): Feature {
   let wood: LitMaterial | null           = null
   let nets: Nets | null                  = null
   let tender: Tender | null              = null
+  let gulls: Flight | null               = null
 
   return {
     name: 'pier',
@@ -78,18 +84,27 @@ export function createPierFeature (world: World): Feature {
         tender.mesh.castShadow = false
       }
 
+      // The gulls are lit as the starlings are, a plain material with a
+      // colour to each lump, and so are drawn with their program.
+      gulls = createFlight(createGulls(pier, findPerches(pier), world.wind.direction, world.seed, quality.tier), createLitMaterial(world, { name: 'pier-gulls' }))
+
+      if (phone)
+        keepOutOfMirror(gulls.mesh)
+
       nets.blow(0)
       tender.ride(0)
-      scene.add(stones, gear, nets.mesh, tender.mesh)
+      scene.add(stones, gear, nets.mesh, tender.mesh, gulls.mesh)
     },
 
     update (_state, frame) {
       nets?.blow(frame.frame * STEP)
       tender?.ride(frame.frame * STEP)
+      gulls?.fly(frame.frame * STEP)
     },
 
     dispose () {
       disposeInstances(stones)
+      disposeInstances(gulls?.mesh ?? null)
       gear?.geometry.dispose()
       gear?.removeFromParent()
       nets?.dispose()
@@ -101,11 +116,12 @@ export function createPierFeature (world: World): Feature {
       wood   = null
       nets   = null
       tender = null
+      gulls  = null
     },
   }
 }
 
-// perf: cheap — four draw calls, three shadow passes and three more in the
-// sea's mirror (a phone: four, one and one): some 290 stones of 20
-// triangles, 2k of gear, 130 of net and 450 of boat. A step moves the nets'
-// hundred vertices and the small boat.
+// perf: cheap — five draw calls, three shadow passes and four more in the
+// sea's mirror (a phone: five, one and one): some 290 stones of 20
+// triangles, 2k of gear, 130 of net, 450 of boat and 220 of gulls. A step
+// moves the nets' hundred vertices, the small boat, and four lumps a gull.
