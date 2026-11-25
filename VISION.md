@@ -57,11 +57,11 @@ the night is blue, not black, and there is always a light to see by.
 **Palette.** A handful, all in `src/world/shared/palette.ts`. Cool sky blues and a pale horizon
 for distance. Moss and dry-straw greens for the living ground. Warm sand at the edge. Grey stone:
 darker for what lies where it fell (`rock`), paler for what a hand has placed (`cairn`). One cold
-white (`foam`), only where the sea runs out on the land. Bare earth (`path`), sand's duller kin,
+white (`foam`), where the sea runs out on the land and as first snow on the far tops. Bare earth (`path`), sand's duller kin,
 only where feet have worn the grass away. Two warm notes, both reserved for light itself: the
 sun's cream, and the deeper amber of a flame someone lit (`lamp`), which only the shelter's
 lamp and its window show. Clouds have no colour of their own: the sun's cream where they are
-lit, the sky's blues where they are not. Smoke is the same. Weathered wood (`timber`) for what
+lit, the sky's blues where they are not. Smoke and rain are the same. Weathered wood (`timber`) for what
 came by sea and did not grow here: the boat, its oars, its mast; tarred near black where it
 keeps the water out. One pale thing that grows: birch `bark`, near white, scarred with the
 rock's grey taken almost to black; its leaves are the meadow's own two greens, going over to the barley's gold, and its cut
@@ -94,6 +94,8 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
 - *The high air.* Over the low clouds a thin mackerel sky, combed into streaks by a wind
   aloft that turns from the one below and creeps; it lies on the dome, takes the clouds'
   colours, and thins at night so the stars show between its bands.
+- *Showers.* A few heavier clouds trail rain: fine streaks leaning back from the wind, a
+  veil far off and hairlines overhead. One is in the sound as the visit opens.
 - *The moor.* Above the worked ground the hill is heather, in patches with grass between,
   thickest on the tops, bare only on the cliffs: low faceted bushes on a mauve ground.
 - *The hour.* The other shared signal (`world.day`): where the sun is, and from that the sky,
@@ -137,14 +139,12 @@ ruins of anything grand, no magic glow. Not busy: every added thing must leave t
 quiet as it found it. Not photoreal: its textures are made, not photographed, and stop at grain.
 
 **The chapters ahead.** Each is one day's major update, not a week's. Done: the summit cairn,
-the shoreline, water with depth, wind, the way up, the shelter with its lamp, fire and smoke,
-the boat at anchor, the day itself (evening, a night with moon and stars, morning, once round
-in a visit), the land beyond, the birch wood and its outliers, the infield (rigs, dyke, gate,
-fold, head-dyke), a sea that answers (mirror, swell, foam, wet sand), the flock on its hefts
-and trods, late summer (heather, high cloud), the starlings, the skerry and its seals, a
-texture on every surface, the burn, grass by the blade, the mill on the burn, and the harvest
-home (the kiln, the stacks, the first gold in the birches). Next: the inside of the shelter,
-the mill and the kiln, a night worth staying up for, and the back end of the year.
+the shoreline, water with depth, wind, the way up, the shelter, the boat at anchor, the day
+itself, the land beyond, the birch wood, the infield, a sea that answers, the flock, late
+summer (heather, high cloud), the starlings, the skerry and its seals, a texture on every
+surface, the burn, grass by the blade, the mill on the burn, the harvest home, and showers
+in the sound with the first snow on the far tops. Next: the inside of the shelter, the mill
+and the kiln, a night worth staying up for, and the back end of the year.
 
 ## Where it starts
 
