@@ -46,10 +46,10 @@ drawn and shrunk to nothing. The sward now keeps a coarse map of where any grass
 where none does within the patch no blade is drawn: 46,000 triangles back on desktop and
 14,000 on a phone, with every picture pixel for pixel as it was before the showers.
 
-**Cost, from the gate.** Desktop 91 draws and 635,508 triangles before; DESKTOP_AFTER
-(DESKTOP_PCT of 800,000). Mobile 75 and 234,717 before; MOBILE_AFTER (MOBILE_PCT of 300,000).
-Programs PROGRAMS of 40: the rain's is new. A phone's sea gives back the cloud and not its
-rain.
+**Cost, from the gate.** Desktop 91 draws and 635,508 triangles before; 93 and 604,708
+after (76% of 800,000). Mobile 75 and 234,717 before; 76 and 231,917 after (77% of 300,000).
+Programs 30 of 40: the rain's is new. Textures 10. A phone's sea gives back the cloud and
+not its rain.
 
 **Not done.** A shower wets nothing: no pocked sea, no dark stone after, no fuller burn, no
 rainbow (the palette has no colour for one). Its underside is no darker than any cloud's.
