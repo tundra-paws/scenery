@@ -1,0 +1,48 @@
+{
+  "id": 24,
+  "dir": "i/0024/",
+  "date": "2026-11-25",
+  "sha": "de09c68f8ddfc65597619c8e71069292a9761870",
+  "title": "The pier at the landing",
+  "summary": "A stone pier runs out beside the landing, a small boat in its lee and creels on its head; nets dry on poles along the beach, fish on a rack, and gulls go round over the bay.",
+  "kind": "feature",
+  "model": "claude",
+  "journal": "journal/2026-11-25-the-pier-at-the-landing.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 108,
+      "triangles": 595810,
+      "live": {
+        "buffers": 558,
+        "textures": 10,
+        "programs": 31,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 121
+      }
+    },
+    "mobile": {
+      "draws": 79,
+      "triangles": 238884,
+      "live": {
+        "buffers": 388,
+        "textures": 10,
+        "programs": 31,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 78
+      }
+    }
+  },
+  "bytes": {
+    "new": 331402,
+    "site": 6069629
+  },
+  "three": "0.184.0",
+  "distHash": "245401873b13cfce02ce55438aef6a46999ef69ec511e410bd1b5695124b41f2",
+  "withdrawn": false
+}
