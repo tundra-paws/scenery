@@ -13,9 +13,8 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 2. **A night worth staying up for.** The night is a moon, stars, high cloud and one lamp. A
    lantern at the boat's masthead, the window's light falling on the grass, a meteor now and
    then.
-3. **The back end of the year.** The birches have begun to turn and nothing has fallen:
-   leaves torn off by a gust and lying under the trees, the last rig cut, a sack at the
-   mill's door; and what a shower leaves: wet stone, a fuller burn.
+3. **What a shower leaves.** Wet stone and a darker land after the rain passes, a fuller
+   burn, the sea pocked under a veil; the last rig cut and a sack at the mill's door.
 
 ## Known problems
 
@@ -31,11 +30,9 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   them only because they keep five units up.
 - The lone birches are strewn by rule (`strew`); one stands by the burn below the dyke. Tests
   keep every tree off every camera and out of the tour's way.
-- **The afternoon's legs are as short as they go**: `east` 4, `skerry` 4, `wood` 3, `shelter`
-  5, `boat` 4, `infield` 3.5, `yard` 3.5, `mill` 4.5, `flock` 3, `burn` 3.5, `starlings` 4;
-  `skerry`'s turns the camera 33 degrees a second of the 35 the test allows. A new stop after
-  `ridge` takes time of its own, as `yard` did: add it to `DAY` and nothing else moves. One
-  before `ridge` moves the morning: print the sun at every stop and retune `NIGHT`, `TURNED`.
+- **The afternoon's legs are as short as they go** (`skerry`'s turns 33 degrees a second of
+  the 35 allowed). A stop after `ridge` takes time of its own, as `fall` did: add it to
+  `DAY`. One before `ridge` moves the morning: retune `NIGHT` and `TURNED`.
 - Nothing knows a tree is there but the boulders: a visitor walks through a trunk, tufts grow
   against it. The crowns are lit as if half turned to the sky (`SKYWARD` in
   `wood/timber.ts`), a little bright under the moon, and throw no dappled shade.
@@ -60,10 +57,9 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - The shelter's site (`shared/shelter.ts`) and its postcard are typed in; how it sits is read
   from the land, which is not benched for it. Neither it nor the mill has an inside, and the
   walk knows only `ground`: a visitor walks through their walls. The lamp casts no shadow.
-- The boat's place is a rule (`boat/mooring.ts`); its anchor lies under the `landing` view's
-  feet, and that view does not show the boat. Move `HEADING` in `shared/wind.ts` or the
-  landing and look at `hero`, `boat` and `landing` again. It rides the swell and shadows the
-  water; a visitor walks through it; it makes no wake.
+- The boat's place is a rule (`boat/mooring.ts`). Move `HEADING` in `shared/wind.ts` or the
+  landing and look at `hero`, `boat` and `landing` again. A visitor walks through it; it
+  makes no wake.
 - The clouds' shadow and the sun's shadow map do not know each other: a boulder's own shadow
   is as dark under a cloud as in the open. The clouds' is laid as if the light never stood
   lower than 24 degrees (`REACH`), so a turning sun cannot send it racing.
@@ -72,7 +68,7 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   at second ten and pick it again, and the first shower's `OPENING` with it.
 
 - **The day is typed in to fit the tour.** `DAY` in `shared/daylight.ts` is the loop's length
-  (321.5 s). `NIGHT` and `TURNED` (the slow part's seconds, and how far the sky turns in
+  (333.5 s). `NIGHT` and `TURNED` (the slow part's seconds, and how far the sky turns in
   them) hold the stops from `landing` to `ridge` at their hours, and `TEN` holds second ten's
   sun; `EDGE`, `SLOW`, `NOON` and `OPENING` follow. `ridge` is half a degree after sunrise. A
   visitor who takes the camera keeps the same clock: nothing lets them wait for the moon.
@@ -180,9 +176,12 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   no room for a fifth, or a wall round them. Each base is level on ground that is not. The
   kiln is a shell: no fire shows in its mouth, and its smoke is the house's, smaller
   (`fire`). A phone's stacks have no ropes. Tests hold it off everything else and the tour.
-- **The turn is a rule** (`TURNED` in `wood/birch.ts`): a lump of leaves is gold by where it
-  is and how far its tree leans, so the lone birches are nearly all gold. No leaf falls or
-  lies on the ground, and the heather still blooms beside them.
+- **The back end of the year is three rules.** The turn (`TURNED` in `wood/birch.ts`): a
+  lump is gold by where it is and its tree's lean. The bracken (`shared/bracken.ts`): beds
+  between the turf and the moor, held off the heather by sharing `aLand.z` with it (heather
+  less bracken). The litter (`wood.litterAt`, `aLitter`): under each tree, carried downwind.
+  The falling leaves (`wood/fall.ts`) are matrices set on the CPU each step, 720 of them:
+  no shadow, no mirror, and they fall through anything. The flock grazes in the bracken.
 - **The grass is not planted** (`features/grass`): the same blades are gathered ahead of the
   camera (`PATCH`). Where none grows in the patch (`sward.growsNear`: `hero`, out on the
   water) none is drawn; the call is still made, of nothing. Where it grows is one picture
@@ -196,7 +195,8 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   wets nothing, falls through roofs, and has no rainbow (no colour for one).
 - **The far tops' snow is a rule on height** (`SNOWLINE` in `shared/beyond.ts`): the
   mountain coast only. Backlit at second ten, it is a paler crest, not a white one.
-- Triangles: desktop 76%, mobile 77% (the grass gave back 46k and 14k). Walls'
+- Triangles: desktop 72%, mobile 79%. The crowns are cut from a 36-facet dodecahedron on
+  desktop (20 on a phone): they are drawn three times. Walls'
   stones are 20 facets on every tier. On a phone no building's stones throw a shadow of their
   own (the dark block inside does), nor the dykes' cope, and none is in the mirror.
 
@@ -205,7 +205,6 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 Parts for a chapter, never a day by themselves.
 
 - A second colour of dawn: morning and evening are the same sky, by the sun's height alone.
-- Under a shower: the sea pocked, stone wet after, the burn fuller, a darker cloud base.
 - Whitecaps far out under a gust. Terns over the stacks. Weed on the reef below the tide.
 - A peat stack, a scythe left on the dyke. A kailyard against the gable.
 - The boat's sail furled on its yard; a creel or a net on the beach.

@@ -30,7 +30,7 @@ landing: the reason the house, the fold and the landing are where they are. Abov
 fold it goes under a mill no bigger than a byre, and turns the wheel under its floor. The
 barley is mostly cut: its stacks stand roped before the house's door, one still building, and
 a kiln smokes on the shelf by the fold. Beside the house is the only wood on the island,
-birch, bent by the wind, its leaves beginning to turn; the trees nearest the door
+birch, bent by the wind, its leaves mostly gold and coming down; the trees nearest the door
 are stumps, and their logs are stacked under the eave. Below the house is the ground they
 worked: a field of rigs, barley and potatoes, walled round with the stones that came out of it,
 its gate left open; a fold across the path; and the head-dyke that keeps both from the hill,
@@ -64,12 +64,13 @@ lamp and its window show. Clouds have no colour of their own: the sun's cream wh
 lit, the sky's blues where they are not. Smoke and rain are the same. Weathered wood (`timber`) for what
 came by sea and did not grow here: the boat, its oars, its mast; tarred near black where it
 keeps the water out. One pale thing that grows: birch `bark`, near white, scarred with the
-rock's grey taken almost to black; its leaves are the meadow's own two greens, going over to the barley's gold, and its cut
+rock's grey taken almost to black; its leaves are the meadow's own two greens, going over to the barley's gold made riper (`leaf`), and its cut
 wood the bark's colour warmed. One thing sown, `barley`, a pale green-gold, only on the rigs, and
 bleached where it is cut (stubble, stooks, stacks), dulled toward earth where it thatches; the potatoes beside it are the meadow's green
 gone darker, the furrows bare earth turned darker still.
 The hill above the head-dyke wears one colour the meadow does not: `heather`, a dusky mauve,
-in bloom on the moor and only there. The flock's wool is its own: a dull cream white (`fleece`), a brown (`moorit`) for a few, and
+in bloom on the moor and only there; and under it, on the lower hill, the
+dying bracken's rust (`bracken`), in beds between the grazing, never where heather grows. The flock's wool is its own: a dull cream white (`fleece`), a brown (`moorit`) for a few, and
 the near black of their faces and legs (`face`), which a black sheep is all over, and the
 starlings are too. And one dyed
 thing, a worn red (`pennant`): cloth made only to be seen
@@ -126,8 +127,9 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
   half built with the sledge beside it: somebody is about, and is never seen. What they
   built is the house's kind: placed stone in level courses, turf over it, a door to stoop
   through; the kiln is that stone in a ring.
-- *The year.* It turns with the work: harvest, and the birches yellowing from the outside of
-  the wood in, the lone ones first. A stack is a beehive of straw on a ring of stones.
+- *The year.* The back end of it, turning with the work: harvest, the birches gold from the
+  outside of the wood in, the lone ones first, their leaves torn off by the wind and lying
+  under them, and the bracken gone to rust. A stack is a beehive of straw on a ring of stones.
 - *The sward.* Under the tufts, grass by the blade wherever the visitor stands, in the same
   wind as everything; far off it is the land's own grain.
 - *Facets for form, grain for surface.* Low-poly and flat-shaded, few colours; and, since
@@ -138,13 +140,9 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
 ruins of anything grand, no magic glow. Not busy: every added thing must leave the picture as
 quiet as it found it. Not photoreal: its textures are made, not photographed, and stop at grain.
 
-**The chapters ahead.** Each is one day's major update, not a week's. Done: the summit cairn,
-the shoreline, water with depth, wind, the way up, the shelter, the boat at anchor, the day
-itself, the land beyond, the birch wood, the infield, a sea that answers, the flock, late
-summer (heather, high cloud), the starlings, the skerry and its seals, a texture on every
-surface, the burn, grass by the blade, the mill on the burn, the harvest home, and showers
-in the sound with the first snow on the far tops. Next: the inside of the shelter, the mill
-and the kiln, a night worth staying up for, and the back end of the year.
+**The chapters ahead.** Each is one day's major update, not a week's. The journal holds
+the ones done; the last was the back end of the year. Next: the inside of the shelter, the
+mill and the kiln, and a night worth staying up for.
 
 ## Where it starts
 

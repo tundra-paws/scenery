@@ -14,7 +14,8 @@ import type { Ground } from './shared/ground.ts'
  * the path on foot, past the shelter, to the cairn; round to look back over
  * the way up and out to sea; over the summit, and out over the water until
  * the whole island is in the frame; then round it: the western beach, the
- * northern cove, the ridge, across the heather to the cairn on its hill,
+ * northern cove, the ridge, in under the gold birches at the back of the
+ * wood where the leaves come down, across the heather to the cairn on its hill,
  * the eastern shore, down onto the water off the skerry, looking over the
  * seals on it to the house, in to the edge of the wood where the stumps and the
  * stacked logs are, close under the shelter with
@@ -61,7 +62,8 @@ import type { Ground } from './shared/ground.ts'
  * longer, and the night is now typed in as a length and a pace of its own
  * (`NIGHT`, `TURNED` in `shared/daylight.ts`), so every stop from `hero`
  * round to `ridge` kept its hour, and the next view after `ridge` only has
- * to make `DAY` longer.
+ * to make `DAY` longer. `fall` did just that: its stop, its leg, and two
+ * seconds more on the long leg in to it from `ridge`, twelve in all.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },

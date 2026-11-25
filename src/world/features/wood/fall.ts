@@ -180,7 +180,6 @@ export function createFall (world: World, rng: SeededRng): Fall {
   }
 }
 
-// perf: cheap — one draw call, no shadow pass, in the program the sheep and
-// the starlings share. Four triangles a leaf: 3k on desktop, 1k on a phone.
+// perf: cheap — one draw call and one program of its own, no shadow pass. Four triangles a leaf: 3k on desktop, 1k on a phone.
 // A step sets each leaf's matrix (720 on desktop) and uploads them: a few
 // dozen kilobytes, nothing allocated.
