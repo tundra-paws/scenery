@@ -7,47 +7,46 @@ this short: a plan nobody can read in a minute is not a plan.
 
 Each item is one day: a whole chapter, built complete (both tiers, a postcard, the tour).
 
-1. **Inside.** The shelter is a shell. A floor, a hearth with the fire in it, a bench, and a rig
-   that knows a wall from a door, for the visitor who walks in.
+1. **Inside.** The shelter and the mill are shells. A floor, a hearth with the fire in it, a
+   bench; in the mill the stones, the hopper and a sack; and a rig that knows a wall from a
+   door, for the visitor who walks in.
 2. **A night worth staying up for.** The night is a moon, stars, high cloud and one lamp. A
    lantern at the boat's masthead, the window's light falling on the grass, a meteor now and
    then.
-3. **The mill on the burn.** A click mill astride the lower falls, a water-gate where the
-   burn goes under the head-dyke (the wall is simply laid across it now), a slab bridge.
+3. **The harvest home.** Stooks stand on the cut rigs and the mill turns, with nothing between
+   them: round stacks on stone bases in the lee of the house, a kiln to dry the grain, a
+   sledge or a creel left by the gate.
 
 ## Known problems
 
 - **The wood is typed in to fit `hero`** (`HEART`, `REACH` in `shared/wood.ts`): right of the
-  house, clear of the cairn's hill. Which trees stand is a rule (dry, gentle ground, off the
-  path, nothing before the door). Reshape the land or move the shelter and look at `hero`,
-  `wood`, `shelter` and `east` again; `east` is now mostly wood, with the house hidden in it.
-- **The infield is typed in to fit `hero`** (`FIELD`, `HEAD`, `FOLD` in `shared/infield.ts`),
-  like the shelter's site. What it holds is read from the land: the rigs lie down its fall
-  and stop short of the dyke, draped on the drawn grid (`grid.heightAt`). Its tests keep the
-  walls off the path, the house, the way to its door, every tree and every low camera, and
-  the field dyke on dry ground. The wood does not know about the walls: the test does.
-  Move the shelter, the path or the land and look at `hero`, `landing`, `boat`, `infield`.
-- The walls are solid only to the eye: the explore walk goes through them, and the flown
-  legs clear them only because they keep five units up.
-- The lone birches are strewn by rule over the whole island (`strew`). One stands by the
-  landing, in `hero`, `landing` and `boat`, where the pennant flies across its crown. Tests
-  keep every tree off every postcard's camera and out of the tour's way: move a view or a
-  rule and they say so.
-- Stops on borrowed time: `skerry` and `wood` (the afternoon's legs were cut to pay for them:
-  `east` 5, `skerry` 5, `wood` 5, `shelter` 7, `boat` 4, `starlings` 5), `mirror` and `moor`
-  (`ridge` 5 + `moor` 5 + a dwell = the 15 s leg they split). Change one and the day test
-  fails until they sum to what they did. `burn` grew `DAY` by its stop and leg, and `ridge`
-  fell before sunrise: `cove`'s leg was given 22 s to hold it (the sun is half a degree up
-  there now). The next view will need that again, or `EDGE` and `SLOW` retuned.
-- Nothing knows a tree is there but the boulders: an exploring visitor walks through a trunk,
-  tufts grow against it, and the lamp lights the far side of it. The crowns are lit as if
-  half turned to the sky (`SKYWARD` in `wood/timber.ts`), so under the moon they are a little
-  brighter than the grass.
-- A tree's shadow is in the sun's one shadow map, a few texels a trunk. The leaves are solid
-  lumps: no light comes through a crown and none falls dappled under it.
+  house, clear of the cairn's hill. Which trees stand is a rule. Reshape the land or move the
+  shelter and look at `hero`, `wood`, `shelter` and `east` (mostly wood now) again.
+- **The infield is typed in to fit `hero`** (`FIELD`, `HEAD`, `FOLD` in `shared/infield.ts`).
+  What it holds is read from the land. Its tests keep the walls off the path, the house, the
+  way to its door, every tree and every low camera; the wood does not know the walls, the
+  test does. Move the shelter, the path or the land and look at `hero`, `landing`, `boat`,
+  `infield`.
+- The walls are solid only to the eye: the walk goes through them, and the flown legs clear
+  them only because they keep five units up.
+- The lone birches are strewn by rule (`strew`). One stands by the burn below the dyke (in
+  `hero`, `landing`, `boat`; from `burn` it stands before the mill). Tests keep every tree
+  off every camera and out of the tour's way.
+- **The afternoon has no time left to lend.** `skerry`, `wood` and now `mill` stand on time
+  cut from its legs: `east` 4, `skerry` 4, `wood` 3, `shelter` 5, `boat` 4, `infield` 4,
+  `mill` 4.5, `flock` 3, `burn` 3.5, `starlings` 4. `skerry`'s leg turns the camera 33 degrees
+  a second and `mill`'s 32.5, of the 35 the test allows. `mirror` and `moor` split a 15 s leg.
+  Change one and the day test fails until they sum to what they did. Growing `DAY` instead
+  does not work as it stands: 9 s more put `ridge` two degrees under the horizon, and each
+  second then added to `cove`'s leg (22 s now, the sun half a degree up at `ridge`) won back
+  0.15. The next view needs `EDGE` and `SLOW` retuned first.
+- Nothing knows a tree is there but the boulders: a visitor walks through a trunk, tufts grow
+  against it, the lamp lights its far side. The crowns are lit as if half turned to the sky
+  (`SKYWARD` in `wood/timber.ts`), a little bright under the moon; they are solid lumps, with
+  a few texels of shadow and none dappled under them.
 
 - The first frame waits for every shader program to link (`lib-stack/README.md`, "Tried and
-  dropped"). Fewer programs would help: the gate counts 20.
+  dropped").
 - The terrain's slope is read from `world.grid`, so it is measured across grid points, which
   are further apart on the smaller tiers. A rule keyed to slope (the rock line) lands a little
   differently on each tier.
@@ -57,49 +56,39 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
 - The tour's flown legs keep five units over the ground but do not know what stands on it.
   `climb` to `island` leaves the cairn 21 units to one side. A new view near a tall thing needs
   a look at the legs into and out of it.
-- A leg between two views that face opposite ways swings the camera round as it passes what it
-  was looking at (`ridge` to `hero` did, at 72 degrees a second, until `east` went between
-  them). A test now walks the whole loop and fails over 35 a second: add a view between.
-- The path is colour only. The ground under it is as steep across as the hill it crosses;
-  benching it would change `ground.heightAt` for everything that stands on the land.
+- A leg between views that face opposite ways whips the camera round: a test walks the loop
+  and fails over 35 degrees a second. Add a view between, or give the leg time.
+- The path is colour only: benching it would change `ground.heightAt` for everything that
+  stands on the land.
 - The path follows the land, but two views do not follow the path: `landing` and `climb` are
   typed in at its foot and 68 units up it. Reshape the land or move `LANDING_BEARING`
   (`shared/path.ts`) and they must be moved too; the tour test says when the walk has left it.
-- The shelter has no inside and the walk knows only `ground`: an exploring visitor can walk
-  through its walls and sees the stones from behind. Its lamp casts no shadow, so a little of
-  its light reaches the grass behind the gable.
-- The shelter's site (`shared/shelter.ts`) and the `shelter` postcard are typed in. The floor,
-  the facing and the way to the door are read from the land and the path, and the land is not
-  benched for it: the walls simply start where the hill is. Reshape the land and look again.
-- The boat's place is a rule (`boat/mooring.ts`): off the landing, to the side the wind does
-  not blow it back across, in water its own test says is deep enough from end to end. Its anchor
-  lies under the `landing` view's feet, and that view does not show the boat. Move `HEADING`
-  in `shared/wind.ts` or the landing and look at `hero`, `boat` and `landing` again.
-- The boat rides the sea's swell (`shared/swell.ts`) and lays its shadow on the water, but an
-  exploring visitor can walk through it. It makes no wake: at anchor it hardly moves.
-- The clouds' shadow and the sun's shadow map do not know about each other: a boulder's own
-  shadow is as dark under a cloud as in the open. The clouds' shadow is also only roughly
-  theirs now: it is laid as if the light never stood lower than 24 degrees (`REACH`), and a
-  puff's height over its cloud's base is ignored, so that a turning sun cannot send it racing.
+- The shelter's site (`shared/shelter.ts`) and its postcard are typed in; how it sits is read
+  from the land, which is not benched for it. Neither it nor the mill has an inside, and the
+  walk knows only `ground`: a visitor walks through their walls. The lamp casts no shadow.
+- The boat's place is a rule (`boat/mooring.ts`); its anchor lies under the `landing` view's
+  feet, and that view does not show the boat. Move `HEADING` in `shared/wind.ts` or the
+  landing and look at `hero`, `boat` and `landing` again. It rides the swell and shadows the
+  water; a visitor walks through it; it makes no wake.
+- The clouds' shadow and the sun's shadow map do not know each other: a boulder's own shadow
+  is as dark under a cloud as in the open. The clouds' is laid as if the light never stood
+  lower than 24 degrees (`REACH`), so a turning sun cannot send it racing.
 - `HEAD_START` in `shared/wind.ts` was picked by looking at second ten of this layout of
-  clouds: the low sun stands clear in `hero` with two bars of cloud under it. Changing their
-  count, their layout, the wind's speed or heading, or the sun's place at second ten
-  (`OPENING`, `NORTH` in `shared/daylight.ts`) moves them: pick it again. The same clock
-  decides the gusts the smoke at second ten left the chimney in, and so its bend.
+  clouds: the low sun stands clear in `hero` with two bars of cloud under it. Change the
+  clouds, the wind or the sun's place at second ten (`OPENING`, `NORTH`) and pick it again.
+  The same clock bends the smoke.
 
 - **The day is typed in to fit the tour.** `DAY` in `shared/daylight.ts` is the loop's length
-  (313.5 s since `burn`) and `OPENING`, `EDGE` and `SLOW` put each stop at its hour. Add a view,
-  or give a leg its own `travel`, and a test in `rig/tour.test.ts` fails until `DAY` follows;
-  `OPENING` follows `DAY` by itself so second ten keeps its sun. Then print the sun's height at
-  every stop and look at the night ones again (`flock` moved sunrise from `cove` toward `ridge`). A visitor who takes the
-  camera keeps the same clock: nothing lets them wait for the moon or hurry the dawn.
+  (313.5 s) and `OPENING`, `EDGE` and `SLOW` put each stop at its hour. Change a leg's time
+  and a test in `rig/tour.test.ts` fails until `DAY` follows; `OPENING` follows `DAY` by
+  itself. Then print the sun's height at every stop. A visitor who takes the camera keeps the
+  same clock: nothing lets them wait for the moon or hurry the dawn.
 - Every postcard, and so every thumbnail in the gallery, is taken at second ten: the gallery
   will never show the night. A second picture of an iteration (`seaward` at second 90) needs
   `budgets.json` and the site's scripts: a framework day.
-- The moon and the shelter do not fit in one frame from any ground the smoke does not blow
-  across: the hill behind the shelter is too steep. `seaward` settles for the path, the
-  landing's stones, the boat and the moon's road on the water; the lamp shows only as a warm
-  stone at the picture's foot.
+- The moon and the shelter do not fit in one frame: the hill behind the shelter is too steep.
+  `seaward` settles for the path, the boat and the moon's road on the water; the mill's roof
+  is in its corner now.
 - At the handover (sun seven degrees down) nothing casts a shadow for a few seconds and the
   land is lit by the sky alone. The light on the land never comes from lower than seven
   degrees (`LOWEST`), so at sunset the shadows are shorter than the sun says.
@@ -112,15 +101,14 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   not. Move the sun's place at second ten (`OPENING`, `NORTH`) or `hero`, and retune it by
   printing the skyline from `hero` bearing by bearing, as the test does.
 
-- **The mirror draws the world twice** (`water/mirror.ts`): every frame, everything over the
-  water again from under it, at half the picture's size (a third on a phone): a draw call
-  an object and its triangles again. Tufts and barley are kept out of it everywhere
-  (`keepOutOfMirror`), the wood and the dykes on a phone. Something new that is many and
-  small should be kept out too. It draws even when little water is on screen.
-- **Every shader is TSL** since `tsl` (`.claude/skills/threejs-scenes/references/tsl.md`):
-  node materials, three's `WebGPURenderer` forced onto WebGL 2 so a visitor gets what the
-  gate judged. Native WebGPU is one flag in `main.ts`, the owner's to turn: untried here. The mirror shares the picture's programs now: 20 live
-  of 40, where GLSL had 31.
+- **The mirror draws the world twice** (`water/mirror.ts`): everything over the water again
+  from under it, at half the picture's size (a third on a phone). Tufts, barley, stooks and
+  the mill's boards are kept out of it (`keepOutOfMirror`), the wood and every wall's stones
+  on a phone. Something new that is many and small should be too. It draws even when little
+  water is on screen.
+- **Every shader is TSL** (`.claude/skills/threejs-scenes/references/tsl.md`): node
+  materials, three's `WebGPURenderer` forced onto WebGL 2 so a visitor gets what the gate
+  judged. Native WebGPU is one flag in `main.ts`, the owner's to turn: untried here.
 - `main.ts` reaches into three's backend to keep instance matrices out of uniform arrays:
   look at it again when three is bumped.
 - The sea is still a flat plane: the swell tilts its light and the reflection, it does not move
@@ -130,12 +118,11 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   landing's stones, the head-dyke's foot. Something new that stands in the water must say so,
   and `water` must stay last in `index.ts` to hear it. The boat is three uniforms, set each step.
 
-- **The hefts are typed in to fit `hero`** (`HEFTS` in `shared/flock.ts`): the brae under the
-  cairn, the inbye above the landing, the dooryard, the fold, and two on the far side for
-  `cove`. Which ground a sheep stands on is a rule (grass, not steep, clear of the path and its
-  waymarks, walls, trees, house, cairn, boulders and every postcard's camera); a test walks
-  every sheep's round against it. Boulders are known only once `rocks` has built
-  (`world.clutter`), so the test's flock does not know them. Move a view, and look again.
+- **The hefts are typed in to fit `hero`** (`HEFTS` in `shared/flock.ts`): the brae, the
+  inbye, the dooryard, the fold, and two on the far side for `cove`. Which ground a sheep
+  stands on is a rule; a test walks every sheep's round against it. Boulders are known only
+  once `rocks` has built (`world.clutter`), so the test's flock does not know them. Move a
+  view, and look again.
 - A sheep's round is a loop of two to four places, walked in straight lines; it never meets
   another sheep, so two can walk through each other. Nothing but the boulders and the walls
   turn them: an exploring visitor walks through a sheep, and the tour's legs ignore them.
@@ -173,26 +160,45 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   the cloud is what reads.
 
 - **Every surface has a texture** (`shared/surface.ts`): noise worked out a fragment, no
-  image. `finish(surface)` on a lit material gives it colour and relief (a bumped normal).
-  Still things read `inWorld`, moving ones `inItself`. The land decides sand, turf, heather
-  and rock a fragment from `aLand` (`terrain/land.ts`); its vertex colours are gone. Each kind
-  of finish is a program: 20 became 29. A grain fades out once a pixel spans half a cycle
-  (`kept`): from `hero` only the coarse octaves show, and the brae is in shadow at second ten.
+  image. `finish(surface)` on a lit material gives it colour and relief. Still things read
+  `inWorld`, moving ones `inItself`. The land decides sand, turf, heather and rock a fragment
+  from `aLand` (`terrain/land.ts`). Each kind of finish is a program (29 of 40): make a new
+  material like an old one and it costs none. A grain fades out once a pixel spans half a
+  cycle (`kept`); the brae is in shadow at second ten.
 - **Displacement is only the crags**: the land's vertices are pushed where it is rock
   (`aLand.w`), never where anything stands, nor near the burn. Relief elsewhere is light, not
   shape: real displacement wants a finer land near the camera, and triangles the budget lacks.
 - Not textured: sea, clouds, smoke, barley, tufts, pennant, starlings, the lamp.
 - **The burn's course is the land's** (`shared/burn.ts`): it falls from `SPRING` (typed in to
-  fit `hero`) and turns aside from the path and the landing's slip (`SHY`, `NEAR`). Its water
-  lies on the land, which is not cut for it; the head-dyke is laid across it; nothing walks
-  round it but the sheep. It is not in the sun's shadow map, and no rain swells it. The pool
-  is a slow reach, not level water.
+  fit `hero`) and turns aside from the path and the landing's slip (`SHY`, `NEAR`), so below
+  the dyke it runs across a slope of 0.5 to 0.9, not down it: nothing can be built there. Its
+  water lies on the land, which is not cut for it. It is not in the sun's shadow map, and no
+  rain swells it. The pool is a slow reach, not level water. From `hero`, lower than the
+  pool, only water that falls toward the camera shows.
+- **The mill is typed in to fit `hero`** (`ABOVE_POOL`, `MILL_RACE` in `shared/mill.ts`):
+  astride the burn on the one gentle shelf, under the cairn, 3.3 from the path and 2 from the
+  fold. It hides the white falls under the spring from `hero`; from `mill` they show over its
+  roof. The walls start where the hill is; the burn lies on the land under the floor and is
+  only called white below it (`CHURN` in `features/burn`); the wheel turns at one pace. Its
+  door is shut and nothing is inside. A visitor walks through it. Tests hold its site, the
+  way to its door over the bridge, the water-gate and the tour off its walls.
+- The water-gate is found, not typed (`mill.gate`: where the burn meets a wall). `dyke.ts`
+  leaves out the stones within it after their draws are taken; its poles are in the mill's
+  one mesh of boards. Stones, courses and turf roofs are shared now (`shared/masonry.ts`,
+  `shared/roof.ts`): a third building is a plan and a list of openings.
+- **The harvest is a rule** (`CUT` in `infield/rigs.ts`): the first two rigs of each plot of
+  barley are stubble, with stooks down their crowns. The stooks wear the stone's material to
+  share its program, so their grain is stone's. Nothing has been carried: no stack, no sheaf
+  at the mill.
+- The sheep's rule is passed the burn and the mill now (the feature had left the burn out):
+  the brae's flock stands a little differently.
 - **The grass is not planted** (`features/grass`): the same blades are gathered ahead of the
   camera (`PATCH`), so `hero`, out on the water, draws almost none and still pays for them.
   Where it grows is one picture (`sward.ts`): move a wall or the path and it follows. Blades
   cast no shadow and stand through a sheep's feet. Tufts are still planted, as before.
-- Triangles: desktop 76%, mobile 79%. The dyke's stones are 20 facets on every tier now, and
-  the waymarks' on a phone.
+- Triangles: desktop 77%, mobile 79%. The dykes' and the mill's stones are 20 facets on every
+  tier, the waymarks' on a phone. To pay for the mill a phone leaves the house's stones out
+  of the mirror and the mill's out of the shadow pass (the dark block inside throws it).
 
 ## Ideas
 
@@ -201,7 +207,7 @@ Parts for a chapter, never a day by themselves.
 - A second colour of dawn: the stops are by the sun's height alone, so morning and evening
   are the same sky. A cooler, pinker east would need the hour as well as the height.
 - Whitecaps far out under a gust. Terns over the stacks. Weed on the reef below the tide.
-- Stooks, a peat stack, a scythe left on the dyke. A kailyard against the gable.
+- A peat stack, a scythe left on the dyke. A kailyard against the gable.
 - Leaves torn off the wood by a gust. A few birches turned yellow.
 - The boat's sail furled on its yard; a creel or a net on the beach.
 - Parallax in the land's relief; wet stone beside the burn; ripples where a seal dives.

@@ -112,7 +112,7 @@ export function createInfieldFeature (world: World): Feature {
       // its cracks read as straw at a stook's size. Their colour is their own.
       const straw = createLitMaterial(world, { name: 'infield-stooks' })
 
-      straw.finish(stonework(inItself(world.quality.tier)))
+      straw.finish(stonework(inWorld(world.quality.tier)))
       stooks = standStooks(field.stooks, straw, rng.fork('infield:stooks'))
 
       // The ears are many and small; in the sea the rigs' colour is enough.

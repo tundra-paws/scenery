@@ -48,16 +48,16 @@ export function createTirlGeometry (depth: number): THREE.BufferGeometry {
   shaft.translate(0, -(depth + UNDER) / 2, 0)
 
   const blades = Array.from({ length: TIRL.blades }, (_, blade) => {
-    const turn  = Math.PI * 2 * blade / TIRL.blades
-    const board = new THREE.BoxGeometry(TIRL.radius - 0.1, TIRL.tall, 0.06)
+    const turn = Math.PI * 2 * blade / TIRL.blades
+    const vane = new THREE.BoxGeometry(TIRL.radius - 0.1, TIRL.tall, 0.06)
 
     // Each leans back from the way it turns, to cup the water: from the
     // side they are eight facets in different lights, not one band.
-    board.rotateX(0.62)
-    board.translate((TIRL.radius + 0.1) / 2, foot + TIRL.tall / 2, 0)
-    board.rotateY(turn)
+    vane.rotateX(0.62)
+    vane.translate((TIRL.radius + 0.1) / 2, foot + TIRL.tall / 2, 0)
+    vane.rotateY(turn)
 
-    return board
+    return vane
   })
 
   // The hub the blades are let into.
