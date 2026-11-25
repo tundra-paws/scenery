@@ -103,13 +103,15 @@ export function createBushGeometry (): THREE.BufferGeometry {
 
 /** Whether a bush may stand here: off every way and wall, and clear of the cairn. */
 function clear (world: World, x: number, z: number): boolean {
-  const { path, shelter, infield, summit, burn, mill } = world
+  const { path, shelter, infield, summit, burn, mill, yard } = world
 
   return path.distanceTo(x, z) > OFF_PATH &&
     shelter.distanceTo(x, z) > OFF_HOUSE &&
     shelter.distanceToSpur(x, z) > OFF_HOUSE &&
     mill.distanceTo(x, z) > OFF_HOUSE &&
     mill.distanceToSpur(x, z) > OFF_HOUSE &&
+    yard.distanceTo(x, z) > OFF_HOUSE &&
+    yard.distanceToSpur(x, z) > OFF_HOUSE &&
     infield.distanceTo(x, z) > OFF_DYKE &&
     burn.distanceTo(x, z) > burn.pool.half + OFF_BURN &&
     !infield.inField(x, z) &&

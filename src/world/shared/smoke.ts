@@ -1,12 +1,11 @@
-// src/world/features/shelter/smoke.ts
+// src/world/shared/smoke.ts
 import * as THREE from 'three'
 import type { QualityTier } from 'threejs-scenes'
 import { createNoise3D, hash2, smoothstep } from 'threejs-scenes/primitives'
 
-
-import { createLitMaterial } from '../../shared/lit.ts'
-import { PALETTE } from '../../shared/palette.ts'
-import type { Wind } from '../../shared/wind.ts'
+import { createLitMaterial } from './lit.ts'
+import { PALETTE } from './palette.ts'
+import type { Wind } from './wind.ts'
 
 
 /** Puffs in the air at once. Fewer on a phone, and the plume is the same length: they are only further apart. */
@@ -57,6 +56,16 @@ interface SmokeOptions {
 
   /** What the puffs are drawn with (`createSmokeMaterial`). */
   material: THREE.Material
+
+  /** The mesh's name. The house's own, unless said. */
+  name?: string
+
+  /**
+   * How much of a hearth's smoke this is: 1 is the house's fire. A smaller
+   * fire sends up smaller puffs that are gone sooner, as many of them, so
+   * its plume is thinner and shorter and still one thing.
+   */
+  fire?: number
 }
 
 /** One puff: the clouds' own shape in small, all the way round. */
@@ -95,8 +104,8 @@ export function createSmokeMaterial (air: Parameters<typeof createLitMaterial>[0
 }
 
 /**
- * Smoke from the chimney: the first thing in the world to read the wind on
- * the CPU.
+ * Smoke from a chimney: the first thing in the world to read the wind on
+ * the CPU. The house's fire sends it up, and the kiln's a thinner one.
  *
  * A puff is not simulated. Where it is depends only on the time and on which
  * puff it is: it left the chimney a known while ago, into air that was
@@ -106,13 +115,14 @@ export function createSmokeMaterial (air: Parameters<typeof createLitMaterial>[0
  * whenever it is asked for. Puffs are opaque, like the clouds: they come from
  * nothing and thin to nothing by size, not by fading.
  */
-export function createSmoke ({ tier, seed, wind, from, material }: SmokeOptions): Smoke {
+export function createSmoke ({ tier, seed, wind, from, material, name = 'shelter-smoke', fire = 1 }: SmokeOptions): Smoke {
   const count = PUFFS[tier]
+  const life  = LIFE * fire
 
   const mesh  = new THREE.InstancedMesh(createPuffGeometry(seed), material, count)
-  const reach = LIFE * (RISE + wind.speed * (CARRY + GUST))
+  const reach = life * (RISE + wind.speed * (CARRY + GUST))
 
-  mesh.name = 'shelter-smoke'
+  mesh.name = name
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
   // The puffs move every step, so the sphere three culls by is given once,
@@ -124,10 +134,10 @@ export function createSmoke ({ tier, seed, wind, from, material }: SmokeOptions)
 
     drift (time) {
       for (let puff = 0; puff < count; puff += 1) {
-        const turn = time / LIFE + puff / count
+        const turn = time / life + puff / count
         const born = Math.floor(turn)
         const age  = turn - born
-        const gone = age * LIFE
+        const gone = age * life
 
         // How hard it was blowing over the chimney when this puff left it.
         const gust  = wind.gustAt(from.x, from.z, time - gone)
@@ -137,9 +147,9 @@ export function createSmoke ({ tier, seed, wind, from, material }: SmokeOptions)
         // wandering, from which puff it is and how many times it has left.
         // It swells as it leaves, and only near the end does it thin away, so
         // the plume is one thing for most of its length and crumbs at its tip.
-        const size  = (BORN + (FULL - BORN) * smoothstep(0, 0.35, age)) * smoothstep(0, 0.03, age) * (1 - smoothstep(0.62, 1, age))
+        const size  = fire * (BORN + (FULL - BORN) * smoothstep(0, 0.35, age)) * smoothstep(0, 0.03, age) * (1 - smoothstep(0.62, 1, age))
         const far   = speed * (gone - CATCH * (1 - Math.exp(-gone / CATCH)))
-        const stray = STRAY * Math.sqrt(age)
+        const stray = STRAY * fire * Math.sqrt(age)
 
         dummy.position.set(
           from.x + wind.direction[0] * far + (hash2(born, puff + 0.3) - 0.5) * stray,

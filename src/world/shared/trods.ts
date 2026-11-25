@@ -7,6 +7,7 @@ import type { Infield } from './infield.ts'
 import type { Mill } from './mill.ts'
 import type { Path, Waypoint } from './path.ts'
 import type { Shelter } from './shelter.ts'
+import type { Yard } from './yard.ts'
 
 
 /** Trods looked for on each heft, and the tries for where one starts. */
@@ -44,10 +45,13 @@ interface Site {
 
   /** The mill, where there is one: no trod runs through it, or along the way to its door. */
   mill?: Mill
+
+  /** The kiln and the stacks, where there are any: no trod runs through them, or along the ways to them. */
+  yard?: Yard
 }
 
 /** Whether a trod may run through a place. */
-function open ({ ground, summit, path, shelter, infield, mill }: Site, x: number, z: number): boolean {
+function open ({ ground, summit, path, shelter, infield, mill, yard }: Site, x: number, z: number): boolean {
   const { fold } = infield
 
   return ground.heightAt(x, z) > ground.waterLevel + SHORE &&
@@ -57,7 +61,7 @@ function open ({ ground, summit, path, shelter, infield, mill }: Site, x: number
     path.distanceTo(x, z) > OFF.path &&
     shelter.distanceTo(x, z) > OFF.shelter &&
     shelter.distanceToSpur(x, z) > OFF.spur &&
-    (mill === undefined || mill.distanceTo(x, z) > OFF.shelter && mill.distanceToSpur(x, z) > OFF.spur) &&
+    [ mill, yard ].every(built => built === undefined || built.distanceTo(x, z) > OFF.shelter && built.distanceToSpur(x, z) > OFF.spur) &&
     Math.hypot(x - summit.x, z - summit.z) > OFF.summit &&
     Math.hypot(x - fold.x, z - fold.z) > fold.radius + OFF.fold
 }

@@ -76,7 +76,7 @@ export function createTerrain (world: World): Feature {
       material.finish(land.surface)
       material.positionNode = land.position
 
-      wear = createPathWear(world.path, world.quality.tier, [ world.shelter.spur, world.infield.track, world.mill.spur ], traceTrods(world, world.seed))
+      wear = createPathWear(world.path, world.quality.tier, [ world.shelter.spur, world.infield.track, world.mill.spur, ...world.yard.ways ], traceTrods(world, world.seed))
 
       wearPath(material, wear, land.grit)
       shore = wetTheShore(material, world.wind, ground.waterLevel)

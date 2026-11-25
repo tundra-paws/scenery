@@ -5,13 +5,8 @@ import type { SeededRng } from 'threejs-scenes'
 
 import { commitInstances } from '../../shared/instances.ts'
 import { PALETTE } from '../../shared/palette.ts'
+import { createSheafGeometry } from '../../shared/sheaf.ts'
 import type { Stook } from './rigs.ts'
-
-/**
- * A sheaf, foot to ears, as a radius at each height: spread where it
- * stands, drawn in where it is bound, and its ears hanging out over the band.
- */
-const SHEAF = [[ 0.19, 0 ], [ 0.085, 0.66 ], [ 0.2, 1.02 ], [ 0.02, 1.1 ]] as const
 
 /** Pairs of sheaves in a stook, how far apart the pairs stand along it, how far each foot is from its middle line, and how far a sheaf leans in. */
 const PAIRS = 3
@@ -28,13 +23,13 @@ function createStookGeometry (): THREE.BufferGeometry {
   const sheaves = Array.from({ length: PAIRS * 2 }, (_, index) => {
     const side  = index & 1 ? 1 : -1
     const pair  = (index >> 1) - (PAIRS - 1) / 2
-    const sheaf = new THREE.LatheGeometry(SHEAF.map(([ radius, height ]) => new THREE.Vector2(radius, height)), 5)
+    const sheaf = createSheafGeometry()
 
     sheaf.rotateX(-side * LEAN)
     sheaf.rotateY(index * 1.3)
     sheaf.translate(pair * APART, 0, side * FOOT)
 
-    return sheaf.deleteAttribute('uv')
+    return sheaf
   })
 
   const stook = mergeGeometries(sheaves)

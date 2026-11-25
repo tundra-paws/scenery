@@ -34,6 +34,8 @@ import { createWind } from './shared/wind.ts'
 import type { Wind } from './shared/wind.ts'
 import { createWood } from './shared/wood.ts'
 import type { Wood } from './shared/wood.ts'
+import { createYard } from './shared/yard.ts'
+import type { Yard } from './shared/yard.ts'
 
 
 /**
@@ -76,7 +78,8 @@ export type Feature = AppModule<WorldState>
  * loose on the land, which the flock grazes round. And for the reef off
  * the east shore, its mark and its seals. And for the water that runs off
  * it: the burn, which everything on the brae keeps out of, and the mill
- * that stands over it.
+ * that stands over it. And for where the harvest comes home to: the kiln
+ * and the stacks.
  */
 export interface World {
   seed:    number
@@ -102,6 +105,9 @@ export interface World {
 
   /** The mill astride the burn above its pool, the way to its door, and the gap the head-dyke leaves the water. */
   mill: Mill
+
+  /** The kiln on the shelf by the fold and the stacks before the house's door, and the ways to them. */
+  yard: Yard
 
   /** The field below the shelter, its dyke and gate, and the fold across the path. */
   infield: Infield
@@ -149,6 +155,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     shelter,
     burn,
     mill:    createMill(ground, path, burn, infield),
+    yard:    createYard(ground, path, shelter),
     infield,
     wood:    createWood({ ground, summit, path, shelter }, seed),
     moor:    createMoor(ground, seed),

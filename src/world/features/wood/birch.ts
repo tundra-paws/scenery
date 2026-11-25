@@ -1,6 +1,7 @@
 // src/world/features/wood/birch.ts
 import * as THREE from 'three'
 import type { QualityTier, SeededRng } from 'threejs-scenes'
+import { hash2, smoothstep } from 'threejs-scenes/primitives'
 
 import { PALETTE } from '../../shared/palette.ts'
 import type { Tree } from '../../shared/wood.ts'
@@ -39,9 +40,21 @@ const SQUASH = 0.92
 /** The angle between one limb and the next round the trunk: the golden one, so no two stand over each other. */
 const ROUND = 2.4
 
+/**
+ * The year has turned with the harvest: the birches have begun to yellow.
+ * How much of a crown has gone over, in a tree that grew in shelter and in
+ * one that grew in the open (by how far it leans: `Tree.lean`); how much
+ * more of it toward the top, which goes first; and how far over a lump
+ * that has turned is, from and to.
+ */
+const TURNED = { lean: [ 0.1, 0.32 ], share: [ 0.16, 0.8 ], top: 0.22, gone: [ 0.6, 1 ]} as const
+
 const BARK = new THREE.Color(PALETTE.bark)
 const LEAF = new THREE.Color(PALETTE.grass)
 const DRY  = new THREE.Color(PALETTE.grassDry)
+
+/** A leaf that has turned: the barley's own gold, a little riper. No colour the field does not have. */
+const GOLD = new THREE.Color(PALETTE.barley).offsetHSL(-0.012, 0.16, 0.02)
 
 /** The near black of a birch's scars and of the rough bark at its foot, and the brown of its thin wood, half way to that. */
 export const SCAR = new THREE.Color(PALETTE.rock).multiplyScalar(0.36)
@@ -81,6 +94,20 @@ function spine (tree: Tree, crook: number, phase: number, part: number, out: THR
 function leafGreen (rng: SeededRng): THREE.Color {
   return tint.copy(LEAF).lerp(DRY, rng.range(0, 0.6))
     .offsetHSL(0, 0.05, rng.range(-0.02, 0.06))
+}
+
+/**
+ * The colour of a lump of leaves this late in the year: its green, or gone
+ * over to gold if the turn has reached it. `part` is how far up the tree it
+ * hangs. Which lumps have turned is read from where they are, not drawn
+ * from the stream, so every tree is still the tree it was.
+ */
+function leafNow (rng: SeededRng, tree: Tree, at: THREE.Vector3, part: number): THREE.Color {
+  const green = leafGreen(rng)
+  const share = TURNED.share[0] + (TURNED.share[1] - TURNED.share[0]) * smoothstep(TURNED.lean[0], TURNED.lean[1], tree.lean) + TURNED.top * (part - 0.5)
+  const luck  = hash2(at.x * 7.31, at.z * 7.31)
+
+  return luck < share ? green.lerp(GOLD, TURNED.gone[0] + (TURNED.gone[1] - TURNED.gone[0]) * hash2(at.z * 3.7, at.x * 3.7)) : green
 }
 
 /**
@@ -144,7 +171,7 @@ export function growBirch (timber: Timber, tree: Tree, { tier, lee, rng, ball }:
       timber.limb([{ at: from, radius: radius(part) * 0.55 }, { at: to, radius: 0 }], 3, () => TWIG)
     }
 
-    timber.lump(ball, { at: to, radius: size, lee: lean, stretch: STRETCH, squash: SQUASH, cut: rng.range(0, 90) }, leafGreen(rng), rng.range(0.05, 1))
+    timber.lump(ball, { at: to, radius: size, lee: lean, stretch: STRETCH, squash: SQUASH, cut: rng.range(0, 90) }, leafNow(rng, tree, to, last ? 1 : part), rng.range(0.05, 1))
   }
 }
 

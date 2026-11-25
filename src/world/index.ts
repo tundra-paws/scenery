@@ -17,6 +17,7 @@ import { createTerrain } from './features/terrain/index.ts'
 import { createTufts } from './features/tufts/index.ts'
 import { createWaymarks } from './features/waymarks/index.ts'
 import { createWoodFeature } from './features/wood/index.ts'
+import { createYardFeature } from './features/yard/index.ts'
 import { createWater } from './features/water/index.ts'
 import type { Feature, World } from './world.ts'
 
@@ -48,6 +49,7 @@ export function createFeatures (world: World): Feature[] {
     createMillFeature(world),
     createShelterFeature(world),
     createInfieldFeature(world),
+    createYardFeature(world),
     createWoodFeature(world),
     createFlockFeature(world),
     createBoat(world),

@@ -11,6 +11,7 @@ import type { Mill } from './mill.ts'
 import type { Path, Waypoint } from './path.ts'
 import type { Shelter } from './shelter.ts'
 import type { Wood } from './wood.ts'
+import type { Yard } from './yard.ts'
 
 
 /**
@@ -172,6 +173,9 @@ interface Site {
 
   /** The mill, where there is one: no sheep stands in it, or on the way to its door. */
   mill?: Mill
+
+  /** The kiln and the stacks, where there are any: no sheep stands among them, or on the ways to them. */
+  yard?: Yard
 }
 
 /** Whether a sheep may stand at a place: penned in the fold, or out on the island. */
@@ -190,13 +194,13 @@ export interface Flock {
 
 /** The rule for a place a sheep may graze: on the island's open grass, clear of everything that stands on it. */
 function makeRule (site: Site, clear: (x: number, z: number) => number): Rule {
-  const { ground, summit, path, shelter, infield, wood, burn, mill } = site
-  const cameras                                                      = VIEWS.map(view => resolveView(view, ground).position)
-  const fold                                                         = infield.fold
-  const dry                                                          = (x: number, z: number): boolean => burn === undefined || burn.distanceTo(x, z) > OFF_BURN
+  const { ground, summit, path, shelter, infield, wood, burn, mill, yard } = site
+  const cameras                                                            = VIEWS.map(view => resolveView(view, ground).position)
+  const fold                                                               = infield.fold
+  const dry                                                                = (x: number, z: number): boolean => burn === undefined || burn.distanceTo(x, z) > OFF_BURN
 
-  /** Off both buildings and the ways to their doors. */
-  const open = (x: number, z: number): boolean => [ shelter, mill ].every(house => house === undefined || house.distanceTo(x, z) > OFF_SHELTER && house.distanceToSpur(x, z) > OFF_SPUR)
+  /** Off everything built and the ways to it. */
+  const open = (x: number, z: number): boolean => [ shelter, mill, yard ].every(house => house === undefined || house.distanceTo(x, z) > OFF_SHELTER && house.distanceToSpur(x, z) > OFF_SPUR)
 
   return (x, z, penned) => {
     const height = ground.heightAt(x, z)

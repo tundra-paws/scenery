@@ -52,11 +52,13 @@ const PROFILE = [
  * gives to the wind. Barley sways and pales in a gust; potato haulm is dark
  * and lumpy and barely moves; a rig left in grass is the meadow again, and
  * the rigs under it show. Stubble is barley that has been cut: the same
- * colour bleached, a hand high, and stiff.
+ * colour bleached, a hand high, and stiff; `carried` is stubble whose stooks
+ * have gone to the stacks.
  */
 const CROPS = {
   barley:  { colour: PALETTE.barley, light: 0, dull: 0, lift: 1, rough: 0.1, give: 1 },
   stubble: { colour: PALETTE.barley, light: 0.09, dull: 0.14, lift: 0.4, rough: 0.035, give: 0.06 },
+  carried: { colour: PALETTE.barley, light: 0.11, dull: 0.2, lift: 0.4, rough: 0.035, give: 0.06 },
   potato:  { colour: PALETTE.grass, light: -0.07, dull: 0, lift: 1.2, rough: 0.16, give: 0.25 },
   lea:     { colour: PALETTE.grass, light: 0.02, dull: 0, lift: 0.55, rough: 0.05, give: 0.45 },
 } as const
@@ -66,12 +68,15 @@ const ROTATION = [ 'barley', 'potato', 'barley', 'barley', 'lea', 'potato' ] as 
 const PLOT     = [ 3, 5 ] as const
 
 /**
- * The harvest has begun: of every plot of barley, this many rigs are cut,
- * from the side the reaper started at, and their sheaves stood up in
- * stooks to dry, so far apart along the rig and no nearer its ends than that.
+ * The harvest is most of the way home. A plot of barley is cut from the
+ * side the reaper started at: its first rigs, this many, are bare stubble,
+ * their sheaves carried to the stacks; its last, this many, still stand;
+ * and the rigs between are cut and stand in stooks to dry, so far apart
+ * along the rig and no nearer its ends than that.
  */
-const CUT   = 2
-const STOOK = { every: 2.3, end: 1.1 } as const
+const CARRIED  = 2
+const STANDING = 1
+const STOOK    = { every: 2.3, end: 1.1 } as const
 
 /** Module-scope scratch. */
 const tint = new THREE.Color()
@@ -115,6 +120,14 @@ interface Plough {
   stooks: Stook[]
 }
 
+/** What stands on a rig of barley now: `cut` rigs of its plot come before it, and `left` after. */
+function reaped (cut: number, left: number): Crop {
+  if (left < STANDING)
+    return 'barley'
+
+  return cut < CARRIED ? 'carried' : 'stubble'
+}
+
 /** Which way the land falls across the field, on the whole: the way rigs are laid, so they drain. */
 function fallOf (ground: Ground, infield: Infield): readonly [number, number] {
   let dx = 0
@@ -150,9 +163,9 @@ function setOut (infield: Infield, fall: readonly [number, number], across: read
   const first = Math.min(...ends)
   const last  = Math.max(...ends)
   const rigs  = [] as Rig[]
-  let plot   = 0
-  let left   = lay.int(PLOT[0], PLOT[1])
-  let reaped = 0
+  let plot = 0
+  let left = lay.int(PLOT[0], PLOT[1])
+  let cut  = 0
 
   for (let side = Math.min(...sides) + PITCH / 2; side < Math.max(...sides); side += PITCH) {
     let best  = { from: 0, to: 0 }
@@ -178,19 +191,19 @@ function setOut (infield: Infield, fall: readonly [number, number], across: read
     if (best.to - best.from < 2)
       continue
 
-    // The first rigs of a plot of barley are the ones already cut.
-    const sown       = ROTATION[plot % ROTATION.length]!
-    const crop: Crop = sown === 'barley' && reaped < CUT ? 'stubble' : sown
+    // How far the harvest has got with this rig, if it is barley.
+    const seed       = ROTATION[plot % ROTATION.length]!
+    const crop: Crop = seed === 'barley' ? reaped(cut, left - 1) : seed
 
     rigs.push({ x: across[0] * side + fall[0] * best.from, z: across[1] * side + fall[1] * best.from, length: best.to - best.from, crop })
 
-    left   -= 1
-    reaped += 1
+    left -= 1
+    cut  += 1
 
     if (left === 0) {
-      plot  += 1
-      left   = lay.int(PLOT[0], PLOT[1])
-      reaped = 0
+      plot += 1
+      left  = lay.int(PLOT[0], PLOT[1])
+      cut   = 0
     }
   }
 
@@ -271,8 +284,8 @@ function sway (material: LitMaterial, wind: Wind): void {
  * The field's rigs, as one mesh: lazy beds, the old way of making a field on
  * thin ground, earth heaped into long beds between furrows and laid down the
  * fall of the land so the rain runs off. Sown in plots across the field:
- * barley, potatoes, and one plot left in grass. The first rigs of each plot
- * of barley are cut to stubble, and say where their stooks stand.
+ * barley, potatoes, and one plot left in grass. Most of the barley is cut
+ * to stubble (`reaped`), and the rigs still in stooks say where they stand.
  */
 export function ploughRigs (material: LitMaterial, lay: SeededRng, ground: Ground, grid: HeightGrid, infield: Infield, wind: Wind): Field {
   const fall   = fallOf(ground, infield)

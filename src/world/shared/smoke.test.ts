@@ -1,8 +1,8 @@
-// src/world/features/shelter/smoke.test.ts
+// src/world/shared/smoke.test.ts
 import { describe, expect, test } from 'bun:test'
 import * as THREE from 'three'
 
-import { createWind } from '../../shared/wind.ts'
+import { createWind } from './wind.ts'
 import { createSmoke } from './smoke.ts'
 
 

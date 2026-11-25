@@ -1,7 +1,7 @@
 // src/world/features/mill/timber.ts
 import * as THREE from 'three'
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 
+import { board, join } from '../../shared/boards.ts'
 import type { WaterGate } from '../../shared/mill.ts'
 import { DOOR, DOOR_HALF, DOOR_TOP, HALF_DEEP, RACE, ROOM_BACK, TIRL, UNDER } from './plan.ts'
 
@@ -10,31 +10,6 @@ const POLES = { every: 0.3, thick: 0.07, clear: 0.16 } as const
 
 /** How high over the land at its ends the water-gate's spar lies: on the top of the dyke's two posts. */
 const SPAR = 1.42
-
-/** A board as a box, from one end of its middle line to the other. */
-function board (from: THREE.Vector3, to: THREE.Vector3, thick: number, deep: number): THREE.BufferGeometry {
-  const length   = from.distanceTo(to)
-  const geometry = new THREE.BoxGeometry(length, thick, deep)
-  const lie      = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1, 0, 0), to.clone().sub(from)
-    .normalize())
-
-  geometry.applyQuaternion(lie)
-  geometry.translate((from.x + to.x) / 2, (from.y + to.y) / 2, (from.z + to.z) / 2)
-
-  return geometry
-}
-
-/** Several boards as one geometry, with nothing the material does not read. */
-function join (parts: THREE.BufferGeometry[]): THREE.BufferGeometry {
-  const geometry = mergeGeometries(parts.map(part => part.deleteAttribute('uv')))
-
-  for (const part of parts)
-    part.dispose()
-
-  geometry.computeBoundingSphere()
-
-  return geometry
-}
 
 /**
  * The wheel, about its own shaft: a round post from the bed to the floor

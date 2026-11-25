@@ -43,7 +43,7 @@ export function createRocks (world: World): Feature {
     name: 'rocks',
 
     build ({ scene, rng }) {
-      const { ground, summit, path, shelter, wood, infield, burn, mill } = world
+      const { ground, summit, path, shelter, wood, infield, burn, mill, yard } = world
 
       const place = rng.fork('rocks:place')
       const shape = rng.fork('rocks:shape')
@@ -93,6 +93,7 @@ export function createRocks (world: World): Feature {
           Math.hypot(spot.x - summit.x, spot.z - summit.z) < size + OFF_SUMMIT ||
           Math.min(shelter.distanceTo(spot.x, spot.z), shelter.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
           Math.min(mill.distanceTo(spot.x, spot.z), mill.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
+          Math.min(yard.distanceTo(spot.x, spot.z), yard.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
           wood.distanceTo(spot.x, spot.z) < size + OFF_TREE
 
         if (taken)

@@ -20,7 +20,7 @@ import type { HourName } from './palette.ts'
  * `rig/tour.test.ts` holds the two together: add a view, or change how long
  * a leg takes, and this is the number to change with it.
  */
-export const DAY = 313.5
+export const DAY = 321.5
 
 /** How far north the island lies, and how far north of the equator the sun is: a summer's day, with a low sun and a short night. */
 const LATITUDE    = THREE.MathUtils.degToRad(58)
@@ -37,14 +37,18 @@ const NORTH = THREE.MathUtils.degToRad(8)
 export const POLE = new THREE.Vector3(Math.sin(NORTH) * Math.cos(LATITUDE), Math.sin(LATITUDE), -Math.cos(NORTH) * Math.cos(LATITUDE))
 
 /**
- * Where on its round the sun is when the world begins, as an angle from noon.
+ * The slow part of the day, from a little past sunset to a little before
+ * sunrise: how many seconds it lasts, and how far the sky turns in them.
  *
- * Picked by looking, like the wind's head start: at second ten, when the
- * postcards are taken, the sun stands ten degrees over the sea to the west.
- * When `DAY` grows, this grows with it, so that second ten keeps its sun:
- * it was 0.742 in a day of 277.5 seconds.
+ * These two are what the tour's evening, night and morning stops are timed
+ * by (the landing at sunset, the cairn under the stars, `ridge` half a
+ * degree after sunrise), so they are the numbers that are typed in, and the
+ * pace of the rest follows from them. A view added in the afternoon makes
+ * `DAY` longer and nothing else: the night keeps its length and its pace,
+ * every stop before `ridge` keeps its hour, and noon gives up the time.
  */
-const OPENING = 0.742 + Math.PI * 2 * 10 * (1 / 277.5 - 1 / DAY)
+const NIGHT  = 177.65
+const TURNED = THREE.MathUtils.degToRad(143.13)
 
 /**
  * The day's pace, as multiples of an even turn. `EDGE` is how far from noon,
@@ -52,11 +56,26 @@ const OPENING = 0.742 + Math.PI * 2 * 10 * (1 / 277.5 - 1 / DAY)
  * before sunrise the other. From there right through the night the sky goes
  * at `SLOW`, and noon is what is left over, so that a day is still a day:
  * the evening, the night and the morning last, and the hours nobody stops
- * for are the quick ones.
+ * for are the quick ones. (78 degrees, 0.7 and 2.08 in a day of 313.5.)
  */
-const EDGE = THREE.MathUtils.degToRad(78)
-const SLOW = 0.7
+const EDGE = Math.PI * (1 - NIGHT / DAY)
+const SLOW = TURNED / 2 / (Math.PI - EDGE)
 const NOON = Math.PI * 2 / EDGE * (1 - SLOW) + SLOW
+
+/**
+ * How far the sky has turned from noon at second ten, when the postcards
+ * are taken: picked by looking, like the wind's head start. The sun stands
+ * ten degrees over the sea to the west, and every thumbnail in the gallery
+ * has had it there.
+ */
+const TEN = THREE.MathUtils.degToRad(90.791)
+
+/**
+ * Where on its even round the sun is when the world begins, as an angle
+ * from noon: wherever puts it at `TEN` ten seconds later, whatever the day's
+ * length and pace have become.
+ */
+const OPENING = evenAt(TEN) - Math.PI * 2 * 10 / DAY
 
 /** Sun elevation, in degrees, under which the moon is the body that lights the land. The light is out as it passes. */
 const HANDOVER = -7
@@ -194,6 +213,30 @@ export interface Daylight {
   turn (time: number): void
 }
 
+/** How far the sky has really turned when an even turn would have gone `away` from noon (0 to pi): the pace, added up. */
+function paced (away: number): number {
+  const light = Math.min(away, EDGE)
+
+  return (NOON + SLOW) / 2 * light + (NOON - SLOW) / 2 * EDGE / Math.PI * Math.sin(Math.PI * light / EDGE) + SLOW * (away - light)
+}
+
+/** The even turn by which the sky has really turned `hour` from noon. Found by halving: `paced` has no inverse to write down. */
+function evenAt (hour: number): number {
+  let under = 0
+  let over  = Math.PI
+
+  for (let halving = 0; halving < 50; halving += 1) {
+    const middle = (under + over) / 2
+
+    if (paced(middle) < hour)
+      under = middle
+    else
+      over = middle
+  }
+
+  return (under + over) / 2
+}
+
 /**
  * The sky's turn at `time`: an angle from noon, in radians, that goes round
  * once a day, quickly through the middle of the day and slowly from evening
@@ -208,11 +251,8 @@ export function hourAt (time: number): number {
   const mean  = OPENING + time / DAY * Math.PI * 2
   const turns = Math.floor(mean / (Math.PI * 2) + 0.5)
   const from  = mean - turns * Math.PI * 2
-  const away  = Math.abs(from)
-  const light = Math.min(away, EDGE)
-  const gone  = (NOON + SLOW) / 2 * light + (NOON - SLOW) / 2 * EDGE / Math.PI * Math.sin(Math.PI * light / EDGE) + SLOW * (away - light)
 
-  return turns * Math.PI * 2 + Math.sign(from) * gone
+  return turns * Math.PI * 2 + Math.sign(from) * paced(Math.abs(from))
 }
 
 /**
