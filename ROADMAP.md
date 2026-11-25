@@ -7,15 +7,15 @@ this short: a plan nobody can read in a minute is not a plan.
 
 Each item is one day: a whole chapter, built complete (both tiers, a postcard, the tour).
 
-1. **Inside.** The shelter and the mill are shells. A floor, a hearth with the fire in it, a
-   bench; in the mill the stones, the hopper and a sack; and a rig that knows a wall from a
-   door, for the visitor who walks in.
+1. **Inside.** The shelter, the mill and the kiln are shells. A floor, a hearth with the fire
+   in it, a bench; in the mill the stones, the hopper and a sack; a fire in the kiln's mouth;
+   and a rig that knows a wall from a door, for the visitor who walks in.
 2. **A night worth staying up for.** The night is a moon, stars, high cloud and one lamp. A
    lantern at the boat's masthead, the window's light falling on the grass, a meteor now and
    then.
-3. **The harvest home.** Stooks stand on the cut rigs and the mill turns, with nothing between
-   them: round stacks on stone bases in the lee of the house, a kiln to dry the grain, a
-   sledge or a creel left by the gate.
+3. **The back end of the year.** The birches have begun to turn and nothing has fallen:
+   leaves torn off by a gust and lying under the trees, the last rig cut, a sack at the
+   mill's door, the first snow on the far range.
 
 ## Known problems
 
@@ -29,17 +29,13 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   `infield`.
 - The walls are solid only to the eye: the walk goes through them, and the flown legs clear
   them only because they keep five units up.
-- The lone birches are strewn by rule (`strew`). One stands by the burn below the dyke (in
-  `hero`, `landing`, `boat`; from `burn` it stands before the mill). Tests keep every tree
-  off every camera and out of the tour's way.
-- **The afternoon has no time left to lend.** `skerry`, `wood` and now `mill` stand on time
-  cut from its legs: `east` 4, `skerry` 4, `wood` 3, `shelter` 5, `boat` 4, `infield` 4,
-  `mill` 4.5, `flock` 3, `burn` 3.5, `starlings` 4. `skerry`'s leg turns the camera 33 degrees
-  a second and `mill`'s 32.5, of the 35 the test allows. `mirror` and `moor` split a 15 s leg.
-  Change one and the day test fails until they sum to what they did. Growing `DAY` instead
-  does not work as it stands: 9 s more put `ridge` two degrees under the horizon, and each
-  second then added to `cove`'s leg (22 s now, the sun half a degree up at `ridge`) won back
-  0.15. The next view needs `EDGE` and `SLOW` retuned first.
+- The lone birches are strewn by rule (`strew`); one stands by the burn below the dyke. Tests
+  keep every tree off every camera and out of the tour's way.
+- **The afternoon's legs are as short as they go**: `east` 4, `skerry` 4, `wood` 3, `shelter`
+  5, `boat` 4, `infield` 3.5, `yard` 3.5, `mill` 4.5, `flock` 3, `burn` 3.5, `starlings` 4;
+  `skerry`'s turns the camera 33 degrees a second of the 35 the test allows. A new stop after
+  `ridge` takes time of its own, as `yard` did: add it to `DAY` and nothing else moves. One
+  before `ridge` moves the morning: print the sun at every stop and retune `NIGHT`, `TURNED`.
 - Nothing knows a tree is there but the boulders: a visitor walks through a trunk, tufts grow
   against it, the lamp lights its far side. The crowns are lit as if half turned to the sky
   (`SKYWARD` in `wood/timber.ts`), a little bright under the moon; they are solid lumps, with
@@ -79,10 +75,10 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   The same clock bends the smoke.
 
 - **The day is typed in to fit the tour.** `DAY` in `shared/daylight.ts` is the loop's length
-  (313.5 s) and `OPENING`, `EDGE` and `SLOW` put each stop at its hour. Change a leg's time
-  and a test in `rig/tour.test.ts` fails until `DAY` follows; `OPENING` follows `DAY` by
-  itself. Then print the sun's height at every stop. A visitor who takes the camera keeps the
-  same clock: nothing lets them wait for the moon or hurry the dawn.
+  (321.5 s). `NIGHT` and `TURNED` (the slow part's seconds, and how far the sky turns in
+  them) hold the stops from `landing` to `ridge` at their hours, and `TEN` holds second ten's
+  sun; `EDGE`, `SLOW`, `NOON` and `OPENING` follow. `ridge` is half a degree after sunrise. A
+  visitor who takes the camera keeps the same clock: nothing lets them wait for the moon.
 - Every postcard, and so every thumbnail in the gallery, is taken at second ten: the gallery
   will never show the night. A second picture of an iteration (`seaward` at second 90) needs
   `budgets.json` and the site's scripts: a framework day.
@@ -154,7 +150,7 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   the cloud wheels over the summit's western shoulder and lies broadside to `hero` at second
   ten; a test fails when a bird is out of that frame then. Its round is its own (`LAP`), not the
   day's, so the next loop finds it elsewhere on it. Times are the sun's height (`COME`, `ROOST`,
-  `LEAVE`). They roost in the head-dyke under the brae; the walls do not know they are in them.
+  `LEAVE`). They roost in the head-dyke under the brae.
 - The birds fly through anything in their way but the land: the smoke, the clouds, the tour's
   camera on the `flock` to `hero` legs. A wing is two triangles, under a pixel from `hero`:
   the cloud is what reads.
@@ -173,32 +169,36 @@ Each item is one day: a whole chapter, built complete (both tiers, a postcard, t
   fit `hero`) and turns aside from the path and the landing's slip (`SHY`, `NEAR`), so below
   the dyke it runs across a slope of 0.5 to 0.9, not down it: nothing can be built there. Its
   water lies on the land, which is not cut for it. It is not in the sun's shadow map, and no
-  rain swells it. The pool is a slow reach, not level water. From `hero`, lower than the
-  pool, only water that falls toward the camera shows.
+  rain swells it. The pool is a slow reach, not level water.
 - **The mill is typed in to fit `hero`** (`ABOVE_POOL`, `MILL_RACE` in `shared/mill.ts`):
   astride the burn on the one gentle shelf, under the cairn, 3.3 from the path and 2 from the
-  fold. It hides the white falls under the spring from `hero`; from `mill` they show over its
-  roof. The walls start where the hill is; the burn lies on the land under the floor and is
+  fold. The walls start where the hill is; the burn lies on the land under the floor and is
   only called white below it (`CHURN` in `features/burn`); the wheel turns at one pace. Its
   door is shut and nothing is inside. A visitor walks through it. Tests hold its site, the
   way to its door over the bridge, the water-gate and the tour off its walls.
 - The water-gate is found, not typed (`mill.gate`: where the burn meets a wall). `dyke.ts`
   leaves out the stones within it after their draws are taken; its poles are in the mill's
-  one mesh of boards. Stones, courses and turf roofs are shared now (`shared/masonry.ts`,
-  `shared/roof.ts`): a third building is a plan and a list of openings.
-- **The harvest is a rule** (`CUT` in `infield/rigs.ts`): the first two rigs of each plot of
-  barley are stubble, with stooks down their crowns. The stooks wear the stone's material to
-  share its program, so their grain is stone's. Nothing has been carried: no stack, no sheaf
-  at the mill.
-- The sheep's rule is passed the burn and the mill now (the feature had left the burn out):
-  the brae's flock stands a little differently.
+  one mesh of boards. Courses, turf roofs, boards and smoke are shared (`shared/masonry.ts`,
+  `roof.ts`, `boards.ts`, `smoke.ts`).
+- **The harvest is a rule** (`CARRIED`, `STANDING` in `infield/rigs.ts`): of a plot of barley
+  the first two rigs are bare stubble, the last still stands, the rest are in stooks. The
+  field has one such plot. The stooks wear the stone's material to share its program.
+- **The yard is typed in to fit `hero`** (`KILN`, `STACKS` in `shared/yard.ts`): the kiln on
+  the shelf between the fold and the field gate, four stacks on the green before the door, a
+  stride from the house's wall and from the path's edge: no room for a fifth, or a wall
+  round them. Each base is level on ground that is not. The kiln is a shell: no fire shows
+  in its mouth, and its smoke is the house's, smaller (`fire`). A visitor walks through all
+  of it. A phone's stacks have no ropes. Tests hold it off everything else and the tour.
+- **The turn is a rule** (`TURNED` in `wood/birch.ts`): a lump of leaves is gold by where it
+  is and how far its tree leans, so the lone birches are nearly all gold. No leaf falls or
+  lies on the ground, and the heather still blooms beside them.
 - **The grass is not planted** (`features/grass`): the same blades are gathered ahead of the
   camera (`PATCH`), so `hero`, out on the water, draws almost none and still pays for them.
   Where it grows is one picture (`sward.ts`): move a wall or the path and it follows. Blades
   cast no shadow and stand through a sheep's feet. Tufts are still planted, as before.
-- Triangles: desktop 77%, mobile 79%. The dykes' and the mill's stones are 20 facets on every
-  tier, the waymarks' on a phone. To pay for the mill a phone leaves the house's stones out
-  of the mirror and the mill's out of the shadow pass (the dark block inside throws it).
+- Triangles: desktop 79%, mobile 78%: what is built next must make room first. Walls'
+  stones are 20 facets on every tier. On a phone no building's stones throw a shadow of their
+  own (the dark block inside does), nor the dykes' cope, and none is in the mirror.
 
 ## Ideas
 
@@ -208,6 +208,5 @@ Parts for a chapter, never a day by themselves.
   are the same sky. A cooler, pinker east would need the hour as well as the height.
 - Whitecaps far out under a gust. Terns over the stacks. Weed on the reef below the tide.
 - A peat stack, a scythe left on the dyke. A kailyard against the gable.
-- Leaves torn off the wood by a gust. A few birches turned yellow.
 - The boat's sail furled on its yard; a creel or a net on the beach.
 - Parallax in the land's relief; wet stone beside the burn; ripples where a seal dives.

@@ -36,7 +36,7 @@ const STRIDE = 3
  *
  * Typed in for `hero` too: the four stand left of the house's gable, in the
  * evening sun, against the heather. `raised` is how much of one is built:
- * the last of them is half up, the ladder still on it.
+ * the last of them is half up, the sledge beside it.
  */
 const STACKS: readonly (Waypoint & { size: number, raised: number })[] = [
   { x: 49.5, z: 62.1, size: 1.04, raised: 1 },
