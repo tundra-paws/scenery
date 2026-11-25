@@ -26,6 +26,8 @@ import { createMoor } from './shared/moor.ts'
 import type { Moor } from './shared/moor.ts'
 import { createPath, findSummit } from './shared/path.ts'
 import type { Path, Waypoint } from './shared/path.ts'
+import { createPier } from './shared/pier.ts'
+import type { Pier } from './shared/pier.ts'
 import { createShelter } from './shared/shelter.ts'
 import type { Shelter } from './shared/shelter.ts'
 import { createSkerry } from './shared/skerry.ts'
@@ -81,7 +83,8 @@ export type Feature = AppModule<WorldState>
  * the east shore, its mark and its seals. And for the water that runs off
  * it: the burn, which everything on the brae keeps out of, and the mill
  * that stands over it. And for where the harvest comes home to: the kiln
- * and the stacks.
+ * and the stacks. And for what the sea is worked from: the pier at the
+ * landing, the nets on their poles and the fish on the rack.
  */
 export interface World {
   seed:    number
@@ -110,6 +113,9 @@ export interface World {
 
   /** The kiln on the shelf by the fold and the stacks before the house's door, and the ways to them. */
   yard: Yard
+
+  /** The pier beside the landing, the small boat in its lee, the net poles along the beach and the fish rack. */
+  pier: Pier
 
   /** The field below the shelter, its dyke and gate, and the fold across the path. */
   infield: Infield
@@ -162,6 +168,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     burn,
     mill:    createMill(ground, path, burn, infield),
     yard:    createYard(ground, path, shelter),
+    pier:    createPier(ground, path, wind),
     infield,
     wood:    createWood({ ground, summit, path, shelter }, seed),
     moor,

@@ -118,13 +118,18 @@ export function createInfieldFeature (world: World): Feature {
       // The ears are many and small; in the sea the rigs' colour is enough.
       // A phone leaves the walls' hundreds of stones out of it too, and
       // lets the cope throw no shadow of its own: the wall under it does.
+      // Nor do its stooks or its gate, a knee high and six boards: neither
+      // shadow is a pixel there, and the gate is not in its sea.
       keepOutOfMirror(barley)
       keepOutOfMirror(stooks)
 
       if (world.quality.tier === 'mobile') {
         keepOutOfMirror(dyke.stones)
         keepOutOfMirror(dyke.cope)
+        keepOutOfMirror(gate)
         dyke.cope.castShadow = false
+        stooks.castShadow    = false
+        gate.castShadow      = false
       }
 
       wade(world)
@@ -148,7 +153,7 @@ export function createInfieldFeature (world: World): Feature {
   }
 }
 
-// perf: cheap — six draw calls and four shadow passes (three on a phone): the dyke's stones
+// perf: cheap — six draw calls and four shadow passes (one on a phone): the dyke's stones
 // and its cope (`dyke.ts`), the rigs (`rigs.ts`), the barley on them
 // (`barley.ts`), the stooks (`stooks.ts`) and the gate (`gate.ts`). Built
 // once; the barley's sway is in its shaders.

@@ -2,6 +2,7 @@
 import * as THREE from 'three'
 
 import { createLitMaterial } from '../../shared/lit.ts'
+import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { inItself, timber } from '../../shared/surface.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
@@ -78,6 +79,10 @@ export function createBoat (world: World): Feature {
       hull.rotation.order = 'YXZ'
 
       pennant = createPennant(world)
+
+      // A scrap of cloth at a masthead is not a pixel of a phone's sea.
+      if (world.quality.tier === 'mobile')
+        keepOutOfMirror(pennant.mesh)
 
       world.wash.hull(WATERLINE.half, WATERLINE.beam)
 

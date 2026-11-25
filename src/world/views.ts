@@ -27,8 +27,10 @@ import type { Ground } from './shared/ground.ts'
  * over it, down to the inbye, low among the sheep, looking up over
  * the head-dyke to the brae and the cairn, across to the foot of the burn,
  * looking up its water past the birch and the dyke to the spring under the
- * cairn, and last out onto the water under the brae, looking up at the
- * starlings wheeling over it, until `hero` again.
+ * cairn, out onto the water under the brae, looking up at the starlings
+ * wheeling over it, and last low off the pier's head, on the way back out:
+ * the pier, the small boat in its lee, the nets along the beach and the
+ * cairn over them all, until `hero` again.
  *
  * The loop is also a day (`shared/daylight.ts`), so the order is the hours
  * too. `hero` is the last of the afternoon, the landing is sunset, the walk
@@ -63,7 +65,9 @@ import type { Ground } from './shared/ground.ts'
  * (`NIGHT`, `TURNED` in `shared/daylight.ts`), so every stop from `hero`
  * round to `ridge` kept its hour, and the next view after `ridge` only has
  * to make `DAY` longer. `fall` did just that: its stop, its leg, and two
- * seconds more on the long leg in to it from `ridge`, twelve in all.
+ * seconds more on the long leg in to it from `ridge`, twelve in all. `pier`
+ * did the same at the day's other end: its stop and its leg, nine seconds,
+ * between `starlings` and `hero`, which it lies between and looks the way of.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },
@@ -89,6 +93,7 @@ export const VIEWS: readonly View[] = [
   { name: 'flock', at: [ 27, 99 ], height: 3, look: [ 17, 72 ], lookHeight: 3.5, travel: 3 },
   { name: 'burn', at: [ 34, 100.5 ], height: 3, look: [ 29.5, 76 ], lookHeight: 4, travel: 3.5 },
   { name: 'starlings', at: [ 40, 112 ], height: 2.5, look: [ -11, 62 ], lookHeight: 22, travel: 4 },
+  { name: 'pier', at: [ 65, 98 ], height: 3.4, look: [ 49.5, 88 ], lookHeight: 5, travel: 4 },
 ]
 
 /**

@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import type { QualityTier } from 'threejs-scenes'
 
 import { createLitMaterial } from '../../shared/lit.ts'
+import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { scatterOnGround } from '../../shared/scatter.ts'
@@ -43,7 +44,7 @@ export function createRocks (world: World): Feature {
     name: 'rocks',
 
     build ({ scene, rng }) {
-      const { ground, summit, path, shelter, wood, infield, burn, mill, yard } = world
+      const { ground, summit, path, shelter, wood, infield, burn, mill, yard, pier } = world
 
       const place = rng.fork('rocks:place')
       const shape = rng.fork('rocks:shape')
@@ -65,6 +66,11 @@ export function createRocks (world: World): Feature {
       mesh.castShadow    = true
       mesh.receiveShadow = true
 
+      // A phone's sea gives back the land the boulders lie on, not each of
+      // them: its picture is a third the size, and shaken.
+      if (world.quality.tier === 'mobile')
+        keepOutOfMirror(mesh)
+
       let kept = 0
 
       for (const spot of spots) {
@@ -83,7 +89,7 @@ export function createRocks (world: World): Feature {
 
         // A boulder lying on the path was rolled off it long ago, one on the
         // summit went into the cairn, and one where the shelter or the mill
-        // stands into its walls. No tree took root on one. The field was cleared into its
+        // stands into its walls, or the pier's. No tree took root on one. The field was cleared into its
         // dyke, and a dyke goes round a boulder, not over it. Left out after
         // its draws are taken, so every other boulder stays where it was.
         const taken = path.distanceTo(spot.x, spot.z) < size + OFF_PATH ||
@@ -94,6 +100,7 @@ export function createRocks (world: World): Feature {
           Math.min(shelter.distanceTo(spot.x, spot.z), shelter.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
           Math.min(mill.distanceTo(spot.x, spot.z), mill.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
           Math.min(yard.distanceTo(spot.x, spot.z), yard.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
+          Math.min(pier.distanceTo(spot.x, spot.z), pier.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
           wood.distanceTo(spot.x, spot.z) < size + OFF_TREE
 
         if (taken)

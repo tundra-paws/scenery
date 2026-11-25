@@ -52,6 +52,16 @@ export const MAST = { along: 0.14 * LENGTH / 2, top: 5.4, half: 0.075 } as const
 /** The anchor's rope: how far ahead of the bow it is drawn, and how far under the water by then. */
 const RODE = { ahead: 5.4, under: 0.9 } as const
 
+/** Where a rope is made fast at either end of the boat: the head of the stem, or of the stern post. */
+export const STEMHEAD = { along: LENGTH / 2 - 0.05, up: STEM - 0.1 } as const
+
+/** The boat at its anchor: mast up, the sail down and furled, and one rope from the stem down into the water ahead. */
+const AT_ANCHOR: Fit = {
+  mast:  true,
+  sail:  true,
+  ropes: [[[ STEMHEAD.along, STEMHEAD.up, 0 ], [ LENGTH / 2 + RODE.ahead, -RODE.under, 0 ]]],
+}
+
 /** Wood as it is left: the top plank, the rail and everything inside. */
 const TIMBER = new THREE.Color(PALETTE.timber)
 
@@ -60,13 +70,30 @@ const TARRED = new THREE.Color(PALETTE.timber).multiplyScalar(0.3)
 
 /** The inside of the planking, in its own shade, and rope. */
 const INSIDE = new THREE.Color(PALETTE.timber).multiplyScalar(0.72)
-const ROPE   = new THREE.Color(PALETTE.timber).lerp(new THREE.Color(PALETTE.sand), 0.5)
+
+/** Sailcloth: wool woven close and left its own colour, greyed by salt. */
+const SAIL = new THREE.Color(PALETTE.fleece).lerp(new THREE.Color(PALETTE.timber), 0.3)
+const ROPE = new THREE.Color(PALETTE.timber).lerp(new THREE.Color(PALETTE.sand), 0.5)
 
 const corner = new THREE.Vector3()
 const edge   = new THREE.Vector3()
 const facing = new THREE.Vector3()
+const ahead  = new THREE.Vector3(1, 0, 0)
+const lie    = new THREE.Quaternion()
 
 type Point = readonly [number, number, number]
+
+/**
+ * What a boat of this build carries besides its planks, thwarts and oars:
+ * whether it has its mast stepped, whether its sail lies furled on its yard
+ * along the thwarts, and the ropes that lead off it, each from one place to
+ * another in the boat's own frame.
+ */
+export interface Fit {
+  mast:  boolean
+  sail:  boolean
+  ropes: readonly (readonly [Point, Point])[]
+}
 
 /** Triangles, as flat lists a geometry is made from at the end. */
 interface Sheet {
@@ -169,7 +196,7 @@ function box (width: number, height: number, depth: number, colour: THREE.Color)
 }
 
 /** Everything in the boat that is a plain piece of wood or a length of rope. */
-function fit (): THREE.BufferGeometry[] {
+function fit ({ mast, sail, ropes }: Fit): THREE.BufferGeometry[] {
   const parts: THREE.BufferGeometry[] = []
 
   for (const along of THWARTS)
@@ -180,7 +207,16 @@ function fit (): THREE.BufferGeometry[] {
     parts.push(box(0.12, 0.6, 0.12, TIMBER).translate(end * (LENGTH / 2 - 0.03), STEM + 0.18, 0))
 
   // The mast, a little thinner than it is deep so its faces catch different light.
-  parts.push(box(MAST.half * 2, MAST.top - SEAT + 0.5, MAST.half * 1.6, TIMBER).translate(MAST.along, (MAST.top + SEAT - 0.5) / 2, 0))
+  if (mast)
+    parts.push(box(MAST.half * 2, MAST.top - SEAT + 0.5, MAST.half * 1.6, TIMBER).translate(MAST.along, (MAST.top + SEAT - 0.5) / 2, 0))
+
+  // The sail, lowered and rolled on its yard, laid fore and aft to port of the mast.
+  if (sail)
+    parts.push(
+      box(4.7, 0.07, 0.07, TIMBER).translate(0.2, SEAT + 0.3, -0.24),
+      box(4, 0.22, 0.3, SAIL).rotateX(0.5)
+        .translate(0.2, SEAT + 0.2, -0.3),
+    )
 
   // Two oars shipped along the thwarts, blades aft.
   for (const side of [ -1, 1 ]) {
@@ -190,22 +226,26 @@ function fit (): THREE.BufferGeometry[] {
       .translate(-2.2, SEAT + 0.07, side * 0.52))
   }
 
-  // The anchor's rope, from the stem down into the water ahead: the boat
-  // always lies straight behind its anchor, so in its own frame the rope is still.
-  const from = new THREE.Vector3(LENGTH / 2 - 0.05, STEM - 0.1, 0)
-  const to   = new THREE.Vector3(LENGTH / 2 + RODE.ahead, -RODE.under, 0)
+  // Its ropes. The boat at anchor always lies straight behind it, and one
+  // made fast to a pier barely moves, so in the boat's own frame a rope is still.
+  for (const [ a, b ] of ropes) {
+    const from = new THREE.Vector3(...a)
+    const to   = new THREE.Vector3(...b)
 
-  parts.push(box(from.distanceTo(to), 0.05, 0.05, ROPE).rotateZ(Math.atan2(to.y - from.y, to.x - from.x))
-    .translate((from.x + to.x) / 2, (from.y + to.y) / 2, 0))
+    parts.push(box(from.distanceTo(to), 0.05, 0.05, ROPE).applyQuaternion(lie.setFromUnitVectors(ahead, to.clone().sub(from)
+      .normalize()))
+      .translate((from.x + to.x) / 2, (from.y + to.y) / 2, (from.z + to.z) / 2))
+  }
 
   return parts
 }
 
 /**
  * The whole boat but its pennant, as one geometry coloured per vertex: the
- * planking, the rail, three thwarts, a mast, two oars and the anchor's rope.
+ * planking, the rail, three thwarts, two oars, and what `fitted` says of its
+ * mast and its ropes. Left to itself it is the boat at its anchor.
  */
-export function createHullGeometry (): THREE.BufferGeometry {
+export function createHullGeometry (fitted: Fit = AT_ANCHOR): THREE.BufferGeometry {
   const sheet: Sheet = { positions: [], colours: []}
 
   plank(sheet)
@@ -217,7 +257,7 @@ export function createHullGeometry (): THREE.BufferGeometry {
   shell.setAttribute('color', new THREE.Float32BufferAttribute(sheet.colours, 3))
   shell.computeVertexNormals()
 
-  const parts  = [ shell, ...fit() ]
+  const parts  = [ shell, ...fit(fitted) ]
   const merged = mergeGeometries(parts)
 
   for (const part of parts)

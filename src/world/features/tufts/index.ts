@@ -80,6 +80,17 @@ function createTuftGeometry (): THREE.BufferGeometry {
   return merged
 }
 
+/** Whether feet go here, a wall stands here or the ground was dug: off every way, house, wall and bank, and out of the field. */
+function trodden (world: World, x: number, z: number): boolean {
+  const built = [ world.shelter, world.mill, world.yard, world.pier ]
+
+  return world.path.distanceTo(x, z) < OFF_PATH ||
+    built.some(place => place.distanceTo(x, z) < OFF_SHELTER || place.distanceToSpur(x, z) < OFF_SPUR) ||
+    world.infield.distanceTo(x, z) < OFF_DYKE ||
+    world.burn.distanceTo(x, z) < world.burn.pool.half + OFF_BURN ||
+    world.infield.inField(x, z)
+}
+
 /**
  * Let a tuft material lean and sway with the wind: the bend, as where each
  * vertex goes once its instance has been placed.
@@ -169,18 +180,7 @@ export function createTufts (world: World): Feature {
         // Nothing grows where feet go, under a wall, or where the ground was
         // dug. Left out after its draws are taken, so every other tuft stays
         // where it was.
-        const trodden = world.path.distanceTo(spot.x, spot.z) < OFF_PATH ||
-          world.shelter.distanceTo(spot.x, spot.z) < OFF_SHELTER ||
-          world.shelter.distanceToSpur(spot.x, spot.z) < OFF_SPUR ||
-          world.mill.distanceTo(spot.x, spot.z) < OFF_SHELTER ||
-          world.mill.distanceToSpur(spot.x, spot.z) < OFF_SPUR ||
-          world.yard.distanceTo(spot.x, spot.z) < OFF_SHELTER ||
-          world.yard.distanceToSpur(spot.x, spot.z) < OFF_SPUR ||
-          world.infield.distanceTo(spot.x, spot.z) < OFF_DYKE ||
-          world.burn.distanceTo(spot.x, spot.z) < world.burn.pool.half + OFF_BURN ||
-          world.infield.inField(spot.x, spot.z)
-
-        if (trodden)
+        if (trodden(world, spot.x, spot.z))
           continue
 
         mesh.setMatrixAt(kept, dummy.matrix)

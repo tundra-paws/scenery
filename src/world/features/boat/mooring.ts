@@ -7,7 +7,7 @@ import type { Wind } from '../../shared/wind.ts'
 
 /** Where the boat lies when the wind holds it straight: this far out from the waterline, and this far along the shore from the landing. */
 const OUT   = 13.5
-const ASIDE = 13
+const ASIDE = 15.5
 
 /** How far upwind of the boat's middle its anchor went down. */
 export const SCOPE = 13
