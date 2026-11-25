@@ -65,7 +65,10 @@ export function createYardFeature (world: World): Feature {
       sawn.finish(timber(inItself(quality.tier)))
 
       // Twenty facets a stone on every tier, as the dykes are: the grain carries them.
-      stones = layStones(createStoneGeometry(rng.fork('yard:shape').int(1, 1_000_000), 0), stone, rng.fork('yard:lay'), ground, yard)
+      // A phone has the stacks without their ropes, and so without the stones on them.
+      const ropes = quality.tier !== 'mobile'
+
+      stones = layStones(createStoneGeometry(rng.fork('yard:shape').int(1, 1_000_000), 0), stone, rng.fork('yard:lay'), ground, yard, ropes)
 
       const wood = createTimber(yard, ground)
 
@@ -74,7 +77,7 @@ export function createYardFeature (world: World): Feature {
       boards.castShadow    = quality.tier !== 'mobile'
       boards.receiveShadow = true
 
-      body = new THREE.Mesh(createBodyGeometry(yard, ground, rng.fork('yard:body'), quality.tier !== 'mobile', wood.loads), built)
+      body = new THREE.Mesh(createBodyGeometry(yard, ground, rng.fork('yard:body'), ropes, wood.loads), built)
       body.name          = 'yard-body'
       body.castShadow    = true
       body.receiveShadow = true

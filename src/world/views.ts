@@ -20,7 +20,9 @@ import type { Ground } from './shared/ground.ts'
  * stacked logs are, close under the shelter with
  * the cairn over it, back down to the water beside the boat at its anchor,
  * off the beach below the field, looking up its rigs to the gate and the
- * house, up over the fold to the mill astride the burn, with the cairn
+ * house, in over the field's dyke to the kiln on its shelf and the stacks
+ * before the house's door, the path going up between them to the cairn,
+ * up over the fold to the mill astride the burn, with the cairn
  * over it, down to the inbye, low among the sheep, looking up over
  * the head-dyke to the brae and the cairn, across to the foot of the burn,
  * looking up its water past the birch and the dyke to the spring under the
@@ -54,6 +56,12 @@ import type { Ground } from './shared/ground.ts'
  * `mill` stands between `infield` and `flock` the same way, on nine and a
  * half seconds taken from eight legs after `moor`: a longer day would have
  * put `ridge` before its sunrise again.
+ * `yard` stands between `infield` and `mill` on time of its own, eight
+ * seconds: the afternoon had none left to lend. The day is that much
+ * longer, and the night is now typed in as a length and a pace of its own
+ * (`NIGHT`, `TURNED` in `shared/daylight.ts`), so every stop from `hero`
+ * round to `ridge` kept its hour, and the next view after `ridge` only has
+ * to make `DAY` longer.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },

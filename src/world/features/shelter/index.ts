@@ -71,9 +71,13 @@ export function createShelterFeature (world: World): Feature {
       walls = layWalls(createStoneGeometry(rng.fork('shelter:shape').int(1, 1_000_000), detail), stone, rng.fork('shelter:lay'), land)
 
       // And leaves them out of the sea's mirror, as it does the dykes': the
-      // house it gives back is its dark body under its roof.
-      if (world.quality.tier === 'mobile')
+      // house it gives back is its dark body under its roof. Nor do they
+      // throw a shadow of their own there: the dark block just inside them
+      // throws the house's, as the mill's does.
+      if (world.quality.tier === 'mobile') {
         keepOutOfMirror(walls)
+        walls.castShadow = false
+      }
 
       // The dark inside goes down as far as the lowest ground at any corner.
       const foot = Math.min(land(-HALF_DEEP, -HALF_LONG), land(HALF_DEEP, -HALF_LONG), land(-HALF_DEEP, HALF_LONG), land(HALF_DEEP, HALF_LONG)) - 1

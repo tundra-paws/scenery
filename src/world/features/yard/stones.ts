@@ -75,9 +75,9 @@ function raiseKiln (mason: Mason, kiln: Kiln, ground: Ground): void {
 /**
  * A stack's base: a ring of stones to keep the sheaves off the wet, its top
  * level, and under it as many more as the fall of the ground asks for.
- * And, on a stack that is thatched, a stone on the end of every rope.
+ * And, on a stack that is thatched and roped, a stone on the end of every rope.
  */
-function found (mason: Mason, stack: Stack, ground: Ground): void {
+function found (mason: Mason, stack: Stack, ground: Ground, ropes: boolean): void {
   const { lay } = mason
   const radius  = STACK.foot * stack.size - 0.06
   const turned  = lay.range(0, Math.PI * 2)
@@ -95,7 +95,7 @@ function found (mason: Mason, stack: Stack, ground: Ground): void {
     }
   }
 
-  if (stack.raised < 1)
+  if (stack.raised < 1 || !ropes)
     return
 
   for (let rope = 0; rope < ROPES; rope += 1) {
@@ -111,16 +111,16 @@ function found (mason: Mason, stack: Stack, ground: Ground): void {
  *
  * The house's stone, the cairn's paler grey, twenty facets a stone on every
  * tier as the dykes are. A ring is laid like a wall that comes round to its
- * own beginning.
+ * own beginning. `ropes` is whether this tier draws the ropes the weights hang on.
  */
-export function layStones (geometry: THREE.BufferGeometry, material: THREE.Material, lay: SeededRng, ground: Ground, yard: Yard): THREE.InstancedMesh {
+export function layStones (geometry: THREE.BufferGeometry, material: THREE.Material, lay: SeededRng, ground: Ground, yard: Yard, ropes: boolean): THREE.InstancedMesh {
   const mesh  = new THREE.InstancedMesh(geometry, material, ROOM)
   const mason = { mesh, laid: 0, lay, course: COURSE, ground: (x: number, z: number): number => ground.heightAt(x, z) }
 
   raiseKiln(mason, yard.kiln, ground)
 
   for (const stack of yard.stacks)
-    found(mason, stack, ground)
+    found(mason, stack, ground, ropes)
 
   mesh.name          = 'yard-stones'
   mesh.count         = mason.laid
