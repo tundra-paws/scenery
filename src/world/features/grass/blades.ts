@@ -10,7 +10,7 @@ import { PALETTE } from '../../shared/palette.ts'
 import type { Wind } from '../../shared/wind.ts'
 import type { Sward } from './sward.ts'
 
-/** Blades of grass drawn, on each tier: always this many, wherever the camera is. */
+/** Blades of grass, on each tier: all of them drawn wherever grass grows near the camera, none where it does not. */
 export const BLADES: Record<QualityTier, number> = { mobile: 14_000, desktop: 46_000, highEnd: 90_000 }
 
 /** Edge of the square of ground the blades are spread over, which goes with the camera. */
@@ -21,6 +21,9 @@ const AHEAD = 0.3
 
 /** The patch's rim: the parts of half its edge between which a blade shrinks to nothing, so none appears or goes at full height. */
 const RIM = [ 0.62, 0.98 ] as const
+
+/** How far from the patch's middle a blade can stand at all, on each tier. */
+export const REACH: Record<QualityTier, number> = { mobile: RIM[1] * PATCH.mobile / 2, desktop: RIM[1] * PATCH.desktop / 2, highEnd: RIM[1] * PATCH.highEnd / 2 }
 
 /** A blade: half its width at the root, and its height, from and to. */
 const HALF_WIDTH = 0.055

@@ -28,6 +28,9 @@ const OFF_BANK  = [ 0.2, 0.8 ] as const
 const THIN = 0.55
 const DRY  = [ 0.35, 0.6 ] as const
 
+/** Edge of a square of the coarse map that says whether any grass grows in it at all. */
+const PLOT = 2
+
 /** Where grass grows, and the land it grows on, as something a vertex shader can look up. */
 export interface Sward {
 
@@ -36,6 +39,9 @@ export interface Sward {
 
   /** World position to texture coordinate: `uv = xz * scale + 0.5`. */
   scale: number
+
+  /** Whether any grass at all grows within `reach` of a place: out on the water, none does. */
+  growsNear (x: number, z: number, reach: number): boolean
 }
 
 /** How far a place is from a line of points. */
@@ -87,15 +93,25 @@ export function createSward (world: World): Sward {
   const side             = SIDE[world.quality.tier]
   const data             = new Uint16Array(side * side * 2)
 
+  // The same answer much coarser, for the feature to ask before it draws: a
+  // plot is green if any texel in it is.
+  const plots = Math.ceil(ground.size / PLOT)
+  const green = new Uint8Array(plots * plots)
+  const plot  = (at: number): number => Math.min(plots - 1, Math.max(0, Math.floor((at + ground.size / 2) / PLOT)))
+
   for (let row = 0; row < side; row += 1)
     for (let column = 0; column < side; column += 1) {
       const x      = ((column + 0.5) / side - 0.5) * ground.size
       const z      = ((row + 0.5) / side - 0.5) * ground.size
       const height = grid.heightAt(x, z)
+      const thick  = thickness(world, x, z, height)
       const at     = (row * side + column) * 2
 
       data[at]     = THREE.DataUtils.toHalfFloat(height)
-      data[at + 1] = THREE.DataUtils.toHalfFloat(thickness(world, x, z, height))
+      data[at + 1] = THREE.DataUtils.toHalfFloat(thick)
+
+      if (thick > 0)
+        green[plot(z) * plots + plot(x)] = 1
     }
 
   // Half floats, because that is the float format every WebGL2 device filters.
@@ -106,9 +122,33 @@ export function createSward (world: World): Sward {
   texture.minFilter   = THREE.LinearFilter
   texture.needsUpdate = true
 
-  return { texture, scale: 1 / ground.size }
+  return {
+    texture,
+    scale: 1 / ground.size,
+
+    growsNear (x, z, reach) {
+      // A texel's grass is filtered a texel further out than it was asked.
+      const far = reach + ground.size / side
+
+      for (let row = plot(z - far); row <= plot(z + far); row += 1)
+        for (let column = plot(x - far); column <= plot(x + far); column += 1) {
+          if (green[row * plots + column] === 0)
+            continue
+
+          // The nearest point of this plot to the place.
+          const nx = Math.min(Math.max(x, column * PLOT - ground.size / 2), (column + 1) * PLOT - ground.size / 2)
+          const nz = Math.min(Math.max(z, row * PLOT - ground.size / 2), (row + 1) * PLOT - ground.size / 2)
+
+          if (Math.hypot(nx - x, nz - z) < far)
+            return true
+        }
+
+      return false
+    },
+  }
 }
 
 // perf: once — a drawn-land lookup a texel (26k to 102k), and for the third
 // of them that are turf a slope, the moor's noise and the distances to the
 // ways, walls and burn. One two-channel half-float texture, 100 KB to 410 KB.
+// `growsNear` reads a few hundred bytes a frame, of a map of 17k plots.
