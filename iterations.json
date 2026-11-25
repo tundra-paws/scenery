@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repo": "tundra-paws/scenery",
-  "updated": "2026-11-25T04:32:06.555Z",
+  "updated": "2026-11-25T05:53:06.359Z",
   "iterations": [
     {
       "id": 1,
@@ -1057,6 +1057,54 @@
       },
       "three": "0.184.0",
       "distHash": "119e01fb8dab29724bd83e8fb6199d263daa911763c65e760597025d387b51cd",
+      "withdrawn": false
+    },
+    {
+      "id": 23,
+      "dir": "i/0023/",
+      "date": "2026-11-25",
+      "sha": "5a9be1c8754128bae33603571134c7a0d6bb99ef",
+      "title": "The back end of the year",
+      "summary": "The wood has gone gold and its leaves come down on the wind and lie under the trees; the bracken on the lower hill has turned to rust. A new stop, in under the birches.",
+      "kind": "feature",
+      "model": "claude",
+      "journal": "journal/2026-11-25-the-back-end-of-the-year.md",
+      "shots": {
+        "hero": "shot.webp",
+        "thumb": "thumb.webp"
+      },
+      "stats": {
+        "desktop": {
+          "draws": 95,
+          "triangles": 574484,
+          "live": {
+            "buffers": 502,
+            "textures": 10,
+            "programs": 31,
+            "framebuffers": 2,
+            "renderbuffers": 0,
+            "vertexArrays": 108
+          }
+        },
+        "mobile": {
+          "draws": 78,
+          "triangles": 238345,
+          "live": {
+            "buffers": 390,
+            "textures": 10,
+            "programs": 31,
+            "framebuffers": 2,
+            "renderbuffers": 0,
+            "vertexArrays": 80
+          }
+        }
+      },
+      "bytes": {
+        "new": 312380,
+        "site": 5738205
+      },
+      "three": "0.184.0",
+      "distHash": "aa458b3d40fe1b44f1f2e10b2ed32a19b9d04db1acc74f99fe1e607d53a94972",
       "withdrawn": false
     }
   ]
