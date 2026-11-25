@@ -20,7 +20,7 @@ import type { HourName } from './palette.ts'
  * `rig/tour.test.ts` holds the two together: add a view, or change how long
  * a leg takes, and this is the number to change with it.
  */
-export const DAY = 321.5
+export const DAY = 333.48
 
 /** How far north the island lies, and how far north of the equator the sun is: a summer's day, with a low sun and a short night. */
 const LATITUDE    = THREE.MathUtils.degToRad(58)

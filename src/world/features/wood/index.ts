@@ -9,9 +9,12 @@ import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { vec4Attribute } from '../../shared/nodes.ts'
 import { birch, inItself } from '../../shared/surface.ts'
 import type { Wind } from '../../shared/wind.ts'
+import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { growBirch } from './birch.ts'
 import { cutStumps, stackLogs } from './cut.ts'
+import { createFall } from './fall.ts'
+import type { Fall } from './fall.ts'
 import { createTimber } from './timber.ts'
 
 /**
@@ -63,11 +66,13 @@ function swayInWind (material: LitMaterial, wind: Wind): void {
  * The first thing on the island taller than grass that nobody put there,
  * and what the fire in the shelter burns: the trees nearest the door are
  * stumps, and their wood is stacked under the eave. Pale trunks, the
- * meadow's greens in the leaves, and all of it one mesh, which leans and
- * tosses with the same gusts as the grass under it.
+ * meadow's greens in the leaves, most of them gone to gold, and all of it
+ * one mesh, which leans and tosses with the same gusts as the grass under
+ * it; and the leaves coming down off it on the wind (`fall.ts`).
  */
 export function createWoodFeature (world: World): Feature {
   let mesh: THREE.Mesh | null = null
+  let fall: Fall | null       = null
 
   return {
     name: 'wood',
@@ -79,9 +84,11 @@ export function createWoodFeature (world: World): Feature {
       const grow   = rng.fork('wood:grow')
 
       // The ball every lump of leaves is cut from. Unindexed, so each face
-      // has corners of its own and is shaded flat. A phone cuts it with a
-      // quarter of the facets: the crowns were its costliest triangles.
-      const sphere = new THREE.IcosahedronGeometry(1, quality.tier === 'mobile' ? 0 : 1)
+      // has corners of its own and is shaded flat. Desktop cuts it from a
+      // dodecahedron, 36 facets, and a phone from an icosahedron, 20: the
+      // crowns are drawn three times (the picture, the shadow, the sea), and
+      // were the island's costliest triangles at 80 facets a lump.
+      const sphere = quality.tier === 'mobile' ? new THREE.IcosahedronGeometry(1, 0) : new THREE.DodecahedronGeometry(1, 0)
       const ball   = sphere.getAttribute('position').array
 
       for (const tree of [ ...wood.trees, ...wood.outliers ])
@@ -112,10 +119,20 @@ export function createWoodFeature (world: World): Feature {
       if (world.quality.tier === 'mobile')
         keepOutOfMirror(mesh)
 
-      scene.add(mesh)
+      // The back end of the year: the turned leaves coming down.
+      fall = createFall(world, rng.fork('wood:fall'))
+
+      scene.add(mesh, fall.mesh)
+    },
+
+    update (_state, frame) {
+      fall?.step(frame.frame * STEP)
     },
 
     dispose () {
+      fall?.dispose()
+      fall = null
+
       mesh?.geometry.dispose()
 
       if (mesh?.material instanceof THREE.Material)
@@ -127,7 +144,8 @@ export function createWoodFeature (world: World): Feature {
   }
 }
 
-// perf: medium — one draw call and one shadow pass for all of it: 72 birches
+// perf: medium — the falling leaves' one draw call and a step's matrices
+// (`fall.ts`), and one draw call and one shadow pass for all the rest: 72 birches
 // (the wood's 52 and the island's 20) and the cut wood, 11k triangles on the
 // mobile tier (crowns of twenty-faced balls) and 43k on desktop, drawn twice. The sway is five sines a
 // vertex in the shader, from the wind's one uniform; nothing per frame on

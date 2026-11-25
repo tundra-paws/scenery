@@ -36,7 +36,7 @@ function cellsAbove (geometry: THREE.BufferGeometry, floor: number): number[] {
   return kept
 }
 
-/** The land: one heightfield mesh, textured a fragment (`land.ts`), shaded flat under its relief, its crags pushed out of true, with the path and the ways to the shelter's door and the field gate worn into it, and its foot wet where the sea runs up it. */
+/** The land: one heightfield mesh, textured a fragment (`land.ts`), shaded flat under its relief, its crags pushed out of true, the birches' leaves lying under them (`aLitter`), with the path and the ways to the shelter's door and the field gate worn into it, and its foot wet where the sea runs up it. */
 export function createTerrain (world: World): Feature {
   let mesh: THREE.Mesh | null = null
   let wear: PathWear | null   = null
@@ -53,6 +53,7 @@ export function createTerrain (world: World): Feature {
 
       const position = geometry.getAttribute('position')
       const said     = new Float32Array(position.count * 4)
+      const fallen   = new Float32Array(position.count)
 
       // The plane's vertices are the grid's corners, in the grid's order, so
       // each takes its height by index and its slope from its neighbours.
@@ -62,9 +63,11 @@ export function createTerrain (world: World): Feature {
 
         position.setY(index, height)
         describeLand(world, position.getX(index), position.getZ(index), grid.slopeAt(column, (index - column) / grid.side), height, said, index * 4)
+        fallen[index] = height > ground.waterLevel ? world.wood.litterAt(position.getX(index), position.getZ(index), world.wind.direction) : 0
       }
 
       geometry.setAttribute('aLand', new THREE.BufferAttribute(said, 4))
+      geometry.setAttribute('aLitter', new THREE.BufferAttribute(fallen, 1))
       geometry.setIndex(cellsAbove(geometry, ground.waterLevel - DEEP_WATER))
       geometry.computeVertexNormals()
       geometry.computeBoundingBox()

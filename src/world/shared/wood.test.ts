@@ -124,4 +124,17 @@ describe('the wood', () => {
       }
     }
   })
+
+  test('lets its leaves lie under each standing tree and downwind of it, and nowhere else', () => {
+    const lee = [ 0.36, -0.93 ] as const
+
+    for (const tree of [ ...wood.trees, ...wood.outliers ])
+      expect(wood.litterAt(tree.x + lee[0] * tree.height * 0.3, tree.z + lee[1] * tree.height * 0.3, lee)).toBe(1)
+
+    for (const stump of wood.stumps)
+      expect(wood.litterAt(stump.x, stump.z, lee)).toBeLessThan(1)
+
+    expect(wood.litterAt(summit.x, summit.z, lee)).toBe(0)
+    expect(wood.litterAt(shelter.x, shelter.z + 200, lee)).toBe(0)
+  })
 })

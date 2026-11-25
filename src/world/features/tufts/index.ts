@@ -14,6 +14,7 @@ import { PALETTE } from '../../shared/palette.ts'
 import { scatterOnGround } from '../../shared/scatter.ts'
 import type { Wind } from '../../shared/wind.ts'
 import type { Feature, World } from '../../world.ts'
+import { plantBracken } from './bracken.ts'
 import { plantHeather } from './heather.ts'
 
 
@@ -106,10 +107,11 @@ function swayInWind (material: LitMaterial, wind: Wind): void {
   })
 }
 
-/** Grass tufts on the gentle, low ground, in patches, and the heather on the hill above it (`heather.ts`): two instanced meshes in one material, leaning with the wind. */
+/** Grass tufts on the gentle, low ground, in patches, the heather on the hill above it (`heather.ts`) and the bracken between (`bracken.ts`): three instanced meshes in one material, leaning with the wind. */
 export function createTufts (world: World): Feature {
   let mesh: THREE.InstancedMesh | null    = null
   let heather: THREE.InstancedMesh | null = null
+  let bracken: THREE.InstancedMesh | null = null
 
   return {
     name: 'tufts',
@@ -191,22 +193,29 @@ export function createTufts (world: World): Feature {
       tellReach(mesh)
       commitInstances(mesh)
 
-      // The hill's heather shares the grass's material, and so its program.
+      // The hill's heather and the bracken under it share the grass's
+      // material, and so its program.
       heather = plantHeather(world, rng, material)
-      scene.add(mesh, heather)
+      bracken = plantBracken(world, rng, material)
+      scene.add(mesh, heather, bracken)
     },
 
     dispose () {
       heather?.geometry.dispose()
       heather?.removeFromParent()
       heather?.dispose()
+      bracken?.geometry.dispose()
+      bracken?.removeFromParent()
+      bracken?.dispose()
       disposeInstances(mesh)
       mesh    = null
       heather = null
+      bracken = null
     },
   }
 }
 
-// perf: cheap — two draw calls, no shadow pass. Nine triangles a tuft: 7k on
-// the mobile tier, 20k on desktop, and the heather's bushes (`heather.ts`). Placed once; the sway is four sines a vertex in
+// perf: cheap — three draw calls, no shadow pass. Nine triangles a tuft: 7k on
+// the mobile tier, 20k on desktop, and the heather's bushes and the bracken's
+// clumps (`heather.ts`, `bracken.ts`). Placed once; the sway is four sines a vertex in
 // the shader, from the wind's one uniform, and nothing per frame on the CPU.

@@ -41,20 +41,21 @@ const SQUASH = 0.92
 const ROUND = 2.4
 
 /**
- * The year has turned with the harvest: the birches have begun to yellow.
+ * The back end of the year: most of the wood has gone over to gold, the trees
+ * in the open first and all but whole, the sheltered ones keeping some green.
  * How much of a crown has gone over, in a tree that grew in shelter and in
  * one that grew in the open (by how far it leans: `Tree.lean`); how much
  * more of it toward the top, which goes first; and how far over a lump
  * that has turned is, from and to.
  */
-const TURNED = { lean: [ 0.1, 0.32 ], share: [ 0.16, 0.8 ], top: 0.22, gone: [ 0.6, 1 ]} as const
+const TURNED = { lean: [ 0.1, 0.32 ], share: [ 0.5, 0.96 ], top: 0.24, gone: [ 0.65, 1 ]} as const
 
 const BARK = new THREE.Color(PALETTE.bark)
 const LEAF = new THREE.Color(PALETTE.grass)
 const DRY  = new THREE.Color(PALETTE.grassDry)
 
-/** A leaf that has turned: the barley's own gold, a little riper. No colour the field does not have. */
-const GOLD = new THREE.Color(PALETTE.barley).offsetHSL(-0.012, 0.16, 0.02)
+/** A leaf that has turned: the barley's own gold, riper (`leaf`). */
+const GOLD = new THREE.Color(PALETTE.leaf)
 
 /** The near black of a birch's scars and of the rough bark at its foot, and the brown of its thin wood, half way to that. */
 export const SCAR = new THREE.Color(PALETTE.rock).multiplyScalar(0.36)

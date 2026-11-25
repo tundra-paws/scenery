@@ -4,6 +4,8 @@ import type { AppModule } from 'threejs-scenes/core'
 
 import { createLands, createSkyline } from './shared/beyond.ts'
 import type { Land } from './shared/beyond.ts'
+import { createBracken } from './shared/bracken.ts'
+import type { Bracken } from './shared/bracken.ts'
 import { createBurn } from './shared/burn.ts'
 import type { Burn } from './shared/burn.ts'
 import { createCloudShadow } from './shared/cloud-shadow.ts'
@@ -73,7 +75,7 @@ export type Feature = AppModule<WorldState>
  * And for what was made on it: the summit the cairn stands on, the one path
  * up to it, the shelter beside that path, and the walls round the ground
  * worked from it. And for what grows on it: the wood beside the shelter,
- * and the heather on the hill.
+ * the heather on the hill, and the bracken under it.
  * And for what stands in the sea, which the sea breaks round, and what lies
  * loose on the land, which the flock grazes round. And for the reef off
  * the east shore, its mark and its seals. And for the water that runs off
@@ -116,6 +118,9 @@ export interface World {
   /** The heather on the hill above the worked ground, for the land's colour and the clumps on it. */
   moor: Moor
 
+  /** The bracken on the lower hill, gone over to rust, for the land's colour and the fronds on it. */
+  bracken: Bracken
+
   /** The reef off the east shore, the mark on it and the seals hauled out there. */
   skerry: Skerry
 
@@ -140,6 +145,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
   const infield = createInfield(shelter)
   const wind    = createWind()
   const burn    = createBurn(ground, path, [ infield.fold ])
+  const moor    = createMoor(ground, seed)
 
   return {
     seed,
@@ -158,7 +164,8 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     yard:    createYard(ground, path, shelter),
     infield,
     wood:    createWood({ ground, summit, path, shelter }, seed),
-    moor:    createMoor(ground, seed),
+    moor,
+    bracken: createBracken(ground, seed, { moor, path, infield, burn }),
     skerry:  createSkerry(ground, seed, quality.tier),
     wash:    createWash(),
     clutter: createClutter(),

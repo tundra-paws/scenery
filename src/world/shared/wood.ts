@@ -73,6 +73,10 @@ const OFF_SUMMIT = 21
 const FELLED  = 3
 const CARRIED = 22
 
+/** Where the leaves of a tree lie: how far downwind of its foot, and how wide, both as a part of its height. */
+const DRIFT  = 0.3
+const LITTER = 0.55
+
 /** A birch, as a place on the ground and a size. */
 export interface Tree extends Waypoint {
 
@@ -109,6 +113,13 @@ export interface Wood extends Waypoint {
 
   /** How far a place is from the nearest trunk or stump. */
   distanceTo (x: number, z: number): number
+
+  /**
+   * How thick the fallen leaves lie at a place, from none to a carpet: under
+   * each standing tree's crown, carried downwind (`lee`, a unit `[x, z]`)
+   * the way the wind takes them as they come down.
+   */
+  litterAt (x: number, z: number, lee: readonly [number, number]): number
 }
 
 /** What the rule for a spot reads. */
@@ -222,10 +233,24 @@ export function createWood (site: Site, seed: number): Wood {
 
       return nearest
     },
+
+    litterAt (x, z, lee) {
+      let thickest = 0
+
+      for (const tree of [ ...trees, ...outliers ]) {
+        const wide = tree.height * LITTER
+        const away = Math.hypot(tree.x + lee[0] * tree.height * DRIFT - x, tree.z + lee[1] * tree.height * DRIFT - z)
+
+        if (away < wide)
+          thickest = Math.max(thickest, 1 - smoothstep(wide * 0.35, wide, away))
+      }
+
+      return thickest
+    },
   }
 }
 
 // perf: cheap — up to 2700 spots tried once, each one ground sample at most
 // and, for the few that pass everything else, the four of its slope.
-// `distanceTo` is a pass over some seventy trunks: ask it at build time, not
-// per frame.
+// `distanceTo` and `litterAt` are a pass over some seventy trunks: ask them at
+// build time, not per frame.
