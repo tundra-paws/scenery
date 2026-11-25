@@ -1,0 +1,48 @@
+{
+  "id": 22,
+  "dir": "i/0022/",
+  "date": "2026-11-25",
+  "sha": "52a8fbf8b9ac63411bfd231f3390062749a02479",
+  "title": "Showers in the sound",
+  "summary": "Rain clouds ride the wind and trail slanting veils to the sea, one off the far headland beside the low sun as the visit opens. The far tops have their first snow, and the grass costs less.",
+  "kind": "feature",
+  "model": "claude",
+  "journal": "journal/2026-11-25-showers-in-the-sound.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 93,
+      "triangles": 604708,
+      "live": {
+        "buffers": 489,
+        "textures": 10,
+        "programs": 30,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 105
+      }
+    },
+    "mobile": {
+      "draws": 76,
+      "triangles": 231917,
+      "live": {
+        "buffers": 377,
+        "textures": 10,
+        "programs": 30,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 77
+      }
+    }
+  },
+  "bytes": {
+    "new": 304357,
+    "site": 5425803
+  },
+  "three": "0.184.0",
+  "distHash": "119e01fb8dab29724bd83e8fb6199d263daa911763c65e760597025d387b51cd",
+  "withdrawn": false
+}
