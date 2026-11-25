@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repo": "tundra-paws/scenery",
-  "updated": "2026-11-25T01:38:26.857Z",
+  "updated": "2026-11-25T03:45:34.553Z",
   "iterations": [
     {
       "id": 1,
@@ -961,6 +961,54 @@
       },
       "three": "0.184.0",
       "distHash": "d19c2eb56fd0dd3e117eee16133d79580c832596a5e2a5863c4bba3e4ea122ce",
+      "withdrawn": false
+    },
+    {
+      "id": 21,
+      "dir": "i/0021/",
+      "date": "2026-11-25",
+      "sha": "cadccc025222f2e20373c058fbddc4829ae274d6",
+      "title": "The harvest home",
+      "summary": "A kiln smokes on the shelf by the fold, four roped stacks stand before the house's door, the barley is mostly cut and carried, and the birches have begun to turn gold.",
+      "kind": "feature",
+      "model": "claude",
+      "journal": "journal/2026-11-25-the-harvest-home.md",
+      "shots": {
+        "hero": "shot.webp",
+        "thumb": "thumb.webp"
+      },
+      "stats": {
+        "desktop": {
+          "draws": 91,
+          "triangles": 635508,
+          "live": {
+            "buffers": 482,
+            "textures": 10,
+            "programs": 29,
+            "framebuffers": 2,
+            "renderbuffers": 0,
+            "vertexArrays": 104
+          }
+        },
+        "mobile": {
+          "draws": 75,
+          "triangles": 234717,
+          "live": {
+            "buffers": 372,
+            "textures": 10,
+            "programs": 29,
+            "framebuffers": 2,
+            "renderbuffers": 0,
+            "vertexArrays": 76
+          }
+        }
+      },
+      "bytes": {
+        "new": 291328,
+        "site": 5121424
+      },
+      "three": "0.184.0",
+      "distHash": "f0b49b1114bc35deb40dae6e9dcbdf4d3926f7ebd05501150962663faa543d49",
       "withdrawn": false
     }
   ]
