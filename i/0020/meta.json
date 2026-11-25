@@ -1,0 +1,48 @@
+{
+  "id": 20,
+  "dir": "i/0020/",
+  "date": "2026-11-25",
+  "sha": "91fe7fa4af24befc86eb316e530109dd37d74405",
+  "title": "The mill on the burn",
+  "summary": "A click mill stands astride the burn above its pool, its wheel turning under the floor. The first rigs of barley are cut and stooked for it, and the head-dyke lets the water through a gate.",
+  "kind": "feature",
+  "model": "claude",
+  "journal": "journal/2026-11-25-the-mill-on-the-burn.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 82,
+      "triangles": 616570,
+      "live": {
+        "buffers": 446,
+        "textures": 10,
+        "programs": 29,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 95
+      }
+    },
+    "mobile": {
+      "draws": 70,
+      "triangles": 238223,
+      "live": {
+        "buffers": 356,
+        "textures": 10,
+        "programs": 29,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 73
+      }
+    }
+  },
+  "bytes": {
+    "new": 275845,
+    "site": 4830074
+  },
+  "three": "0.184.0",
+  "distHash": "d19c2eb56fd0dd3e117eee16133d79580c832596a5e2a5863c4bba3e4ea122ce",
+  "withdrawn": false
+}
