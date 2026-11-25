@@ -20,7 +20,8 @@ import type { Ground } from './shared/ground.ts'
  * stacked logs are, close under the shelter with
  * the cairn over it, back down to the water beside the boat at its anchor,
  * off the beach below the field, looking up its rigs to the gate and the
- * house, along the shore to the inbye, low among the sheep, looking up over
+ * house, up over the fold to the mill astride the burn, with the cairn
+ * over it, down to the inbye, low among the sheep, looking up over
  * the head-dyke to the brae and the cairn, across to the foot of the burn,
  * looking up its water past the birch and the dyke to the spring under the
  * cairn, and last out onto the water under the brae, looking up at the
@@ -50,6 +51,9 @@ import type { Ground } from './shared/ground.ts'
  * `skerry` stands between `east` and `wood` on time taken from five legs of
  * the afternoon (`east`, `wood`, `shelter`, `boat`, `starlings`), so the day
  * is the length it was and no stop before it has moved from its hour.
+ * `mill` stands between `infield` and `flock` the same way, on nine and a
+ * half seconds taken from eight legs after `moor`: a longer day would have
+ * put `ridge` before its sunrise again.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },
