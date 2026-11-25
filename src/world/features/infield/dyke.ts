@@ -5,6 +5,7 @@ import type { SeededRng } from 'threejs-scenes'
 import type { Ground } from '../../shared/ground.ts'
 import type { Infield } from '../../shared/infield.ts'
 import { commitInstances } from '../../shared/instances.ts'
+import type { WaterGate } from '../../shared/mill.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import type { Waypoint } from '../../shared/path.ts'
 
@@ -61,6 +62,9 @@ interface Waller {
   cope:   Laid[]
   lay:    SeededRng
   ground: Ground
+
+  /** Where a wall is left open for water to go under: no stone is laid within one. */
+  gaps: readonly WaterGate[]
 }
 
 /** The walls as two instanced meshes: the walling stones and posts, and the thin cope along their tops. */
@@ -105,6 +109,11 @@ function set (waller: Waller, at: Station, base: number, size: Size, into: Laid[
 
   tint.set(PALETTE.cairn).lerp(rock, lay.range(0, PICKED))
     .offsetHSL(0, 0, lay.range(-0.05, 0.04))
+
+  // Left out after its draws are taken, so every other stone stays where it was.
+  if (waller.gaps.some(gap => Math.hypot(at.x - gap.x, at.z - gap.z) < gap.half))
+    return
+
   into.push({ matrix: dummy.matrix.clone(), colour: tint.clone() })
 }
 
@@ -165,16 +174,25 @@ function build (laid: readonly Laid[], geometry: THREE.BufferGeometry, material:
  * rock's in it. The same stones on every tier, all cut with twenty facets:
  * they were a sixth of the island's triangles, drawn three times, from any
  * view they are a few pixels across, and the stone's grain (`shared/surface.ts`)
- * now carries what the facets did.
+ * now carries what the facets did. Where the burn goes under the head-dyke
+ * (`gaps`) the wall stops at a post each side: the mill hangs the gate.
  */
-export function layDyke (stone: THREE.BufferGeometry, slab: THREE.BufferGeometry, material: THREE.Material, lay: SeededRng, ground: Ground, { runs, posts }: Pick<Infield, 'runs' | 'posts'>): Dyke {
-  const waller: Waller = { laid: [], cope: [], lay, ground }
+export function layDyke (stone: THREE.BufferGeometry, slab: THREE.BufferGeometry, material: THREE.Material, lay: SeededRng, ground: Ground, { runs, posts }: Pick<Infield, 'runs' | 'posts'>, gaps: readonly WaterGate[] = []): Dyke {
+  const waller: Waller = { laid: [], cope: [], lay, ground, gaps }
 
   for (const run of runs)
     raise(waller, run)
 
   for (const post of posts)
     set(waller, { ...post }, ground.heightAt(post.x, post.z) - 0.5, POST)
+
+  // A post each side of a gap the water goes through, as at any other.
+  for (const { x, z, along, half } of gaps)
+    for (const side of [ -1, 1 ]) {
+      const at = { x: x + along[0] * side * (half + POST.half), z: z + along[1] * side * (half + POST.half), turn: Math.atan2(-along[1], along[0]) }
+
+      set(waller, at, ground.heightAt(at.x, at.z) - 0.5, POST)
+    }
 
   return {
     stones: build(waller.laid, stone, material, 'infield-dyke'),

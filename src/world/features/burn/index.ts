@@ -1,5 +1,6 @@
 // src/world/features/burn/index.ts
 import * as THREE from 'three'
+import { smoothstep } from 'threejs-scenes/primitives'
 
 import { disposeInstances } from '../../shared/instances.ts'
 import { createLitMaterial } from '../../shared/lit.ts'
@@ -10,6 +11,12 @@ import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { countStones, layStones } from './stones.ts'
 import { createStreamGeometry, createStreamMaterial } from './water.ts'
+
+/** How near the mill's walls the burn's own stones are left out: its footings stand there. */
+const UNDER_WALL = 0.9
+
+/** What the mill's wheel adds to the water's fall where it leaves it, and how far down the burn that is spent. */
+const CHURN = { fall: 0.62, spent: 3.4 } as const
 
 /**
  * The burn: the island's fresh water.
@@ -35,7 +42,11 @@ export function createBurnFeature (world: World): Feature {
     build ({ scene, rng }) {
       const { burn, ground, grid, quality } = world
 
-      water      = new THREE.Mesh(createStreamGeometry(burn, grid), createStreamMaterial({ clouds: world.clouds, day: world.day, level: ground.waterLevel, time }))
+      // White from under the mill's floor, and settling as it crosses the pool.
+      const [ into, out ] = world.mill.under
+      const churned       = (along: number): number => along < into + 1 ? 0 : CHURN.fall * (1 - smoothstep(out - 1, out + CHURN.spent, along))
+
+      water      = new THREE.Mesh(createStreamGeometry(burn, grid, churned), createStreamMaterial({ clouds: world.clouds, day: world.day, level: ground.waterLevel, time }))
       water.name = 'burn'
 
       // The island's stone, in the boulders' own material and grain, so the
@@ -48,7 +59,7 @@ export function createBurnFeature (world: World): Feature {
       stones.name          = 'burn-stones'
       stones.receiveShadow = true
 
-      layStones(stones, burn, ground, quality.tier, rng.fork('burn:lay'))
+      layStones(stones, burn, ground, quality.tier, rng.fork('burn:lay'), (x, z) => world.mill.distanceTo(x, z) < UNDER_WALL)
 
       // Small and many: a phone leaves them out of the sea's reflection.
       if (quality.tier === 'mobile')

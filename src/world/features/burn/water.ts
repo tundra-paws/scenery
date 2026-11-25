@@ -54,8 +54,10 @@ interface StreamOptions {
  * the turf comes up through it. Every vertex says where it is on the burn
  * (`aBurn`): the seconds the water takes to reach it from the spring, how
  * far across it is, how fast the land falls there, and how far down it is.
+ * `churned` is what a wheel adds to that fall, a distance down the burn:
+ * water that has been thrown at one runs on as white as if it had fallen.
  */
-export function createStreamGeometry (burn: Burn, grid: HeightGrid): THREE.BufferGeometry {
+export function createStreamGeometry (burn: Burn, grid: HeightGrid, churned: (along: number) => number = () => 0): THREE.BufferGeometry {
   const position: number[] = []
   const said: number[]     = []
   const index: number[]    = []
@@ -69,7 +71,7 @@ export function createStreamGeometry (burn: Burn, grid: HeightGrid): THREE.Buffe
       const z = reach.z + reach.ahead[0] * across * half
 
       position.push(x, Math.min(middle, grid.heightAt(x, z)) + LIFT, z)
-      said.push(reach.since, across, reach.fall, reach.along)
+      said.push(reach.since, across, reach.fall + churned(reach.along), reach.along)
     }
 
     if (row === 0)

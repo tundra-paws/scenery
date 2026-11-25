@@ -3,11 +3,13 @@ import { describe, expect, test } from 'bun:test'
 
 import { VIEWS, resolveView } from '../views.ts'
 import { WORLD_SEED } from '../world.ts'
+import { createBurn } from './burn.ts'
 import { DAY, elevationAt } from './daylight.ts'
 import { PACE, createFlock } from './flock.ts'
 import type { Hold, Moment, Sheep } from './flock.ts'
 import { createGround } from './ground.ts'
 import { createInfield } from './infield.ts'
+import { createMill } from './mill.ts'
 import { createPath, findSummit } from './path.ts'
 import type { Waypoint } from './path.ts'
 import { createShelter } from './shelter.ts'
@@ -21,7 +23,9 @@ describe('the flock', () => {
   const shelter = createShelter(ground, path)
   const infield = createInfield(shelter)
   const wood    = createWood({ ground, summit, path, shelter }, WORLD_SEED)
-  const site    = { ground, summit, path, shelter, infield, wood }
+  const burn    = createBurn(ground, path, [ infield.fold ])
+  const mill    = createMill(ground, path, burn, infield)
+  const site    = { ground, summit, path, shelter, infield, wood, burn, mill }
   const flock   = createFlock(site, WORLD_SEED, 'desktop')
   const fold    = infield.fold
 

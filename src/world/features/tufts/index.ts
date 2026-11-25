@@ -170,6 +170,8 @@ export function createTufts (world: World): Feature {
         const trodden = world.path.distanceTo(spot.x, spot.z) < OFF_PATH ||
           world.shelter.distanceTo(spot.x, spot.z) < OFF_SHELTER ||
           world.shelter.distanceToSpur(spot.x, spot.z) < OFF_SPUR ||
+          world.mill.distanceTo(spot.x, spot.z) < OFF_SHELTER ||
+          world.mill.distanceToSpur(spot.x, spot.z) < OFF_SPUR ||
           world.infield.distanceTo(spot.x, spot.z) < OFF_DYKE ||
           world.burn.distanceTo(spot.x, spot.z) < world.burn.pool.half + OFF_BURN ||
           world.infield.inField(spot.x, spot.z)

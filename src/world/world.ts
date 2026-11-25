@@ -18,6 +18,8 @@ import { GRID_SEGMENTS, createHeightGrid } from './shared/height-grid.ts'
 import type { HeightGrid } from './shared/height-grid.ts'
 import { createInfield } from './shared/infield.ts'
 import type { Infield } from './shared/infield.ts'
+import { createMill } from './shared/mill.ts'
+import type { Mill } from './shared/mill.ts'
 import { createMoor } from './shared/moor.ts'
 import type { Moor } from './shared/moor.ts'
 import { createPath, findSummit } from './shared/path.ts'
@@ -73,7 +75,8 @@ export type Feature = AppModule<WorldState>
  * And for what stands in the sea, which the sea breaks round, and what lies
  * loose on the land, which the flock grazes round. And for the reef off
  * the east shore, its mark and its seals. And for the water that runs off
- * it: the burn, which everything on the brae keeps out of.
+ * it: the burn, which everything on the brae keeps out of, and the mill
+ * that stands over it.
  */
 export interface World {
   seed:    number
@@ -96,6 +99,9 @@ export interface World {
 
   /** The island's one stream, from its spring under the cairn to the sea by the landing. */
   burn: Burn
+
+  /** The mill astride the burn above its pool, the way to its door, and the gap the head-dyke leaves the water. */
+  mill: Mill
 
   /** The field below the shelter, its dyke and gate, and the fold across the path. */
   infield: Infield
@@ -127,6 +133,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
   const shelter = createShelter(ground, path)
   const infield = createInfield(shelter)
   const wind    = createWind()
+  const burn    = createBurn(ground, path, [ infield.fold ])
 
   return {
     seed,
@@ -140,7 +147,8 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     beyond,
     day:     createDaylight(createSkyline(beyond)),
     shelter,
-    burn:    createBurn(ground, path, [ infield.fold ]),
+    burn,
+    mill:    createMill(ground, path, burn, infield),
     infield,
     wood:    createWood({ ground, summit, path, shelter }, seed),
     moor:    createMoor(ground, seed),

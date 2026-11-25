@@ -50,9 +50,9 @@ function distanceToLine (x: number, z: number, line: readonly Waypoint[]): numbe
 
 /** How thick the grass grows at a place, 0 to 1: the meadow's own rule, cheapest question first. */
 function thickness (world: World, x: number, z: number, height: number): number {
-  const { ground, moor, path, shelter, infield, burn } = world
-  const above                                          = height - ground.waterLevel
-  const turf                                           = smoothstep(TURF[0], TURF[1], above)
+  const { ground, moor, path, shelter, infield, burn, mill } = world
+  const above                                                = height - ground.waterLevel
+  const turf                                                 = smoothstep(TURF[0], TURF[1], above)
 
   if (turf <= 0 || infield.inField(x, z))
     return 0
@@ -66,8 +66,8 @@ function thickness (world: World, x: number, z: number, height: number): number 
   return open *
     (1 - THIN * smoothstep(DRY[0], DRY[1], above / ground.relief)) *
     smoothstep(OFF_PATH[0], OFF_PATH[1], path.distanceTo(x, z)) *
-    smoothstep(OFF_WAY[0], OFF_WAY[1], Math.min(shelter.distanceToSpur(x, z), distanceToLine(x, z, infield.track))) *
-    smoothstep(OFF_HOUSE[0], OFF_HOUSE[1], shelter.distanceTo(x, z)) *
+    smoothstep(OFF_WAY[0], OFF_WAY[1], Math.min(shelter.distanceToSpur(x, z), mill.distanceToSpur(x, z), distanceToLine(x, z, infield.track))) *
+    smoothstep(OFF_HOUSE[0], OFF_HOUSE[1], Math.min(shelter.distanceTo(x, z), mill.distanceTo(x, z))) *
     smoothstep(OFF_DYKE[0], OFF_DYKE[1], infield.distanceTo(x, z)) *
     smoothstep(OFF_BANK[0], OFF_BANK[1], burn.distanceTo(x, z) - burn.pool.half)
 }

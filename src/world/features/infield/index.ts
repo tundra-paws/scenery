@@ -13,6 +13,7 @@ import { layDyke } from './dyke.ts'
 import type { Dyke } from './dyke.ts'
 import { hangGate } from './gate.ts'
 import { ploughRigs } from './rigs.ts'
+import { standStooks } from './stooks.ts'
 
 
 /**
@@ -59,15 +60,17 @@ function wade (world: World): void {
  * round with the stones that came out of it, and a fold for sheep across the
  * path from it.
  *
- * Still nobody: the barley stands in its rigs and the gate is open. The crop
- * answers the one wind with everything else, and the walls are the boulders'
- * shape, placed, like the cairn and the house.
+ * Still nobody: the gate is open, and the harvest is begun and left: the
+ * first rigs of barley are cut and stooked, the rest stand. The crop answers
+ * the one wind with everything else, and the walls are the boulders' shape,
+ * placed, like the cairn and the house.
  */
 export function createInfieldFeature (world: World): Feature {
   let dyke: Dyke | null                  = null
   let rigs: THREE.Mesh | null            = null
   let gate: THREE.Mesh | null            = null
   let barley: THREE.InstancedMesh | null = null
+  let stooks: THREE.InstancedMesh | null = null
 
   return {
     name: 'infield',
@@ -95,7 +98,7 @@ export function createInfieldFeature (world: World): Feature {
       // tier since they have a grain, which carries them where eighty did.
       const cut = createStoneGeometry(rng.fork('infield:shape').int(1, 1_000_000), 0)
 
-      dyke = layDyke(cut, cut, stone, rng.fork('infield:lay'), ground, infield)
+      dyke = layDyke(cut, cut, stone, rng.fork('infield:lay'), ground, infield, [ world.mill.gate ])
 
       const field = ploughRigs(earth, rng.fork('infield:rigs'), ground, grid, infield, wind)
       const ears  = createLitMaterial(world, { name: 'infield-barley', flatShading: false, side: THREE.DoubleSide })
@@ -104,9 +107,18 @@ export function createInfieldFeature (world: World): Feature {
       barley = sowBarley(field.ears, ears, rng.fork('infield:barley'), world.quality.tier, wind)
       gate   = hangGate(ground, infield.gates[0]!, shelter, wood)
 
+      // The sheaves are bound straw, but they take the stone's own material:
+      // made alike it is one program with every boulder, and its blotch and
+      // its cracks read as straw at a stook's size. Their colour is their own.
+      const straw = createLitMaterial(world, { name: 'infield-stooks' })
+
+      straw.finish(stonework(inItself(world.quality.tier)))
+      stooks = standStooks(field.stooks, straw, rng.fork('infield:stooks'))
+
       // The ears are many and small; in the sea the rigs' colour is enough.
       // A phone leaves the walls' hundreds of stones out of it too.
       keepOutOfMirror(barley)
+      keepOutOfMirror(stooks)
 
       if (world.quality.tier === 'mobile') {
         keepOutOfMirror(dyke.stones)
@@ -114,13 +126,14 @@ export function createInfieldFeature (world: World): Feature {
       }
 
       wade(world)
-      scene.add(dyke.stones, dyke.cope, rigs, barley, gate)
+      scene.add(dyke.stones, dyke.cope, rigs, barley, stooks, gate)
     },
 
     dispose () {
       disposeInstances(dyke?.stones ?? null)
       disposeInstances(dyke?.cope ?? null)
       disposeInstances(barley)
+      disposeInstances(stooks)
       free(rigs)
       free(gate)
 
@@ -128,10 +141,12 @@ export function createInfieldFeature (world: World): Feature {
       rigs = null
       gate   = null
       barley = null
+      stooks = null
     },
   }
 }
 
-// perf: cheap — five draw calls and three shadow passes: the dyke's stones
-// and its cope (`dyke.ts`), the rigs (`rigs.ts`), the barley on them (`barley.ts`) and
-// the gate (`gate.ts`). Built once; the barley's sway is in its shaders.
+// perf: cheap — six draw calls and four shadow passes: the dyke's stones
+// and its cope (`dyke.ts`), the rigs (`rigs.ts`), the barley on them
+// (`barley.ts`), the stooks (`stooks.ts`) and the gate (`gate.ts`). Built
+// once; the barley's sway is in its shaders.

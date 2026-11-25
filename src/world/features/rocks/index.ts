@@ -43,7 +43,7 @@ export function createRocks (world: World): Feature {
     name: 'rocks',
 
     build ({ scene, rng }) {
-      const { ground, summit, path, shelter, wood, infield, burn } = world
+      const { ground, summit, path, shelter, wood, infield, burn, mill } = world
 
       const place = rng.fork('rocks:place')
       const shape = rng.fork('rocks:shape')
@@ -82,8 +82,8 @@ export function createRocks (world: World): Feature {
         tint.set(PALETTE.rock).offsetHSL(0, 0, place.range(-0.07, 0.07))
 
         // A boulder lying on the path was rolled off it long ago, one on the
-        // summit went into the cairn, and one where the shelter stands into
-        // its walls. No tree took root on one. The field was cleared into its
+        // summit went into the cairn, and one where the shelter or the mill
+        // stands into its walls. No tree took root on one. The field was cleared into its
         // dyke, and a dyke goes round a boulder, not over it. Left out after
         // its draws are taken, so every other boulder stays where it was.
         const taken = path.distanceTo(spot.x, spot.z) < size + OFF_PATH ||
@@ -92,6 +92,7 @@ export function createRocks (world: World): Feature {
           burn.distanceTo(spot.x, spot.z) < size + OFF_BURN ||
           Math.hypot(spot.x - summit.x, spot.z - summit.z) < size + OFF_SUMMIT ||
           Math.min(shelter.distanceTo(spot.x, spot.z), shelter.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
+          Math.min(mill.distanceTo(spot.x, spot.z), mill.distanceToSpur(spot.x, spot.z)) < size + OFF_SHELTER ||
           wood.distanceTo(spot.x, spot.z) < size + OFF_TREE
 
         if (taken)

@@ -7,6 +7,7 @@ import type { Burn } from './burn.ts'
 import { DAY, elevationAt } from './daylight.ts'
 import type { Ground } from './ground.ts'
 import type { Infield } from './infield.ts'
+import type { Mill } from './mill.ts'
 import type { Path, Waypoint } from './path.ts'
 import type { Shelter } from './shelter.ts'
 import type { Wood } from './wood.ts'
@@ -168,6 +169,9 @@ interface Site {
 
   /** The burn, where there is one: no sheep stands in it. */
   burn?: Burn
+
+  /** The mill, where there is one: no sheep stands in it, or on the way to its door. */
+  mill?: Mill
 }
 
 /** Whether a sheep may stand at a place: penned in the fold, or out on the island. */
@@ -186,10 +190,13 @@ export interface Flock {
 
 /** The rule for a place a sheep may graze: on the island's open grass, clear of everything that stands on it. */
 function makeRule (site: Site, clear: (x: number, z: number) => number): Rule {
-  const { ground, summit, path, shelter, infield, wood, burn } = site
-  const cameras                                                = VIEWS.map(view => resolveView(view, ground).position)
-  const fold                                                   = infield.fold
-  const dry                                                    = (x: number, z: number): boolean => burn === undefined || burn.distanceTo(x, z) > OFF_BURN
+  const { ground, summit, path, shelter, infield, wood, burn, mill } = site
+  const cameras                                                      = VIEWS.map(view => resolveView(view, ground).position)
+  const fold                                                         = infield.fold
+  const dry                                                          = (x: number, z: number): boolean => burn === undefined || burn.distanceTo(x, z) > OFF_BURN
+
+  /** Off both buildings and the ways to their doors. */
+  const open = (x: number, z: number): boolean => [ shelter, mill ].every(house => house === undefined || house.distanceTo(x, z) > OFF_SHELTER && house.distanceToSpur(x, z) > OFF_SPUR)
 
   return (x, z, penned) => {
     const height = ground.heightAt(x, z)
@@ -202,8 +209,7 @@ function makeRule (site: Site, clear: (x: number, z: number) => number): Rule {
       infield.distanceTo(x, z) > OFF_WALL &&
       path.distanceTo(x, z) > OFF_PATH &&
       wood.distanceTo(x, z) > OFF_TREE &&
-      shelter.distanceTo(x, z) > OFF_SHELTER &&
-      shelter.distanceToSpur(x, z) > OFF_SPUR &&
+      open(x, z) &&
       Math.hypot(x - summit.x, z - summit.z) > OFF_SUMMIT &&
       clear(x, z) > OFF_STONE &&
       dry(x, z) &&

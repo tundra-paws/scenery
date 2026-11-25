@@ -3,6 +3,7 @@ import * as THREE from 'three'
 
 import { createLitMaterial, createUnlitMaterial } from '../../shared/lit.ts'
 import { disposeInstances } from '../../shared/instances.ts'
+import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { createStoneGeometry } from '../../shared/stone.ts'
 import { inWorld, stone as stonework, turf } from '../../shared/surface.ts'
 import { STEP } from '../../world.ts'
@@ -68,6 +69,11 @@ export function createShelterFeature (world: World): Feature {
       const detail = world.quality.tier === 'mobile' ? 0 : 1
 
       walls = layWalls(createStoneGeometry(rng.fork('shelter:shape').int(1, 1_000_000), detail), stone, rng.fork('shelter:lay'), land)
+
+      // And leaves them out of the sea's mirror, as it does the dykes': the
+      // house it gives back is its dark body under its roof.
+      if (world.quality.tier === 'mobile')
+        keepOutOfMirror(walls)
 
       // The dark inside goes down as far as the lowest ground at any corner.
       const foot = Math.min(land(-HALF_DEEP, -HALF_LONG), land(HALF_DEEP, -HALF_LONG), land(-HALF_DEEP, HALF_LONG), land(HALF_DEEP, HALF_LONG)) - 1

@@ -172,10 +172,10 @@ export function createFlockFeature (world: World): Feature {
     name: 'flock',
 
     build ({ scene, rng }) {
-      const { ground, summit, path, shelter, infield, wood, clutter, quality } = world
-      const flock                                                              = createFlock({ ground, summit, path, shelter, infield, wood }, world.seed, quality.tier, clutter.distanceTo)
-      const count                                                              = flock.sheep.length
-      const seed                                                               = rng.fork('flock:fleece').int(1, 1_000_000)
+      const { ground, summit, path, shelter, infield, wood, burn, mill, clutter, quality } = world
+      const flock                                                                          = createFlock({ ground, summit, path, shelter, infield, wood, burn, mill }, world.seed, quality.tier, clutter.distanceTo)
+      const count                                                                          = flock.sheep.length
+      const seed                                                                           = rng.fork('flock:fleece').int(1, 1_000_000)
 
       herd = {
         flock,

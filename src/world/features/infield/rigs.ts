@@ -47,20 +47,31 @@ const PROFILE = [
 ] as const
 
 /**
- * What a run of rigs is sown with: the crop's colour and how much it lifts,
- * how rough it stands, and how much it gives to the wind. Barley sways and
- * pales in a gust; potato haulm is dark and lumpy and barely moves; a rig
- * left in grass is the meadow again, and the rigs under it show.
+ * What a run of rigs is sown with: the crop's colour, how much paler and how
+ * much duller it is, how much it lifts, how rough it stands, and how much it
+ * gives to the wind. Barley sways and pales in a gust; potato haulm is dark
+ * and lumpy and barely moves; a rig left in grass is the meadow again, and
+ * the rigs under it show. Stubble is barley that has been cut: the same
+ * colour bleached, a hand high, and stiff.
  */
 const CROPS = {
-  barley: { colour: PALETTE.barley, light: 0, lift: 1, rough: 0.1, give: 1 },
-  potato: { colour: PALETTE.grass, light: -0.07, lift: 1.2, rough: 0.16, give: 0.25 },
-  lea:    { colour: PALETTE.grass, light: 0.02, lift: 0.55, rough: 0.05, give: 0.45 },
+  barley:  { colour: PALETTE.barley, light: 0, dull: 0, lift: 1, rough: 0.1, give: 1 },
+  stubble: { colour: PALETTE.barley, light: 0.09, dull: 0.14, lift: 0.4, rough: 0.035, give: 0.06 },
+  potato:  { colour: PALETTE.grass, light: -0.07, dull: 0, lift: 1.2, rough: 0.16, give: 0.25 },
+  lea:     { colour: PALETTE.grass, light: 0.02, dull: 0, lift: 0.55, rough: 0.05, give: 0.45 },
 } as const
 
 /** What is sown, plot by plot across the field, and how many rigs a plot is. */
 const ROTATION = [ 'barley', 'potato', 'barley', 'barley', 'lea', 'potato' ] as const
 const PLOT     = [ 3, 5 ] as const
+
+/**
+ * The harvest has begun: of every plot of barley, this many rigs are cut,
+ * from the side the reaper started at, and their sheaves stood up in
+ * stooks to dry, so far apart along the rig and no nearer its ends than that.
+ */
+const CUT   = 2
+const STOOK = { every: 2.3, end: 1.1 } as const
 
 /** Module-scope scratch. */
 const tint = new THREE.Color()
@@ -75,10 +86,19 @@ interface Rig {
   crop:   Crop
 }
 
-/** The rigs, and where the barley on them stands, as x, y, z in turn. */
+/** The rigs, where the barley on them stands, as x, y, z in turn, and where the stooks stand on the ones that are cut. */
 export interface Field {
-  mesh: THREE.Mesh
-  ears: readonly number[]
+  mesh:   THREE.Mesh
+  ears:   readonly number[]
+  stooks: readonly Stook[]
+}
+
+/** A stook: where it stands, and the turn that lays its row of sheaves along its rig. */
+export interface Stook {
+  x:    number
+  y:    number
+  z:    number
+  turn: number
 }
 
 /** The buffers being filled. */
@@ -90,6 +110,9 @@ interface Plough {
 
   /** Where an ear of barley stands: on the crop of a barley rig, at every vertex of it. */
   ears: number[]
+
+  /** Where a stook stands: down the crown of a cut rig. */
+  stooks: Stook[]
 }
 
 /** Which way the land falls across the field, on the whole: the way rigs are laid, so they drain. */
@@ -126,9 +149,10 @@ function setOut (infield: Infield, fall: readonly [number, number], across: read
   const ends  = infield.field.map(point => on(point, fall))
   const first = Math.min(...ends)
   const last  = Math.max(...ends)
-  const rigs  = []
-  let plot = 0
-  let left = lay.int(PLOT[0], PLOT[1])
+  const rigs  = [] as Rig[]
+  let plot   = 0
+  let left   = lay.int(PLOT[0], PLOT[1])
+  let reaped = 0
 
   for (let side = Math.min(...sides) + PITCH / 2; side < Math.max(...sides); side += PITCH) {
     let best  = { from: 0, to: 0 }
@@ -154,13 +178,19 @@ function setOut (infield: Infield, fall: readonly [number, number], across: read
     if (best.to - best.from < 2)
       continue
 
-    rigs.push({ x: across[0] * side + fall[0] * best.from, z: across[1] * side + fall[1] * best.from, length: best.to - best.from, crop: ROTATION[plot % ROTATION.length]! })
+    // The first rigs of a plot of barley are the ones already cut.
+    const sown       = ROTATION[plot % ROTATION.length]!
+    const crop: Crop = sown === 'barley' && reaped < CUT ? 'stubble' : sown
 
-    left -= 1
+    rigs.push({ x: across[0] * side + fall[0] * best.from, z: across[1] * side + fall[1] * best.from, length: best.to - best.from, crop })
+
+    left   -= 1
+    reaped += 1
 
     if (left === 0) {
-      plot += 1
-      left = lay.int(PLOT[0], PLOT[1])
+      plot  += 1
+      left   = lay.int(PLOT[0], PLOT[1])
+      reaped = 0
     }
   }
 
@@ -191,13 +221,22 @@ function plough (out: Plough, grid: HeightGrid, rig: Rig, fall: readonly [number
       out.give.push(sown ? crop.give * round : 0)
 
       if (sown)
-        tint.set(crop.colour).offsetHSL(0, 0, crop.light + lay.range(-0.05, 0.05))
+        tint.set(crop.colour).offsetHSL(0, -crop.dull, crop.light + lay.range(-0.05, 0.05))
       else
         tint.set(PALETTE.path).offsetHSL(0, -0.08, -0.2 + lay.range(-0.02, 0.02))
 
       out.colour.push(tint.r, tint.g, tint.b)
     }
   }
+
+  // The stooks, down the crown of a rig that is cut.
+  if (rig.crop === 'stubble')
+    for (let along = STOOK.end + (rig.length - STOOK.end * 2) % STOOK.every / 2; along <= rig.length - STOOK.end; along += STOOK.every) {
+      const x = rig.x + fall[0] * along
+      const z = rig.z + fall[1] * along
+
+      out.stooks.push({ x, y: grid.heightAt(x, z) + LIFT + PROFILE[3].high * crop.lift, z, turn: Math.atan2(-fall[1], fall[0]) })
+    }
 
   const columns = PROFILE.length
 
@@ -232,12 +271,13 @@ function sway (material: LitMaterial, wind: Wind): void {
  * The field's rigs, as one mesh: lazy beds, the old way of making a field on
  * thin ground, earth heaped into long beds between furrows and laid down the
  * fall of the land so the rain runs off. Sown in plots across the field:
- * barley, potatoes, and one plot left in grass.
+ * barley, potatoes, and one plot left in grass. The first rigs of each plot
+ * of barley are cut to stubble, and say where their stooks stand.
  */
 export function ploughRigs (material: LitMaterial, lay: SeededRng, ground: Ground, grid: HeightGrid, infield: Infield, wind: Wind): Field {
   const fall   = fallOf(ground, infield)
   const across = [ -fall[1], fall[0] ] as const
-  const out    = { position: [], colour: [], give: [], index: [], ears: []}
+  const out    = { position: [], colour: [], give: [], index: [], ears: [], stooks: []}
 
   for (const rig of setOut(infield, fall, across, lay))
     plough(out, grid, rig, fall, across, lay)
@@ -258,7 +298,7 @@ export function ploughRigs (material: LitMaterial, lay: SeededRng, ground: Groun
   mesh.name          = 'infield-rigs'
   mesh.receiveShadow = true
 
-  return { mesh, ears: out.ears }
+  return { mesh, ears: out.ears, stooks: out.stooks }
 }
 
 // perf: cheap — one draw call, no shadow pass of its own. A dozen rigs of

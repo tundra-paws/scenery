@@ -3,103 +3,16 @@ import * as THREE from 'three'
 import type { SeededRng } from 'threejs-scenes'
 
 import { commitInstances } from '../../shared/instances.ts'
-import { PALETTE } from '../../shared/palette.ts'
+import { runAround, runCourse, setStone } from '../../shared/masonry.ts'
+import type { Mason } from '../../shared/masonry.ts'
 import { CHIMNEY, COURSE, DOOR_HALF, DOOR_TOP, EAVE, HALF_DEEP, HALF_LONG, RIDGE, TURF, WINDOW } from './plan.ts'
 
-
-/** Length of wall a stone takes up, more or less. */
-const STONE = 0.95
 
 /** How far a wall's stones stop short of a corner on the courses where the other wall turns it. */
 const QUOIN = 0.5
 
 /** Stones the mesh has room for. Half as many again as this plan lays on this land. */
 const ROOM = 320
-
-/** Module-scope scratch, so placing an instance allocates nothing. */
-const dummy = new THREE.Object3D()
-const tint  = new THREE.Color()
-
-/** A place in the shelter's own frame: across the ridge, and along it. */
-type Spot = readonly [number, number]
-
-/** What laying a stone needs: the mesh it goes into, where the next one goes, and the land under it. */
-interface Mason {
-  mesh: THREE.InstancedMesh
-  laid: number
-  lay:  SeededRng
-
-  /** Height of the ground over the floor, at a place in the shelter's own frame. */
-  ground: (across: number, along: number) => number
-}
-
-/** One stone, by where its foot is and how big it is. */
-interface Stone {
-  at:   Spot
-  base: number
-
-  /** Half its length, its height in the wall, and half its depth through the wall. */
-  half:   number
-  thick?: number
-  depth?: number
-
-  /** The turn that lays its length along the wall. */
-  turn: number
-}
-
-/** Lay one stone, a little out of true, the way a hand leaves it. */
-function set (mason: Mason, { at, base, half, turn, thick = COURSE, depth = 0.4 }: Stone): void {
-  const { lay } = mason
-
-  // On other land the hill may stand lower against the walls and ask for more
-  // courses than there is room for: the last stones are then left off.
-  if (mason.laid >= ROOM)
-    return
-
-  dummy.position.set(at[0] + lay.range(-0.05, 0.05), base + thick * 0.55, at[1] + lay.range(-0.05, 0.05))
-  dummy.rotation.set(lay.range(-0.07, 0.07), turn + lay.range(-0.1, 0.1), lay.range(-0.07, 0.07))
-  dummy.scale.set(half, thick / 1.05, depth * lay.range(0.9, 1.12))
-  dummy.updateMatrix()
-
-  mason.mesh.setMatrixAt(mason.laid, dummy.matrix)
-  mason.mesh.setColorAt(mason.laid, tint.set(PALETTE.cairn).offsetHSL(0, 0, lay.range(-0.06, 0.05)))
-  mason.laid += 1
-}
-
-/**
- * One course of one stretch of wall: stones end to end from `from` to `to`,
- * one more of them on every other course so no joint stands over another.
- * A stone that would lie wholly under the ground is not laid.
- */
-function run (mason: Mason, from: Spot, to: Spot, base: number): void {
-  const length = Math.hypot(to[0] - from[0], to[1] - from[1])
-
-  if (length < 0.3)
-    return
-
-  const count = Math.max(1, Math.round(length / STONE) + (Math.round(base / COURSE) & 1))
-  const turn  = Math.atan2(from[1] - to[1], to[0] - from[0])
-
-  for (let stone = 0; stone < count; stone += 1) {
-    const along  = (stone + 0.5 + mason.lay.range(-0.1, 0.1)) / count
-    const at     = [ from[0] + (to[0] - from[0]) * along, from[1] + (to[1] - from[1]) * along ] as const
-    const half   = length / count * mason.lay.range(0.56, 0.66)
-    const buried = base + COURSE < mason.ground(at[0], at[1]) - 0.1
-
-    if (!buried)
-      set(mason, { at, base, half, turn })
-  }
-}
-
-/** The stretches of one wall line on one course, less an opening where the course crosses one. */
-function around (mason: Mason, from: Spot, to: Spot, base: number, opening: readonly [Spot, Spot] | null): void {
-  if (opening) {
-    run(mason, from, opening[0], base)
-    run(mason, opening[1], to, base)
-  }
-  else
-    run(mason, from, to, base)
-}
 
 /** The four walls up to the eaves, with the doorway and the window left out of them. */
 function raiseWalls (mason: Mason, lowest: number): void {
@@ -111,10 +24,10 @@ function raiseWalls (mason: Mason, lowest: number): void {
     const light = base + COURSE > WINDOW.sill && base < WINDOW.head
     const door  = base + COURSE > 0 && base < DOOR_TOP
 
-    around(mason, [ -HALF_DEEP, -long ], [ -HALF_DEEP, long ], base, null)
-    around(mason, [ HALF_DEEP, -long ], [ HALF_DEEP, long ], base, light ? [[ HALF_DEEP, WINDOW.from ], [ HALF_DEEP, WINDOW.to ]] : null)
-    around(mason, [ -deep, -HALF_LONG ], [ deep, -HALF_LONG ], base, null)
-    around(mason, [ -deep, HALF_LONG ], [ deep, HALF_LONG ], base, door ? [[ -DOOR_HALF, HALF_LONG ], [ DOOR_HALF, HALF_LONG ]] : null)
+    runAround(mason, [ -HALF_DEEP, -long ], [ -HALF_DEEP, long ], base, null)
+    runAround(mason, [ HALF_DEEP, -long ], [ HALF_DEEP, long ], base, light ? [[ HALF_DEEP, WINDOW.from ], [ HALF_DEEP, WINDOW.to ]] : null)
+    runAround(mason, [ -deep, -HALF_LONG ], [ deep, -HALF_LONG ], base, null)
+    runAround(mason, [ -deep, HALF_LONG ], [ deep, HALF_LONG ], base, door ? [[ -DOOR_HALF, HALF_LONG ], [ DOOR_HALF, HALF_LONG ]] : null)
   }
 }
 
@@ -125,9 +38,9 @@ function raiseGables (mason: Mason): void {
 
     for (const along of [ -HALF_LONG, HALF_LONG ])
       if (half > 0.5)
-        run(mason, [ -half, along ], [ half, along ], base)
+        runCourse(mason, [ -half, along ], [ half, along ], base)
       else
-        set(mason, { at: [ 0, along ], base, half: 0.5, turn: 0, thick: COURSE * 0.8 })
+        setStone(mason, { at: [ 0, along ], base, half: 0.5, turn: 0, thick: COURSE * 0.8 })
   }
 }
 
@@ -136,8 +49,8 @@ function dress (mason: Mason): void {
   const { lay, ground } = mason
   const ridge           = RIDGE + TURF * 1.1
 
-  set(mason, { at: [ 0, HALF_LONG + 0.05 ], base: DOOR_TOP - 0.08, half: DOOR_HALF + 0.55, turn: 0, thick: 0.36, depth: 0.56 })
-  set(mason, { at: [ 0, HALF_LONG + 0.7 ], base: ground(0, HALF_LONG + 0.7) - 0.08, half: 1, turn: 0, thick: 0.2, depth: 0.7 })
+  setStone(mason, { at: [ 0, HALF_LONG + 0.05 ], base: DOOR_TOP - 0.08, half: DOOR_HALF + 0.55, turn: 0, thick: 0.36, depth: 0.56 })
+  setStone(mason, { at: [ 0, HALF_LONG + 0.7 ], base: ground(0, HALF_LONG + 0.7) - 0.08, half: 1, turn: 0, thick: 0.2, depth: 0.7 })
 
   // Two stones a course, laid across the two under them, round a flue.
   for (let course = 0; course * COURSE < CHIMNEY.over + 0.6; course += 1)
@@ -145,11 +58,11 @@ function dress (mason: Mason): void {
       const off = side * (CHIMNEY.half - 0.26)
       const at  = course & 1 ? [ off, CHIMNEY.along ] as const : [ 0, CHIMNEY.along + off ] as const
 
-      set(mason, { at, base: RIDGE - 0.6 + course * COURSE, half: CHIMNEY.half, turn: course & 1 ? Math.PI / 2 : 0, depth: 0.34 })
+      setStone(mason, { at, base: RIDGE - 0.6 + course * COURSE, half: CHIMNEY.half, turn: course & 1 ? Math.PI / 2 : 0, depth: 0.34 })
     }
 
   for (let along = CHIMNEY.along + CHIMNEY.half + 0.75; along < HALF_LONG + 0.3; along += lay.range(1, 1.25))
-    set(mason, { at: [ 0, along ], base: ridge, half: lay.range(0.42, 0.54), turn: Math.PI / 2, thick: 0.2, depth: 0.36 })
+    setStone(mason, { at: [ 0, along ], base: ridge, half: lay.range(0.42, 0.54), turn: Math.PI / 2, thick: 0.2, depth: 0.36 })
 }
 
 /**
@@ -162,7 +75,7 @@ function dress (mason: Mason): void {
  */
 export function layWalls (geometry: THREE.BufferGeometry, material: THREE.Material, lay: SeededRng, ground: Mason['ground']): THREE.InstancedMesh {
   const mesh  = new THREE.InstancedMesh(geometry, material, ROOM)
-  const mason = { mesh, laid: 0, lay, ground }
+  const mason = { mesh, laid: 0, lay, ground, course: COURSE }
 
   let lowest = 0
 
