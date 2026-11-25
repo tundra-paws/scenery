@@ -85,6 +85,9 @@ export interface Wind {
   /** Put the air where it is at `time` seconds. */
   blow (time: number): void
 
+  /** How far the air has moved by `time` seconds, as `[x, z]` wrapped to the weather's span: what `blow` writes. */
+  driftAt (time: number): readonly [number, number]
+
   /** How hard it blows at a place and a time: 0 in a lull, 1 in a gust. */
   gustAt (x: number, z: number, time: number): number
 }
@@ -154,6 +157,12 @@ export function createWind (): Wind {
     speed: SPEED,
     uniforms,
     nodes: createWindNodes(uniforms),
+
+    driftAt (time) {
+      const gone = SPEED * (time + HEAD_START)
+
+      return [ wrap(direction[0] * gone, WEATHER_SPAN), wrap(direction[1] * gone, WEATHER_SPAN) ]
+    },
 
     blow (time) {
       const gone = SPEED * (time + HEAD_START)

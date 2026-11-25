@@ -10,10 +10,10 @@ import type { WindNodes } from '../../shared/wind.ts'
 
 
 /** Distance from the island at which a cloud starts to dwindle, and at which it is gone. */
-const DWINDLE = [ 760, 980 ] as const
+export const DWINDLE = [ 760, 980 ] as const
 
 /** How fast the haze takes a cloud, per world unit. Thinner than the fog on the sea: the look is upward. */
-const HAZE = 0.0016
+export const HAZE = 0.0016
 
 /**
  * Flat-shaded cloud stuff that drifts on the wind in its vertex shader, in

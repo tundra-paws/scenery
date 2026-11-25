@@ -51,6 +51,15 @@ const GRASS = new THREE.Color(PALETTE.grass).lerp(new THREE.Color(PALETTE.rock),
 const DRY   = new THREE.Color(PALETTE.grassDry).lerp(new THREE.Color(PALETTE.rock), 0.5)
 const ROCK  = new THREE.Color(PALETTE.rock)
 
+/**
+ * The year's first snow: the sea's own white, lying on the far tops and
+ * nowhere on the island. The heights between which it comes in, and the
+ * slopes between which a face is too steep to hold it.
+ */
+const SNOW      = new THREE.Color(PALETTE.foam)
+const SNOWLINE  = [ 68, 96 ] as const
+const TOO_STEEP = [ 0.5, 0.78 ] as const
+
 const scratch = new THREE.Color()
 
 /** One stretch of land on the horizon. */
@@ -157,13 +166,16 @@ export function createSkyline (lands: readonly Land[]): (bearing: number) => num
   }
 }
 
-/** What the far ground is made of, as a colour: the island's own bands, coarser. */
+/** What the far ground is made of, as a colour: the island's own bands, coarser, and snow on the highest of it. */
 function colourAt (height: number, slope: number, reach: Reach, out: THREE.Color): THREE.Color {
   out.copy(SAND)
   out.lerp(GRASS, smoothstep(0.5, 3, height))
   out.lerp(DRY, smoothstep(0.3, 0.6, height / reach.height))
 
-  return out.lerp(ROCK, smoothstep(0.35, 0.7, slope))
+  out.lerp(ROCK, smoothstep(0.35, 0.7, slope))
+
+  // A dusting on the tops, off the steepest faces: only the mountain coast is high enough.
+  return out.lerp(SNOW, smoothstep(SNOWLINE[0], SNOWLINE[1], height) * (1 - smoothstep(TOO_STEEP[0], TOO_STEEP[1], slope)))
 }
 
 /** One reach as a grid of positions and colours, appended to the arrays, and the indices of its cells that show. */

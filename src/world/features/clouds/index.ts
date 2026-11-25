@@ -6,9 +6,12 @@ import { createNoise3D } from 'threejs-scenes/primitives'
 import { createCloudShadowTexture } from '../../shared/cloud-shadow.ts'
 import type { Blot } from '../../shared/cloud-shadow.ts'
 import { disposeInstances } from '../../shared/instances.ts'
+import { keepOutOfMirror } from '../../shared/mirror.ts'
 import type { Feature, World } from '../../world.ts'
 import { PUFF_FLOOR, layOutClouds } from './layout.ts'
 import { createCloudMaterial } from './material.ts'
+import { createRainGeometry, createRainMaterial } from './rain.ts'
+import { layOutShowers } from './showers.ts'
 
 
 /**
@@ -17,6 +20,15 @@ import { createCloudMaterial } from './material.ts'
  * and a phone that drew fewer would have their shadows fall somewhere else.
  */
 const COUNT = 60
+
+/**
+ * Showers among them: heavier clouds, lower, that trail rain to the sea.
+ * Few, so that one in sight is an event; the same on every tier.
+ */
+const SHOWERS = 5
+
+/** The second the postcards are taken at: the first shower is put where that moment wants it. */
+const POSTCARD = 10
 
 /** Texels a side of the picture the clouds' shadow is drawn from: eight world units each on a phone, four above. */
 const SHADOW_SIDE: Record<QualityTier, number> = { mobile: 256, desktop: 512, highEnd: 512 }
@@ -52,22 +64,29 @@ function createPuffGeometry (seed: number): THREE.BufferGeometry {
 
 /**
  * The clouds: flat-bottomed heaps of puffs that ride the wind across the sky,
- * and the shadow they lay on the land and the sea.
+ * the shadow they lay on the land and the sea, and the rain that a few of
+ * them, the showers, let fall.
  *
- * One instanced mesh for every puff of every cloud. They are moved in the
- * vertex shader by the wind's drift, so nothing here runs per frame, and the
- * shadow is the same layout painted once from above into `world.clouds`.
+ * One instanced mesh for every puff of every cloud, and one mesh of streaks
+ * for all the rain. They are moved in the vertex shader by the wind's drift,
+ * so nothing here runs per frame, and the shadow is the same layout painted
+ * once from above into `world.clouds`: it is darker under a shower, as it
+ * should be. The showers are laid out after the clouds, from a stream of
+ * their own, so the fair-weather sky is the one it was.
  */
 export function createClouds (world: World): Feature {
   let mesh: THREE.InstancedMesh | null = null
+  let rain: THREE.Mesh | null          = null
   let shadow: THREE.DataTexture | null = null
 
   return {
     name: 'clouds',
 
     build ({ scene, rng }) {
-      const clouds = layOutClouds({ rng: rng.fork('clouds:layout'), count: COUNT, along: world.wind.direction })
-      const puffs  = clouds.reduce((sum, cloud) => sum + cloud.puffs.length, 0)
+      const { wind } = world
+      const showers  = layOutShowers({ rng: rng.fork('clouds:showers'), count: SHOWERS, along: wind.direction, drift: wind.driftAt(POSTCARD) })
+      const clouds   = [ ...layOutClouds({ rng: rng.fork('clouds:layout'), count: COUNT, along: wind.direction }), ...showers ]
+      const puffs    = clouds.reduce((sum, cloud) => sum + cloud.puffs.length, 0)
 
       const geometry = createPuffGeometry(rng.fork('clouds:puff').int(1, 1_000_000))
       const homes    = new Float32Array(puffs * 3)
@@ -113,21 +132,38 @@ export function createClouds (world: World): Feature {
 
       world.clouds.cover(shadow)
 
-      scene.add(mesh)
+      rain               = new THREE.Mesh(createRainGeometry(showers, rng.fork('clouds:rain')), createRainMaterial(wind.nodes, world.day.nodes, wind.direction))
+      rain.name          = 'rain'
+      rain.frustumCulled = false
+
+      // A phone's sea gives back the cloud and not its rain: the streaks
+      // are a pixel wide, and its mirror is a third of the picture's size.
+      if (world.quality.tier === 'mobile')
+        keepOutOfMirror(rain)
+
+      scene.add(mesh, rain)
     },
 
     dispose () {
       disposeInstances(mesh)
+      rain?.geometry.dispose()
+
+      if (rain?.material instanceof THREE.Material)
+        rain.material.dispose()
+
+      rain?.removeFromParent()
       shadow?.dispose()
 
       world.clouds.cover(null)
 
       mesh   = null
+      rain   = null
       shadow = null
     },
   }
 }
 
-// perf: cheap — one draw call and no shadow pass (the shadow is a texture).
-// About 150 puffs of 80 triangles, 12k on every tier: the sky is one thing,
-// like the cairn. Placed once; the drift is a uniform the environment writes.
+// perf: cheap — two draw calls and no shadow pass (the shadow is a texture).
+// About 200 puffs of 80 triangles, 16k on every tier, and 4k of rain
+// (`rain.ts`): the sky is one thing, like the cairn. Placed once; the drift
+// is a uniform the environment writes.
