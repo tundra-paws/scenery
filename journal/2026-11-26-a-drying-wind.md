@@ -46,9 +46,9 @@ turn in under 35 degrees a second; the day is the length it was.
 
 **In `hero`.** Where the mast stood bare before the nets, a pale sail as tall as the
 house, lit from behind, the red pennant over it; right of the house, small, the washing.
-`diff`: 8 of 24 views moved: `hero` by 1.6% (small in pixels, and the first thing the eye
-finds at thumbnail size), `boat` 6.4%, `shelter` 3.6%, `wood` 2.8%, `skerry`, `mirror` and
-`east` under 1%, `infield` all of it (it moved); 14 views by not one pixel.
+`diff`: 8 of 24 views moved: `hero` by 1.9% (small in pixels, and the first thing the eye
+finds at thumbnail size), `boat` 8.1%, `shelter` 3.6%, `wood` 2.8%, `skerry` and `mirror`
+a little over 1%, `east` under it, `infield` all of it (it moved); 14 by not one pixel.
 
 **Cost** (the gate, `hero`): desktop 113 draws of 160 (108 before) and 597,014 triangles
 of 800,000 (595,810); mobile 82 of 100 (79) and 239,258 of 300,000 (238,884). Programs 32
