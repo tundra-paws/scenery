@@ -6,16 +6,16 @@ this short: a plan nobody can read in a minute is not a plan.
 ## Next
 
 Each item is one day: a whole chapter, built complete (both tiers, a postcard, the tour).
-None of the three shows in `hero` at second ten by itself: pair it with something that does.
+Neither shows in `hero` at second ten by itself: pair it with something that does.
 
-1. **Inside.** The shelter, the mill and the kiln are shells. A floor, a hearth with the fire
-   in it, a bench; in the mill the stones, the hopper and a sack; a fire in the kiln's mouth;
-   and a rig that knows a wall from a door, for the visitor who walks in.
-2. **A night worth staying up for.** The night is a moon, stars, high cloud and one lamp. A
-   lantern at the boat's masthead, the window's light falling on the grass, a meteor now and
-   then.
-3. **What a shower leaves.** Wet stone and a darker land after the rain passes, a fuller
+1. **Inside.** The shelter, the mill, the kiln and now the light's tower are shells. A
+   floor, a hearth with the fire in it, a bench; in the mill the stones, the hopper and a
+   sack; a fire in the kiln's mouth; and a rig that knows a wall from a door.
+2. **What a shower leaves.** Wet stone and a darker land after the rain passes, a fuller
    burn, the sea pocked under a veil; the last rig cut and a sack at the mill's door.
+
+The night's leftovers, for a day that has room: the window's light on the grass, a meteor
+now and then, the aurora's light on the snow of the far tops.
 
 ## Known problems
 
@@ -50,29 +50,33 @@ None of the three shows in `hero` at second ten by itself: pair it with somethin
   visitor walks through their walls. The lamp casts no shadow.
 - The boat's place is a rule (`boat/mooring.ts`). Move `HEADING` in `shared/wind.ts` or the
   landing and look at `hero`, `boat`, `landing` and `pier` again. No wake.
-- **The sail is up, always** (`boat/sail.ts`, `LUG` in `hull.ts`): nobody lowers it at
-  dusk. It is worked out in the boat's frame from the gust and her sheer, a flag with the
-  wind ahead; it lies against the mast but knows nothing else (the pennant can hang
-  across its head). It takes no shadow and lays none on the sea, only on the hull. The
-  camera never asks where it is: `infield` moved inshore of it (65.5, 81.5), a hair over
-  three from the reef, and the leg in from `boat` turns 34 degrees a second of 35.
-- **Cloth lets light through** (`letThrough` in `shared/lit.ts`): one program for the sail
-  and the washing; the pennant and the nets are still the old opaque one. `SLANT` and
-  `THROUGH` were tuned on `boat` at second ten, the sun square behind the sail.
-- **The washing line is typed in to fit `hero`** (`GREEN` in `shared/washing.ts`): along
-  the contour between the house and the field, clear of a stump and the dyke. The flock
-  is told (`clutter`); a visitor walks through it. Its poles are in the cloth's material.
+- **The sail is up, always** (`boat/sail.ts`, `LUG` in `hull.ts`): a flag in the boat's
+  frame from the gust and her sheer; it knows the mast and nothing else. No shadow on the
+  sea. The camera never asks where it is: `infield` moved inshore of it (65.5, 81.5), and
+  the leg in from `boat` turns 34 degrees a second of 35.
+- **Cloth lets light through** (`letThrough` in `shared/lit.ts`): the sail and the washing,
+  not the pennant or the nets. Tuned on `boat` at second ten.
+- **The washing line is typed in to fit `hero`** (`GREEN` in `shared/washing.ts`), on the
+  contour between the house and the field. The flock is told (`clutter`); a visitor is not.
 - **The pier is typed in to fit `hero`** (`JETTY`, `NETS`, `RACK`, `TENDER` in
   `shared/pier.ts`): between the landing's east row and the field's corner, short of the
   boat's swing. The boat moved for it (`ASIDE`), as near the skerry as that test lets it.
   Tests hold it off the tour and every camera. Its stones are not land: a visitor walks
   through it. The sea breaks round a row of discs (`wash.stand`): no shadow, no lee.
-- The nets are cloth, not net: opaque folds, moved on the CPU. The small boat's ropes
-  do not quite hold their posts.
-- The gulls (`shared/gulls.ts`) go round over water only, eight and more up, clear of every
-  camera on the first day (a test); the stream `'gulls:b'` was picked for `hero`.
+- The nets are opaque folds, moved on the CPU. The small boat's ropes miss their posts.
+- The gulls go round over water only, clear of every camera (a test); the stream
+  `'gulls:b'` was picked for `hero`.
 - A phone's gate, stooks, sheep's heads and small boat throw no shadow; its sea gives back
-  no boulder, pennant or kiln smoke. That was the pier's room there.
+  no boulder, pennant, smoke or waymark. That was the pier's room there, and the light's.
+- **The light's tower is the pier's** (`pier/tower.ts`, `TOWER` and `LANTERN` in
+  `pier/plan.ts`): its stones are in the pier's mesh, its lantern in the gear. The lamp is a
+  second point light (`pier/beacon.ts`), out by day; every lit material pays for it. Its road
+  on the water (`roadOn` in `water/shader.ts`) is a column with dashes, not a reflection: it
+  brightens round the one place the level sea would show the lamp (`LAMP_TILT`). The door
+  is a dark gap; nothing climbs it. The lamps' hours are `shared/lamps.ts`.
+- **The aurora is drawn round the camera like the stars** (`features/aurora`): a curtain at
+  1800 units, north of the holm, bright on the darkest of the night (`DARK`), surging every
+  83 s. It lights nothing: the land does not know it is there.
 - The clouds' shadow and the sun's shadow map do not know each other: a boulder's own shadow
   is as dark under a cloud as in the open. The clouds' is laid as if the light never stood
   lower than 24 degrees (`REACH`), so a turning sun cannot send it racing.
@@ -88,8 +92,8 @@ None of the three shows in `hero` at second ten by itself: pair it with somethin
 - Every postcard, and so every thumbnail, is taken at second ten: the gallery will never
   show the night. A second picture of an iteration (`seaward` at second 90) needs
   `budgets.json` and the site's scripts: a framework day.
-- The moon and the shelter do not fit in one frame: the hill behind is too steep. `seaward`
-  settles for the path, the boat and the moon's road on the water.
+- The moon and the shelter do not fit in one frame: `seaward` settles for the path, the boat
+  and the moon's road on the water.
 - At the handover (sun seven degrees down) nothing casts a shadow for a few seconds. The
   light on the land never comes from lower than seven degrees (`LOWEST`), so at sunset the
   shadows are shorter than the sun says.
@@ -106,9 +110,8 @@ None of the three shows in `hero` at second ten by itself: pair it with somethin
   from under it, at half the picture's size (a third on a phone). What is many and small is
   kept out of it (`keepOutOfMirror`), and more on a phone. It draws even when little water
   is on screen.
-- **Every shader is TSL** (`.claude/skills/threejs-scenes/references/tsl.md`): node
-  materials, three's `WebGPURenderer` forced onto WebGL 2 so a visitor gets what the gate
-  judged. Native WebGPU is one flag in `main.ts`, the owner's to turn: untried here.
+- **Every shader is TSL**: node materials, `WebGPURenderer` forced onto WebGL 2 so a
+  visitor gets what the gate judged. Native WebGPU is one flag in `main.ts`: untried.
 - `main.ts` reaches into three's backend to keep instance matrices out of uniform arrays:
   look at it again when three is bumped.
 - The sea is still a flat plane: the swell tilts its light and the reflection, not the
@@ -123,7 +126,6 @@ None of the three shows in `hero` at second ten by itself: pair it with somethin
   stands on is a rule; a test walks every sheep's round against it. Boulders are known only
   once `rocks` has built (`world.clutter`), so the test's flock does not know them. Move a
   view, and look again.
-- A sheep's round is two to four places, walked in straight lines: through each other.
 - The flock keeps its own clock (`at` in `shared/flock.ts`): it stops when the sun is under a
   degree and a half, so every sheep lies down where it stood, and runs again from sunrise.
 - The trods are worn only where the path's picture reaches (`terrain/wear.ts`, its second
@@ -139,7 +141,7 @@ None of the three shows in `hero` at second ten by itself: pair it with somethin
   slopes over 0.3, in noise patches. The land's colour and the bushes read it; the grass
   tufts, the flock and the wood do not (sheep stand in it, a lone birch may). The bushes are
   in the tufts' material to share its program, so they sway by the grass's `BLADE`.
-- The bushes are out of the mirror and cast no shadow. A phone's bloom is thinner.
+- The heather is out of the mirror and casts no shadow.
 - **The high cloud lies on the dome** (`shared/cirrus.ts`): it never parallaxes, casts no
   shadow, and the low clouds' shadow map does not know it. `COVER` and `OPACITY` were tuned
   on `hero` at second ten; the night thins it (`NIGHT_THINS` in `sky.ts`).
@@ -148,7 +150,7 @@ None of the three shows in `hero` at second ten by itself: pair it with somethin
   `shared/starlings.ts`): the cloud wheels over the summit's western shoulder, broadside to
   `hero` at second ten; a test fails when a bird is out of that frame then. Its round is
   its own (`LAP`), not the day's. Times are the sun's height (`COME`, `ROOST`, `LEAVE`).
-- The birds fly through anything but the land. A wing is two triangles: the cloud reads.
+- The birds fly through anything but the land.
 
 - **Every surface has a texture** (`shared/surface.ts`): noise worked out a fragment, no
   image. `finish(surface)` on a lit material gives it colour and relief. Still things read
@@ -193,10 +195,10 @@ None of the three shows in `hero` at second ten by itself: pair it with somethin
   their own. The first is typed to stand off the headland in `hero` at second ten, left of
   the sun (`OPENING`): a test holds it. They come round every 285 s on another line.
   Rain is opaque streaks a pixel wide: it wets nothing and falls through roofs.
-- **The far tops' snow is a rule on height** (`SNOWLINE` in `shared/beyond.ts`): the
-  mountain coast only. Backlit at second ten, it is a paler crest, not a white one.
-- Triangles: desktop 75%, mobile 80%; a phone's draws 82 of 100. Its clouds are 27k, twice
-  (the mirror): the next room is there. Crowns are 36 facets on desktop (20 on a phone),
+- **The far tops' snow is a rule on height** (`SNOWLINE` in `shared/beyond.ts`).
+- Triangles: desktop 75%, mobile 80%; a phone's draws 78 of 100. Its clouds are 27k, twice
+  (the mirror): the next room is there. What is only lit at night (the aurora, the lamps'
+  panes, the stars) is not drawn by day, so `hero` at second ten never pays for it. Crowns are 36 facets on desktop (20 on a phone),
   drawn three times; walls' stones 20 on every tier. On a phone no building's stones throw
   a shadow (the dark block inside does), nor the dykes' cope, and none is in the mirror.
 
