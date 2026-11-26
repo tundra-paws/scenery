@@ -1,14 +1,16 @@
 // src/world/features/boat/boat.test.ts
 import { describe, expect, test } from 'bun:test'
+import * as THREE from 'three'
 
 import { createGround } from '../../shared/ground.ts'
 import { createPath } from '../../shared/path.ts'
 import { createWind } from '../../shared/wind.ts'
 import { WORLD_SEED } from '../../world.ts'
-import { LENGTH, MAST, createHullGeometry } from './hull.ts'
+import { LENGTH, LUG, MAST, createHullGeometry } from './hull.ts'
 import { AFLOAT, SCOPE, berthAt, findMooring } from './mooring.ts'
 import type { Berth } from './mooring.ts'
 import { streamAt } from './pennant.ts'
+import { clothAt } from './sail.ts'
 
 
 const ground  = createGround({ seed: WORLD_SEED })
@@ -157,6 +159,68 @@ describe('the pennant', () => {
   })
 })
 
+describe('the sail', () => {
+  const at = (u: number, v: number, time: number, gust: number, across: number): THREE.Vector3 => clothAt(u, v, time, gust, across, new THREE.Vector3())
+
+  test('is laced to its yard and taut down its luff, whatever it blows', () => {
+    for (const [ time, gust, across ] of [[ 3, 0, -0.2 ], [ 47.5, 1, 0.2 ], [ 300, 0.5, 0 ]] as const)
+      for (let part = 0; part <= 1; part += 0.125) {
+        const head = at(part, 0, time, gust, across)
+        const luff = at(0, part, time, gust, across)
+
+        expect(head.x).toBeCloseTo(LUG.throat[0] + (LUG.peak[0] - LUG.throat[0]) * part, 9)
+        expect(head.y).toBeCloseTo(LUG.throat[1] + (LUG.peak[1] - LUG.throat[1]) * part, 9)
+        expect(head.z).toBeCloseTo(LUG.aside, 9)
+        expect(luff.x).toBeCloseTo(LUG.throat[0] + (LUG.tack[0] - LUG.throat[0]) * part, 9)
+        expect(luff.z).toBeCloseTo(LUG.aside, 9)
+      }
+  })
+
+  test('hangs between the rail and the masthead, and lies against the mast, never through it', () => {
+    for (let time = 0; time < 60; time += 0.37)
+      for (const across of [ -0.2, -0.05, 0.05, 0.2 ])
+        for (let u = 0; u <= 1; u += 0.05)
+          for (let v = 0; v <= 1; v += 0.1) {
+            const place = at(u, v, time, (Math.sin(time) + 1) / 2, across)
+
+            expect(place.y).toBeGreaterThan(0.75)
+            expect(place.y).toBeLessThan(MAST.top)
+            expect(Math.abs(place.z)).toBeLessThan(1.6)
+
+            if (Math.abs(place.x - MAST.along) < MAST.half)
+              expect(place.z).toBeLessThan(-MAST.half * 0.8)
+          }
+  })
+
+  test('lies over to the side the wind is let in from, and shakes more as it blows', () => {
+    let lull = 0
+    let gust = 0
+
+    for (let time = 0; time < 40; time += 0.1) {
+      expect(at(1, 1, time, 0.5, 0.15).z).toBeGreaterThan(at(1, 1, time, 0.5, -0.15).z + 1)
+
+      lull = Math.max(lull, Math.abs(at(0.7, 0.9, time, 0, 0).z - LUG.aside))
+      gust = Math.max(gust, Math.abs(at(0.7, 0.9, time, 1, 0).z - LUG.aside))
+    }
+
+    expect(gust).toBeGreaterThan(lull * 1.4)
+    expect(lull).toBeGreaterThan(0.05)
+  })
+
+  test('never jumps, even as a gust comes on and the boat sheers through the wind', () => {
+    let last = at(1, 1, 0, 0, -0.15)
+
+    // From a lull to a full gust over two seconds, the wind crossing the bow as it does.
+    for (let frame = 1; frame < 60 * 4; frame += 1) {
+      const next = at(1, 1, frame / 60, Math.min(1, frame / 120), -0.15 + 0.3 * frame / 240)
+
+      expect(next.distanceTo(last)).toBeLessThan(0.04)
+
+      last = next
+    }
+  })
+})
+
 describe('the hull', () => {
   const geometry = createHullGeometry()
   const position = geometry.getAttribute('position')
@@ -172,6 +236,12 @@ describe('the hull', () => {
 
     expect(box.min.y).toBeLessThan(-0.3)
     expect(box.max.y).toBeCloseTo(MAST.top, 1)
+
+    // The yard is hoisted under the masthead, peaked up aft, and passes the mast.
+    expect(LUG.peak[1]).toBeLessThan(MAST.top)
+    expect(LUG.peak[1]).toBeGreaterThan(LUG.throat[1] + 1)
+    expect(LUG.throat[0]).toBeGreaterThan(MAST.along)
+    expect(LUG.peak[0]).toBeLessThan(MAST.along)
     expect(box.min.x).toBeCloseTo(-LENGTH / 2, 1)
 
     // As wide as two people sitting side by side, and the same both sides.

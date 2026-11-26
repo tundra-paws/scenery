@@ -1,7 +1,7 @@
 // src/world/shared/lit.ts
-import { diffuseColor, mix, positionWorld, vec4 } from 'three/tsl'
+import { diffuseColor, mix, normalView, positionWorld, vec4 } from 'three/tsl'
 import { MeshBasicNodeMaterial, MeshStandardNodeMaterial, PhysicalLightingModel } from 'three/webgpu'
-import type { MeshBasicNodeMaterialParameters, MeshStandardNodeMaterialParameters, Node, NodeBuilder } from 'three/webgpu'
+import type { LightingModelDirectInput, MeshBasicNodeMaterialParameters, MeshStandardNodeMaterialParameters, Node, NodeBuilder } from 'three/webgpu'
 
 import { GLOOM } from './cloud-shadow.ts'
 import type { CloudShadow } from './cloud-shadow.ts'
@@ -9,6 +9,13 @@ import type { Daylight } from './daylight.ts'
 import { developed, hazed } from './output.ts'
 import { relief } from './surface.ts'
 import type { Surface } from './surface.ts'
+
+/**
+ * How much faster than a lit face light through cloth falls off as the
+ * cloth turns from it: it has more of the weave to cross. This is what
+ * shows a fold in a sail with the sun behind it.
+ */
+const SLANT = 6
 
 /** The part of the world a material needs: the clouds that shade it, and the hour, for the haze it fades into. */
 interface Air {
@@ -26,19 +33,54 @@ interface Gathered {
   indirectDiffuse: Node<'vec3'>
 }
 
+/** One light's share, as three hands it to the lighting model: where it comes from, its colour after its shadow, and what has been gathered so far. */
+interface Lighted {
+  lightDirection: Node<'vec3'>
+  lightColor:     Node<'vec3'>
+  reflectedLight: Gathered
+}
+
 /**
  * three's own lighting, with the clouds' shadow laid over it.
  *
  * The lights' own share is dimmed after three has added it up, and a little of
  * the sky's with it, or a shadow on a slope already turned from the sun would
  * not show. What the shadow map says is left as it was.
+ *
+ * Cloth is thin: a share of the light that falls on its far side comes
+ * through it (`through`), so a sail between the eye and a low sun glows
+ * instead of standing dark. It takes the cloth's colour once going in and
+ * again coming out, and so comes through warmer than it fell. Nothing for
+ * anything else, and then no code.
  */
 class CloudedLighting extends PhysicalLightingModel {
   private readonly lit: Node<'float'>
 
-  constructor (lit: Node<'float'>) {
+  private readonly through: number
+
+  constructor (lit: Node<'float'>, through: number) {
     super()
-    this.lit = lit
+    this.lit     = lit
+    this.through = through
+  }
+
+  // Called once for each light. A flat-shaded facet's normal is always
+  // toward the eye, so light from behind it is light on its far side.
+  override direct (input: LightingModelDirectInput, builder: NodeBuilder): void {
+    super.direct(input, builder)
+
+    if (this.through <= 0)
+      return
+
+    const { lightDirection, lightColor, reflectedLight } = input as unknown as Lighted
+
+    reflectedLight.directDiffuse.addAssign(normalView.dot(lightDirection).negate()
+      .clamp()
+      .pow(SLANT)
+      .mul(lightColor)
+      .mul(diffuseColor.rgb)
+      .mul(diffuseColor.rgb)
+      .mul(this.through / Math.PI))
   }
 
   // Called once every light has been added and the sky's share worked out,
@@ -68,6 +110,9 @@ export class LitMaterial extends MeshStandardNodeMaterial {
 
   private readonly dyes: ((colour: Node<'vec3'>) => Node<'vec3'>)[] = []
 
+  /** The share of the light on its far side that comes through it: nothing, unless it is cloth (`letThrough`). */
+  private through = 0
+
   /**
    * The way to the screen (`shared/output.ts`): developed, then hazed into
    * the horizon's colour. Something far off that fades into more than that
@@ -86,7 +131,7 @@ export class LitMaterial extends MeshStandardNodeMaterial {
   }
 
   override setupLightingModel (): PhysicalLightingModel {
-    return new CloudedLighting(this.cloudLight)
+    return new CloudedLighting(this.cloudLight, this.through)
   }
 
   override setupDiffuseColor (builder: NodeBuilder): void {
@@ -104,6 +149,15 @@ export class LitMaterial extends MeshStandardNodeMaterial {
    */
   dye (change: (colour: Node<'vec3'>) => Node<'vec3'>): void {
     this.dyes.push(change)
+  }
+
+  /**
+   * Say it is cloth, thin enough that this share of the light on one side
+   * of it shows on the other. Every cloth that lets the same share through,
+   * and is otherwise made alike, is one program.
+   */
+  letThrough (share: number): void {
+    this.through = share
   }
 
   /**

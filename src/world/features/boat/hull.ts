@@ -55,10 +55,29 @@ const RODE = { ahead: 5.4, under: 0.9 } as const
 /** Where a rope is made fast at either end of the boat: the head of the stem, or of the stern post. */
 export const STEMHEAD = { along: LENGTH / 2 - 0.05, up: STEM - 0.1 } as const
 
-/** The boat at its anchor: mast up, the sail down and furled, and one rope from the stem down into the water ahead. */
+/**
+ * The sail, hoisted: a standing lug, four-cornered, its head laced to a yard
+ * slung on the mast a third of the way along it and peaked up aft. Its
+ * corners in the boat's own frame, as how far along and how far up: the
+ * throat forward of the mast, the peak under the masthead, the tack made
+ * fast by the mast's foot, and the clew, which a slack sheet leaves free
+ * over the stern. It hangs to port of the mast (`aside`).
+ */
+export const LUG = {
+  throat: [ 1.5, 3.55 ],
+  peak:   [ -2.75, 5.05 ],
+  tack:   [ 0.62, 0.98 ],
+  clew:   [ -3.2, 1.36 ],
+  aside:  -0.13,
+} as const
+
+/** How far the yard runs on past the sail's head at either end, and its thickness. */
+const YARD = { over: 0.22, thick: 0.09 } as const
+
+/** The boat at its anchor: mast up, the yard hoisted for the sail to dry on, and one rope from the stem down into the water ahead. */
 const AT_ANCHOR: Fit = {
   mast:  true,
-  sail:  true,
+  sail:  'hoisted',
   ropes: [[[ STEMHEAD.along, STEMHEAD.up, 0 ], [ LENGTH / 2 + RODE.ahead, -RODE.under, 0 ]]],
 }
 
@@ -72,8 +91,8 @@ const TARRED = new THREE.Color(PALETTE.timber).multiplyScalar(0.3)
 const INSIDE = new THREE.Color(PALETTE.timber).multiplyScalar(0.72)
 
 /** Sailcloth: wool woven close and left its own colour, greyed by salt. */
-const SAIL = new THREE.Color(PALETTE.fleece).lerp(new THREE.Color(PALETTE.timber), 0.3)
-const ROPE = new THREE.Color(PALETTE.timber).lerp(new THREE.Color(PALETTE.sand), 0.5)
+export const SAIL = new THREE.Color(PALETTE.fleece).lerp(new THREE.Color(PALETTE.timber), 0.3)
+export const ROPE = new THREE.Color(PALETTE.timber).lerp(new THREE.Color(PALETTE.sand), 0.5)
 
 const corner = new THREE.Vector3()
 const edge   = new THREE.Vector3()
@@ -85,13 +104,14 @@ type Point = readonly [number, number, number]
 
 /**
  * What a boat of this build carries besides its planks, thwarts and oars:
- * whether it has its mast stepped, whether its sail lies furled on its yard
- * along the thwarts, and the ropes that lead off it, each from one place to
- * another in the boat's own frame.
+ * whether it has its mast stepped, where its sail is (furled on its yard
+ * along the thwarts, or hoisted, when only the yard is the boat's and the
+ * cloth is the wind's: `sail.ts`), and the ropes that lead off it, each from
+ * one place to another in the boat's own frame.
  */
 export interface Fit {
   mast:  boolean
-  sail:  boolean
+  sail:  'furled' | 'hoisted' | 'none'
   ropes: readonly (readonly [Point, Point])[]
 }
 
@@ -211,12 +231,27 @@ function fit ({ mast, sail, ropes }: Fit): THREE.BufferGeometry[] {
     parts.push(box(MAST.half * 2, MAST.top - SEAT + 0.5, MAST.half * 1.6, TIMBER).translate(MAST.along, (MAST.top + SEAT - 0.5) / 2, 0))
 
   // The sail, lowered and rolled on its yard, laid fore and aft to port of the mast.
-  if (sail)
+  if (sail === 'furled')
     parts.push(
       box(4.7, 0.07, 0.07, TIMBER).translate(0.2, SEAT + 0.3, -0.24),
       box(4, 0.22, 0.3, SAIL).rotateX(0.5)
         .translate(0.2, SEAT + 0.2, -0.3),
     )
+
+  // Or the yard alone, hoisted on the mast's port side and peaked up aft,
+  // with the halyard that holds it from the masthead.
+  if (sail === 'hoisted') {
+    const [ fromX, fromY ] = LUG.throat
+    const [ toX, toY ]     = LUG.peak
+    const run              = Math.hypot(toX - fromX, toY - fromY)
+    const slung            = fromY + (toY - fromY) * (fromX - MAST.along) / (fromX - toX)
+
+    parts.push(
+      box(run + YARD.over * 2, YARD.thick, YARD.thick, TIMBER).rotateZ(Math.atan2(fromY - toY, fromX - toX))
+        .translate((fromX + toX) / 2, (fromY + toY) / 2 + YARD.thick / 2, LUG.aside),
+      box(0.04, MAST.top - 0.35 - slung, 0.04, ROPE).translate(MAST.along, (MAST.top - 0.35 + slung) / 2, LUG.aside * 0.8),
+    )
+  }
 
   // Two oars shipped along the thwarts, blades aft.
   for (const side of [ -1, 1 ]) {

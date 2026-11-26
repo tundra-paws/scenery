@@ -34,6 +34,8 @@ import { createSkerry } from './shared/skerry.ts'
 import type { Skerry } from './shared/skerry.ts'
 import { createWash } from './shared/wash.ts'
 import type { Wash } from './shared/wash.ts'
+import { createWashing } from './shared/washing.ts'
+import type { Washing } from './shared/washing.ts'
 import { createWind } from './shared/wind.ts'
 import type { Wind } from './shared/wind.ts'
 import { createWood } from './shared/wood.ts'
@@ -84,7 +86,8 @@ export type Feature = AppModule<WorldState>
  * it: the burn, which everything on the brae keeps out of, and the mill
  * that stands over it. And for where the harvest comes home to: the kiln
  * and the stacks. And for what the sea is worked from: the pier at the
- * landing, the nets on their poles and the fish on the rack.
+ * landing, the nets on their poles and the fish on the rack. And for what
+ * is hung out in the wind ashore: the washing line under the house.
  */
 export interface World {
   seed:    number
@@ -119,6 +122,9 @@ export interface World {
 
   /** The field below the shelter, its dyke and gate, and the fold across the path. */
   infield: Infield
+
+  /** The line on the green under the house, and its two poles. */
+  washing: Washing
   wood:    Wood
 
   /** The heather on the hill above the worked ground, for the land's colour and the clumps on it. */
@@ -170,6 +176,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     yard:    createYard(ground, path, shelter),
     pier:    createPier(ground, path, wind),
     infield,
+    washing: createWashing(ground),
     wood:    createWood({ ground, summit, path, shelter }, seed),
     moor,
     bracken: createBracken(ground, seed, { moor, path, infield, burn }),

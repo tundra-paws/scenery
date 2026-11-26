@@ -52,7 +52,7 @@ export function createTender (pier: Pier, wind: Wind, level: number, material: T
     return [[ end * STEMHEAD.along, STEMHEAD.up, 0 ], [ ahead, up, out ]] as const
   })
 
-  const geometry = createHullGeometry({ mast: false, sail: false, ropes })
+  const geometry = createHullGeometry({ mast: false, sail: 'none', ropes })
   const mesh     = new THREE.Mesh(geometry, material)
 
   mesh.name          = 'pier-tender'
