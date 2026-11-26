@@ -47,7 +47,7 @@ const THWARTS = [ -0.52, 0.14, 0.6 ] as const
 const SEAT    = FREEBOARD - 0.2
 
 /** The mast: where along the boat it stands, how high over the water its top is, and half its thickness at the foot. */
-export const MAST = { along: 0.14 * LENGTH / 2, top: 5.4, half: 0.075 } as const
+export const MAST = { along: 0.14 * LENGTH / 2, top: 6.3, half: 0.075 } as const
 
 /** The anchor's rope: how far ahead of the bow it is drawn, and how far under the water by then. */
 const RODE = { ahead: 5.4, under: 0.9 } as const
@@ -64,10 +64,10 @@ export const STEMHEAD = { along: LENGTH / 2 - 0.05, up: STEM - 0.1 } as const
  * over the stern. It hangs to port of the mast (`aside`).
  */
 export const LUG = {
-  throat: [ 1.5, 3.55 ],
-  peak:   [ -2.75, 5.05 ],
+  throat: [ 1.6, 4.1 ],
+  peak:   [ -2.9, 5.95 ],
   tack:   [ 0.62, 0.98 ],
-  clew:   [ -3.2, 1.36 ],
+  clew:   [ -3.25, 1.36 ],
   aside:  -0.13,
 } as const
 

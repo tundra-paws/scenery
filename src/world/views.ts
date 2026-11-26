@@ -20,8 +20,9 @@ import type { Ground } from './shared/ground.ts'
  * seals on it to the house, in to the edge of the wood where the stumps and the
  * stacked logs are, close under the shelter with
  * the cairn over it, back down to the water beside the boat at its anchor,
- * off the beach below the field, looking up its rigs to the gate and the
- * house, in over the field's dyke to the kiln on its shelf and the stacks
+ * her sail up to dry, in under the field, inshore of that sail, looking up
+ * its rigs to the gate, the house and the washing on its line beside it,
+ * in over the field's dyke to the kiln on its shelf and the stacks
  * before the house's door, the path going up between them to the cairn,
  * up over the fold to the mill astride the burn, with the cairn
  * over it, down to the inbye, low among the sheep, looking up over
@@ -68,6 +69,9 @@ import type { Ground } from './shared/ground.ts'
  * seconds more on the long leg in to it from `ridge`, twelve in all. `pier`
  * did the same at the day's other end: its stop and its leg, nine seconds,
  * between `starlings` and `hero`, which it lies between and looks the way of.
+ * When the sail went up `infield` moved in under the field to keep it out of
+ * the frame, and lent the leg in from `boat` four tenths of a second of its
+ * own leg out, to turn in.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },

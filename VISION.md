@@ -24,7 +24,8 @@ The curator works within these and does not rewrite this section.
 **What this place is.** A small northern island that someone walked before you. Nobody is ever
 seen on it, only what they left: stones stacked on the summit, later a path, a shelter, a light.
 A stranger should know it as "the island with the cairn", and now there is a house under it
-with the lamp lit and the fire in, a boat at anchor off the landing, and still nobody.
+with the lamp lit and the fire in, a boat at anchor off the landing with its sail up to
+dry, the washing out on a line under the house's low wall, and still nobody.
 Beside the landing a pier of the house's stone runs out to deep water: a small boat in its
 lee, creels on its head, nets drying on poles along the beach, split fish on a rack, a few
 gulls over it. A
@@ -65,7 +66,8 @@ sun's cream, and the deeper amber of a flame someone lit (`lamp`), which only th
 lamp and its window show. Clouds have no colour of their own: the sun's cream where they are
 lit, the sky's blues where they are not. Smoke and rain are the same. Weathered wood (`timber`) for what
 came by sea and did not grow here: the boat, its oars, its mast; tarred near black where it
-keeps the water out, and a net's brown where bark has steeped it. One pale thing that grows: birch `bark`, near white, scarred with the
+keeps the water out, and a net's brown where bark has steeped it. Cloth is the flock's own
+wool, undyed, greyed by salt in the sail; linen is the same cream gone toward stone. One pale thing that grows: birch `bark`, near white, scarred with the
 rock's grey taken almost to black; its leaves are the meadow's own two greens, going over to the barley's gold made riper (`leaf`), and its cut
 wood the bark's colour warmed. One thing sown, `barley`, a pale green-gold, only on the rigs, and
 bleached where it is cut (stubble, stooks, stacks), dulled toward earth where it thatches; the potatoes beside it are the meadow's green
@@ -86,56 +88,57 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
   wall is laid in level courses with its corners locked; a roof is the hill's own turf. A field
   dyke rides the land, three courses and a cope set on edge, a long stone stood up at every
   gap.
-- *Wind.* One shared signal that grass, water, clouds, smoke, a pennant, a boat at its
-  anchor, every birch and the barley all read; on the barley it is seen as ripples of paler
-  ears running up the field. Steady and gentle; what shows it is that everything answers
-  to it together. The trees show it standing still: each grew leaning the way it blows, the
-  ones alone in the open hardest.
+- *Wind.* One shared signal that grass, water, clouds, smoke, a boat at its anchor, every
+  birch and the barley all read; on the barley it is ripples of paler ears running up the
+  field. Steady and gentle; what shows it is that everything answers to it together. The
+  trees show it standing still: each grew leaning the way it blows.
+- *Cloth.* The wind's loudest voice, hung out and left: the sail slack on its yard, blankets
+  and a shirt on the line, the nets, the pennant. It hangs in folds that travel and never
+  thrash, and it is thin: a low sun behind it comes through, warmer than it fell.
 - *What grows.* Grass, and birch. One wood, where the ground is low and gentle, thinning to
   scrub at its edge; a few trees alone beyond it; none on the cairn's hill. A tree is a pale
   trunk and a few faceted lumps of leaves, never a model of a tree.
 - *The high air.* Over the low clouds a thin mackerel sky, combed into streaks by a wind
-  aloft that turns from the one below; it takes the clouds' colours, and thins at night so
-  the stars show between its bands.
-- *Showers.* A few heavier clouds trail rain: fine streaks leaning back from the wind, a
-  veil far off and hairlines overhead. One is in the sound as the visit opens.
+  aloft that turns from the one below; it thins at night so the stars show between.
+- *Showers.* A few heavier clouds trail rain: fine streaks leaning back from the wind. One
+  is in the sound as the visit opens.
 - *The moor.* Above the worked ground the hill is heather, in patches with grass between,
-  thickest on the tops, bare only on the cliffs: low faceted bushes on a mauve ground.
+  thickest on the tops: low faceted bushes on a mauve ground.
 - *The hour.* The other shared signal (`world.day`): where the sun is, and from that the sky,
   the one light and its shadows, the fill, the haze, the sea's colours and the clouds'. Nothing
   keeps a colour of the sky for itself. Sun and moon are one light that is out as it changes
   hands; the lamp is the only light that is somebody's.
-- *The line between.* Shore, ridge and horizon: edges are where the detail goes.
+- *The line between.* Shore, ridge, horizon: edges are where the detail goes.
 - *The sea gives back.* The water is a mirror, shaken by its ripples and by a low swell: the
   island, the cairn, the boat and the sky lie upside down in it, and the lamp at night. It
   breaks white round whatever stands in it, rides the boat on its swell, and wets the sand
-  it runs back off. A gust roughens it and the picture in it breaks up.
+  it runs back off. A gust breaks the picture up.
 - *Distance.* What is far is seen through air: fainter, bluer, and fading into the sky's own
   colour on that side. Layers (stacks, headland, range) say how far.
 - *The flock.* Sheep, never people: grazing head down, looking round now and then, walking
   a few strides to the next bite, round their heft; lying down as the sun goes, up at first
-  light. A sheep is a faceted woolsack, a dark head and four sticks, never a model of a
-  sheep. Their trods are worn into the turf as the path is, fainter.
+  light. A sheep is a faceted woolsack, a dark head and four sticks, never a model of one.
+  Their trods are worn into the turf as the path is, fainter.
 - *The starlings.* One cloud, never a bird you can pick out: it folds, stretches and darkens
-  where they bunch. In after noon, over the brae through the evening, into the walls at
-  sunset in a coiling stream, away at first light.
+  where they bunch. In after noon, into the walls at sunset in a coiling stream, away at
+  first light.
 - *The seals.* The flock's opposite number on the sea: pale lumps on dark rock, flat out,
-  breathing; one looks round, one more shows its head in the water and is gone. A seal is
-  two faceted lumps, never a model of a seal, in the stone's greys.
+  breathing; one looks round, one shows its head in the water and is gone. A seal is two
+  faceted lumps in the stone's greys.
 - *The fishing.* Gear left to dry, never anyone at it: a pier laid like a house wall, nets
   hung in folds that stir, creels, fish on a rack, a boat to row out in. Gulls ride the wind
   in rounds over the bay and stand on its posts by dark, head to wind: four faceted lumps
-  each, never a model of a gull.
+  each.
 - *Fresh water.* One burn, found by the land's own fall: white where it is steep, a slow
-  pool by the fold, spread over the sand at its mouth. It gives back the sky, as the sea does.
+  pool by the fold, spread over the sand at its mouth.
 - *Work left running.* The mill turns, the kiln smokes, the gate stands open, a stack is
   half built with the sledge beside it: somebody is about, and is never seen. What they
-  built is the house's kind: stone in level courses, turf over it, a door to stoop through.
+  built is the house's kind: stone in level courses, turf over it.
 - *The year.* The back end of it, turning with the work: harvest, the birches gold from the
   outside of the wood in, their leaves torn off by the wind and lying under them, the
   bracken gone to rust. A stack is a beehive of straw on a ring of stones.
-- *The sward.* Under the tufts, grass by the blade wherever the visitor stands, in the same
-  wind as everything; far off it is the land's own grain.
+- *The sward.* Under the tufts, grass by the blade wherever the visitor stands; far off
+  it is the land's own grain.
 - *Facets for form, grain for surface.* Low-poly and flat-shaded, few colours; and, since
   the owner asked for textures, a texture on every surface: noise worked out in the shader,
   never a photograph, giving grain and relief within the palette and no colour of its own.
@@ -144,9 +147,8 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
 ruins of anything grand, no magic glow. Not busy: every added thing must leave the picture as
 quiet as it found it. Not photoreal: its textures are made, not photographed, and stop at grain.
 
-**The chapters ahead.** Each is one day's major update, not a week's. The journal holds
-the ones done; the last was the pier at the landing. Next: the inside of the shelter, the
-mill and the kiln, and a night worth staying up for.
+**The chapters ahead.** Each is one day's major update. The journal holds the ones done;
+the last was a drying wind. Next: the insides, and a night worth staying up for.
 
 ## Where it starts
 

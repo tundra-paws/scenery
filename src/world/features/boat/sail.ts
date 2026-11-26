@@ -179,7 +179,7 @@ export function createSail (world: World): Sail {
 
   // It moves every step, so the sphere three culls by is set once, round
   // everywhere it can reach.
-  geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(-0.8, 3, 0), LENGTH / 2 + 0.6)
+  geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(-0.8, 3.4, 0), LENGTH / 2 + 1)
 
   const material = createLitMaterial(world, { name: 'sail', vertexColors: true, side: THREE.DoubleSide })
 
