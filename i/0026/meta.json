@@ -1,0 +1,48 @@
+{
+  "id": 26,
+  "dir": "i/0026/",
+  "date": "2026-11-26",
+  "sha": "5ee09ae119c269d79bb983487f718d029022afa7",
+  "title": "The light at the pier's head, and the merry dancers",
+  "summary": "A round stone tower stands on the pier's head with a lantern that is lit at sunset; its road lies broken on the water all night, the boat shows a riding light, and the aurora hangs in the north.",
+  "kind": "feature",
+  "model": "claude",
+  "journal": "journal/2026-11-26-the-light-at-the-pier-head.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 111,
+      "triangles": 600322,
+      "live": {
+        "buffers": 565,
+        "textures": 10,
+        "programs": 31,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 124
+      }
+    },
+    "mobile": {
+      "draws": 78,
+      "triangles": 238686,
+      "live": {
+        "buffers": 379,
+        "textures": 10,
+        "programs": 31,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 75
+      }
+    }
+  },
+  "bytes": {
+    "new": 345426,
+    "site": 6751061
+  },
+  "three": "0.184.0",
+  "distHash": "2080b56ed84f5c61fb587aef18387d79d44b5ba4cf7d8ec315de1a3564b4541d",
+  "withdrawn": false
+}
