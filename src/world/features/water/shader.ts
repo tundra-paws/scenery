@@ -1,6 +1,6 @@
 // src/world/features/water/shader.ts
 import * as THREE from 'three'
-import { Fn, If, abs, cameraPosition, clamp, distance, dot, float, fract, fwidth, length, max, min, mix, normalize, positionWorld, pow, select, sin, smoothstep, texture, uniform, varying, vec2, vec3, vec4 } from 'three/tsl'
+import { Fn, If, abs, cameraPosition, clamp, distance, dot, exp, float, fract, fwidth, length, max, min, mix, normalize, positionWorld, pow, select, sin, smoothstep, texture, uniform, varying, vec2, vec3, vec4 } from 'three/tsl'
 import { NodeMaterial } from 'three/webgpu'
 import type { Node } from 'three/webgpu'
 
@@ -77,10 +77,13 @@ const SHADE = 0.45
  * light, how far from under the lamp it has gone to half, and how wide the
  * column is under the lamp and how much wider for each unit nearer.
  */
-const LAMP_GAIN   = 1.5
-const LAMP_HALF   = 26
+const LAMP_GAIN   = 2
+const LAMP_HALF   = 11
 const LAMP_WIDE   = float(0.45)
 const LAMP_SPREAD = 0.05
+
+/** How rough the water is to the lamp: the higher, the less far from the one place the level sea would give it back the road reaches. */
+const LAMP_TILT = 90
 
 /** How finely the ripples break the road across, in radians of their pattern a unit along it. */
 const LAMP_DASH = 4.6
@@ -244,7 +247,7 @@ export function createSeaMaterial ({ wind, clouds, day, wash, ground, standing, 
    * nearer, that the ripples break into pieces across it. `chop` is the
    * ripples' own pattern, so the pieces move with them.
    */
-  const roadOn = (chop: Node<'float'>): Node<'vec3'> => {
+  const roadOn = (chop: Node<'float'>, view: Node<'vec3'>): Node<'vec3'> => {
     const lampWay = lamp.xz.sub(cameraPosition.xz)
     const lampFar = length(lampWay)
     const offset  = positionWorld.xz.sub(cameraPosition.xz)
@@ -261,9 +264,16 @@ export function createSeaMaterial ({ wind, clouds, day, wash, ground, standing, 
       .sub(now.mul(1.7))
     const broken = mix(smoothstep(-0.15, 0.85, sin(ripple)), 0.42, smoothstep(0.6, 2.2, fwidth(ripple)))
 
+    // Only where a ripple need not tilt far to show it: the water level
+    // would give the lamp back at one place, and the road spreads from there.
+    const tilted = exp(normalize(normalize(lamp.xyz.sub(positionWorld)).add(view)).y
+      .oneMinus()
+      .mul(-LAMP_TILT))
+
     return amber.mul(lamp.w.mul(LAMP_GAIN))
       .mul(column)
       .mul(broken)
+      .mul(tilted)
       .div(short.div(LAMP_HALF).add(1))
   }
 
@@ -358,7 +368,7 @@ export function createSeaMaterial ({ wind, clouds, day, wash, ground, standing, 
       .mul(light)
 
     const colour      = mix(dulled, mirrored, reflectance).add(glint)
-      .add(roadOn(along))
+      .add(roadOn(along, view))
 
     // The sea has no edge of its own: it thins over the last of the sand until
     // the sand is all there is. Over a couple of pixels at least, so the edge

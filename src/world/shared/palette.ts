@@ -33,6 +33,7 @@ export const PALETTE = {
   waterDeep:    '#1d4d68',
   waterShallow: '#8fc2cc',
   foam:         '#eef2f5',
+  aurora:       '#8fe6b0',
 } as const
 
 /**

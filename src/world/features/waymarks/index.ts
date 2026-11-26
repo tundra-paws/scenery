@@ -2,6 +2,7 @@
 import * as THREE from 'three'
 import type { SeededRng } from 'threejs-scenes'
 
+import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { createLitMaterial } from '../../shared/lit.ts'
 import type { Ground } from '../../shared/ground.ts'
 import { commitInstances, disposeInstances } from '../../shared/instances.ts'
@@ -179,6 +180,11 @@ export function createWaymarks (world: World): Feature {
       layLanding(mason, path, world.wash)
 
       mesh.count = mason.laid
+
+      // A phone's sea gives back none of them, as it gives back no wall:
+      // small stones on the hill, and the landing's few at the water's edge.
+      if (world.quality.tier === 'mobile')
+        keepOutOfMirror(mesh)
 
       commitInstances(mesh)
       scene.add(mesh)

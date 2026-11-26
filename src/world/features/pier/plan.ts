@@ -49,13 +49,14 @@ export const LADDER = { along: 8.4, under: 0.7, wide: 0.55, rung: 0.36 } as cons
 export const CREEL = { long: 1, wide: 0.66, high: 0.46 } as const
 
 /**
- * Where the creels are: stacked on the pier's head, where they are landed,
- * each as a place in the pier's frame, how many courses of creels up it
- * sits, and how it is turned. And a few at the foot of the first net pole.
+ * Where the creels are: stacked short of the light at the pier's head,
+ * where they are landed, each as a place in the pier's frame, how many
+ * courses of creels up it sits, and how it is turned. And a few at the foot
+ * of the first net pole.
  */
 export const CREELS = [
   { along: 9.75, across: -1.02, up: 0, turn: 0.04 },
-  { along: 10.8, across: -1.05, up: 0, turn: -0.05 },
+  { along: 10.55, across: -1.05, up: 0, turn: -0.05 },
   { along: 10.25, across: -1, up: 1, turn: 0.08 },
   { along: 8.6, across: -1.05, up: 0, turn: 0.9 },
   { along: 10.45, across: 0.95, up: 0, turn: 1.45 },

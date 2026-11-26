@@ -110,6 +110,10 @@ export function createShelterFeature (world: World): Feature {
 
       smoke.drift(0)
 
+      // Its smoke, up the hill, is not in a phone's sea, as the kiln's is not.
+      if (world.quality.tier === 'mobile')
+        keepOutOfMirror(smoke.mesh)
+
       scene.add(house, smoke.mesh)
     },
 

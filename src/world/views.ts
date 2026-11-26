@@ -97,7 +97,7 @@ export const VIEWS: readonly View[] = [
   { name: 'flock', at: [ 27, 99 ], height: 3, look: [ 17, 72 ], lookHeight: 3.5, travel: 3 },
   { name: 'burn', at: [ 34, 100.5 ], height: 3, look: [ 29.5, 76 ], lookHeight: 4, travel: 3.5 },
   { name: 'starlings', at: [ 40, 112 ], height: 2.5, look: [ -11, 62 ], lookHeight: 22, travel: 4 },
-  { name: 'pier', at: [ 65, 98 ], height: 3.4, look: [ 49.5, 88 ], lookHeight: 5, travel: 4 },
+  { name: 'pier', at: [ 66.5, 101.5 ], height: 3.4, look: [ 47.5, 87 ], lookHeight: 5.5, travel: 4 },
 ]
 
 /**

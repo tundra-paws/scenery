@@ -1,20 +1,12 @@
 // src/world/features/pier/beacon.ts
 import * as THREE from 'three'
 
-import { elevationAt } from '../../shared/daylight.ts'
+import { lampLevel } from '../../shared/lamps.ts'
 import { createUnlitMaterial } from '../../shared/lit.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import type { World } from '../../world.ts'
 import { LANTERN } from './plan.ts'
 import type { Tower } from './tower.ts'
-
-/**
- * The sun's height, in degrees, at which the lamp is lit in the evening and
- * put out in the morning, and how many degrees it takes to come up to its
- * full light: somebody trims the wick and turns it up.
- */
-const LIT_AT = 1.2
-const RAMP   = 1.4
 
 /** How much brighter than its colour the glazing is when it is lit: the shelter's flame, seen through glass. */
 const FLAME = 2.1
@@ -43,11 +35,6 @@ export interface Beacon {
   /** Light it, or put it out, for `time` seconds. */
   burn (time: number, night: number): void
   dispose (): void
-}
-
-/** How far up the lamp is turned at `time`: nothing by day, all of it from a little after sunset to a little before sunrise. */
-export function lampLevel (time: number): number {
-  return THREE.MathUtils.clamp((LIT_AT - elevationAt(time)) / RAMP, 0, 1)
 }
 
 /** The glazing, lit: eight panes of the lamp's amber just outside the glass, painted with the shelter's flame so the two are one program. */

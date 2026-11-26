@@ -11,6 +11,8 @@ import { berthAt, findMooring } from './mooring.ts'
 import type { Berth, Mooring } from './mooring.ts'
 import { createPennant } from './pennant.ts'
 import type { Pennant } from './pennant.ts'
+import { createRidingLight } from './riding-light.ts'
+import type { RidingLight } from './riding-light.ts'
 import { createSail } from './sail.ts'
 import type { Sail } from './sail.ts'
 
@@ -32,14 +34,17 @@ const SHADE_REACH = 2.5
  * its anchor as the wind lets it, bow always to the wind, so the grass, the
  * smoke and the boat all say the same thing about the air, and the sail
  * says it loudest: slack-sheeted, it shakes down its length and lies over
- * to whichever side she has sheered from (`sail.ts`). Three draw calls and
- * two shadow passes: the boat, its sail and its pennant.
+ * to whichever side she has sheered from (`sail.ts`). From dusk to first
+ * light a riding light burns under her masthead (`riding-light.ts`). Three
+ * draw calls and two shadow passes by day: the boat, its sail and its
+ * pennant; the riding light makes four at night.
  */
 export function createBoat (world: World): Feature {
-  let hull: THREE.Mesh | null = null
-  let pennant: Pennant | null = null
-  let sail: Sail | null       = null
-  let mooring: Mooring | null = null
+  let hull: THREE.Mesh | null    = null
+  let pennant: Pennant | null    = null
+  let sail: Sail | null          = null
+  let mooring: Mooring | null    = null
+  let riding: RidingLight | null = null
 
   /** Put the boat and its pennant where they are at `time` seconds. */
   function lie (time: number): void {
@@ -59,6 +64,7 @@ export function createBoat (world: World): Feature {
     // The sail hangs in the boat's own frame: the wind is ahead, and the
     // part of it that blows across her is what her sheer has let in.
     sail?.fill(time, world.wind.gustAt(berth.x, berth.z, time), world.wind.direction[0] * Math.sin(berth.yaw) + world.wind.direction[1] * Math.cos(berth.yaw))
+    riding?.burn(time)
 
     // Tell the sea where it lies: the bow is the boat's own x, turned by its
     // yaw, and its shadow falls away from the light, further the lower that is.
@@ -99,7 +105,9 @@ export function createBoat (world: World): Feature {
       else
         sail.mesh.castShadow = true
 
-      hull.add(sail.mesh)
+      riding = createRidingLight(world)
+
+      hull.add(sail.mesh, riding.mesh)
 
       world.wash.hull(WATERLINE.half, WATERLINE.beam)
 
@@ -120,7 +128,9 @@ export function createBoat (world: World): Feature {
       hull?.removeFromParent()
       pennant?.dispose()
       sail?.dispose()
+      riding?.dispose()
 
+      riding  = null
       hull    = null
       pennant = null
       sail    = null
@@ -130,6 +140,6 @@ export function createBoat (world: World): Feature {
 }
 
 // perf: cheap — three draw calls and two shadow passes (a phone: one), under
-// 700 triangles on every tier. A step is a dozen sines for the boat
+// 700 triangles on every tier; a fourth call at night for the riding light. A step is a dozen sines for the boat
 // (`mooring.ts`), one turn of a vector, fourteen vertices for the pennant
 // (`pennant.ts`) and under a hundred for the sail (`sail.ts`).
