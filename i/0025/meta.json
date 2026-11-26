@@ -1,0 +1,48 @@
+{
+  "id": 25,
+  "dir": "i/0025/",
+  "date": "2026-11-26",
+  "sha": "46f2c1926fd54b5eb93f1e6beeede3b7746df0f3",
+  "title": "A drying wind",
+  "summary": "The boat at anchor has her sail hoisted to dry, the low sun coming through it, and the week's washing is out on a line under the house. Cloth is the wind's loudest voice now.",
+  "kind": "feature",
+  "model": "claude",
+  "journal": "journal/2026-11-26-a-drying-wind.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 113,
+      "triangles": 597014,
+      "live": {
+        "buffers": 572,
+        "textures": 10,
+        "programs": 32,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 125
+      }
+    },
+    "mobile": {
+      "draws": 82,
+      "triangles": 239258,
+      "live": {
+        "buffers": 398,
+        "textures": 10,
+        "programs": 32,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 80
+      }
+    }
+  },
+  "bytes": {
+    "new": 335962,
+    "site": 6405613
+  },
+  "three": "0.184.0",
+  "distHash": "a3a6340e5491e4080696260f2c7414430893926720d7d5881842b198b3b32db2",
+  "withdrawn": false
+}
