@@ -9,9 +9,11 @@ import type { Mason, Spot } from '../../shared/masonry.ts'
 import type { Pier } from '../../shared/pier.ts'
 import type { Wash } from '../../shared/wash.ts'
 import { COURSE, DECK, WALL } from './plan.ts'
+import { raiseTower } from './tower.ts'
+import type { Tower } from './tower.ts'
 
-/** Stones the mesh has room for. Half as many again as this pier lays on this shore. */
-const ROOM = 420
+/** Stones the mesh has room for. A third as many again as this pier and its light lay on this shore. */
+const ROOM = 520
 
 /** How far apart along the pier the sea is told of it, and how far under the water the bed must be for it to break there. */
 const TOLD  = 1
@@ -23,6 +25,7 @@ interface Site {
   pier:   Pier
   wash:   Wash
   under:  number
+  tower:  Tower
 }
 
 /**
@@ -116,20 +119,21 @@ function wedge (mason: Mason, pier: Pier, ground: Ground): void {
 
 /**
  * Every stone of the pier as one instanced mesh, in the world's own frame:
- * its faces, its deck, the step at its root, and the stones wedged round the
- * feet of the net poles and the rack. And the sea is told where the pier
+ * its faces, its deck, the step at its root, the stones wedged round the
+ * feet of the net poles and the rack, and the light's tower on its head. And the sea is told where the pier
  * stands in it, so it breaks white along both faces and round the head.
  *
  * The house's stone, the cairn's paler grey, twenty facets a stone on every
  * tier as the dykes are.
  */
-export function layStones (geometry: THREE.BufferGeometry, material: THREE.Material, lay: SeededRng, { ground, pier, wash, under }: Site): THREE.InstancedMesh {
+export function layStones (geometry: THREE.BufferGeometry, material: THREE.Material, lay: SeededRng, { ground, pier, wash, under, tower }: Site): THREE.InstancedMesh {
   const mesh  = new THREE.InstancedMesh(geometry, material, ROOM)
   const mason = { mesh, laid: 0, lay, course: COURSE, ground: (x: number, z: number): number => ground.heightAt(x, z) }
 
   raiseWalls(mason, pier, under)
   pave(mason, pier, ground)
   wedge(mason, pier, ground)
+  raiseTower(mason, pier, tower)
 
   for (let along = 0; along <= pier.jetty.length; along += TOLD) {
     const { x, z } = pier.place(along, 0)
@@ -149,5 +153,5 @@ export function layStones (geometry: THREE.BufferGeometry, material: THREE.Mater
 }
 
 // perf: cheap — one draw call (two with its shadow pass, three in the
-// mirror). Some 260 stones of 20 triangles: 5k on every tier. Laid once;
+// mirror). Some 350 stones of 20 triangles: 7k on every tier. Laid once;
 // nothing per frame.

@@ -15,6 +15,9 @@ import { NIGHT_THINS } from './sky.ts'
 /** Distance the stars are drawn at: outside the furthest cloud, inside the camera's far plane. */
 const RADIUS = 2000
 
+/** The least light a star is drawn with. */
+const SHOWN = 0.003
+
 /** A star's width in pixels, smallest and largest. Most are small. */
 const SIZE = [ 1.2, 3.4 ] as const
 
@@ -22,8 +25,8 @@ const SIZE = [ 1.2, 3.4 ] as const
 export interface Stars {
   points: THREE.Mesh
 
-  /** Turn them with the sky, and keep their size in screen pixels. */
-  turn (time: number, hour: number, pixelRatio: number): void
+  /** Turn them with the sky, keep their size in screen pixels, and leave them undrawn by day. */
+  turn (time: number, hour: number, pixelRatio: number, night: number): void
   dispose (): void
 }
 
@@ -106,7 +109,7 @@ export function createStars ({ count, rng, colour, pole, day, wind }: StarOption
     .mul(middle.w)
 
   material.name         = 'stars'
-  material.vertexNode   = select(light.greaterThan(0.003), vec4(middle.xy.add(corner), middle.zw), vec4(2, 2, 2, 1))
+  material.vertexNode   = select(light.greaterThan(SHOWN), vec4(middle.xy.add(corner), middle.zw), vec4(2, 2, 2, 1))
   material.fragmentNode = vec4(printed(uniform(new THREE.Color(colour)).mul(light)
     .mul(smoothstep(0.5, 0.15, length(varying(positionGeometry.xy))))), 1)
   material.transparent = true
@@ -126,9 +129,14 @@ export function createStars ({ count, rng, colour, pole, day, wind }: StarOption
   return {
     points,
 
-    turn (now, hour, ratio) {
+    turn (now, hour, ratio, night) {
       time.value       = now
       pixelRatio.value = ratio
+
+      // No star is brighter than the night: under this, every one of them
+      // is put outside the picture, so the sky and the sea's mirror need
+      // not draw them at all.
+      points.visible = night > SHOWN
       points.quaternion.setFromAxisAngle(pole, -hour)
     },
 

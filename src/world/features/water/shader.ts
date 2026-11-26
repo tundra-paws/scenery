@@ -71,7 +71,20 @@ const GLOOM  = 0.5
 
 /** The boat on the water: how much of the sea's own colour its shadow takes, and how long the calm it leaves in its lee is. */
 const SHADE = 0.45
-const LEE   = 16
+
+/**
+ * The road a lamp lays on the water: how bright it is at the lamp's full
+ * light, how far from under the lamp it has gone to half, and how wide the
+ * column is under the lamp and how much wider for each unit nearer.
+ */
+const LAMP_GAIN   = 1.5
+const LAMP_HALF   = 26
+const LAMP_WIDE   = float(0.45)
+const LAMP_SPREAD = 0.05
+
+/** How finely the ripples break the road across, in radians of their pattern a unit along it. */
+const LAMP_DASH = 4.6
+const LEE       = 16
 
 /** What the sea is made from: the air over it, what stands in it, the land under it, and its own mirror and clock. */
 export interface SeaOptions {
@@ -119,6 +132,8 @@ export function createSeaMaterial ({ wind, clouds, day, wash, ground, standing, 
   const boat             = heldVec4(wash.uniforms.uBoat)
   const hullSize         = heldVec2(wash.uniforms.uBoatHull)
   const boatShade        = heldVec2(wash.uniforms.uBoatShade)
+  const lamp             = heldVec4(wash.uniforms.uLamp)
+  const amber            = uniform(new THREE.Color(PALETTE.lamp)) as unknown as Node<'vec3'>
   const deep             = uniform(new THREE.Color(PALETTE.waterDeep)) as unknown as Node<'vec3'>
   const shallow          = uniform(new THREE.Color(PALETTE.waterShallow)) as unknown as Node<'vec3'>
   const white            = uniform(new THREE.Color(PALETTE.foam)) as unknown as Node<'vec3'>
@@ -223,6 +238,35 @@ export function createSeaMaterial ({ wind, clouds, day, wash, ground, standing, 
     return foam
   }
 
+  /**
+   * A lamp that is lit over the water lays its own road on it, from under
+   * the lamp toward whoever looks: a narrow column, wider as it comes
+   * nearer, that the ripples break into pieces across it. `chop` is the
+   * ripples' own pattern, so the pieces move with them.
+   */
+  const roadOn = (chop: Node<'float'>): Node<'vec3'> => {
+    const lampWay = lamp.xz.sub(cameraPosition.xz)
+    const lampFar = length(lampWay)
+    const offset  = positionWorld.xz.sub(cameraPosition.xz)
+    const outward = offset.dot(lampWay).div(lampFar)
+    const abeam   = abs(offset.x.mul(lampWay.y).sub(offset.y.mul(lampWay.x))
+      .div(lampFar))
+    const short  = lampFar.sub(outward)
+    const column = fade(0, LAMP_WIDE.mul(short.mul(LAMP_SPREAD).add(1)), abeam)
+      .mul(smoothstep(-0.5, 1.5, short))
+      .mul(smoothstep(0, 4, outward))
+    const ripple = outward.mul(LAMP_DASH).add(chop.mul(1.4))
+      .add(sin(abeam.mul(4.1).add(now.mul(0.9))).mul(1.2))
+      .add(sin(outward.mul(1.3).sub(now.mul(0.6))).mul(1.6))
+      .sub(now.mul(1.7))
+    const broken = mix(smoothstep(-0.15, 0.85, sin(ripple)), 0.42, smoothstep(0.6, 2.2, fwidth(ripple)))
+
+    return amber.mul(lamp.w.mul(LAMP_GAIN))
+      .mul(column)
+      .mul(broken)
+      .div(short.div(LAMP_HALF).add(1))
+  }
+
   const surface = Fn(() => {
     const at = positionWorld.xz
 
@@ -312,7 +356,9 @@ export function createSeaMaterial ({ wind, clouds, day, wash, ground, standing, 
     const glint   = nodes.seaGlint.mul(pow(max(dot(normal, halfway), 0), 220)).mul(0.9)
       .mul(light)
       .mul(light)
+
     const colour      = mix(dulled, mirrored, reflectance).add(glint)
+      .add(roadOn(along))
 
     // The sea has no edge of its own: it thins over the last of the sand until
     // the sand is all there is. Over a couple of pixels at least, so the edge

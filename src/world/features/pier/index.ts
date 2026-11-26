@@ -10,6 +10,8 @@ import { inItself, inWorld, stone as stonework, timber } from '../../shared/surf
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { createGulls } from '../../shared/gulls.ts'
+import { createBeacon } from './beacon.ts'
+import type { Beacon } from './beacon.ts'
 import { BARKED, createGear } from './gear.ts'
 import { createFlight, findPerches } from './gulls.ts'
 import type { Flight } from './gulls.ts'
@@ -18,6 +20,7 @@ import type { Nets } from './nets.ts'
 import { WALL } from './plan.ts'
 import { layStones } from './stones.ts'
 import { createTender } from './tender.ts'
+import { placeTower } from './tower.ts'
 import type { Tender } from './tender.ts'
 
 /**
@@ -42,6 +45,7 @@ export function createPierFeature (world: World): Feature {
   let nets: Nets | null                  = null
   let tender: Tender | null              = null
   let gulls: Flight | null               = null
+  let beacon: Beacon | null              = null
 
   return {
     name: 'pier',
@@ -60,9 +64,11 @@ export function createPierFeature (world: World): Feature {
 
       wood = sawn
 
-      stones = layStones(createStoneGeometry(rng.fork('pier:shape').int(1, 1_000_000), 0), stone, rng.fork('pier:lay'), { ground, pier, wash: world.wash, under: phone ? 1 : WALL.under })
+      const tower = placeTower(pier)
 
-      gear               = new THREE.Mesh(createGear(pier, ground, rng.fork('pier:gear'), phone), sawn)
+      stones = layStones(createStoneGeometry(rng.fork('pier:shape').int(1, 1_000_000), 0), stone, rng.fork('pier:lay'), { ground, pier, wash: world.wash, under: phone ? 1 : WALL.under, tower })
+
+      gear               = new THREE.Mesh(createGear(pier, ground, tower, rng.fork('pier:gear'), phone), sawn)
       gear.name          = 'pier-gear'
       gear.castShadow    = true
       gear.receiveShadow = true
@@ -91,15 +97,19 @@ export function createPierFeature (world: World): Feature {
       if (phone)
         keepOutOfMirror(gulls.mesh)
 
+      beacon = createBeacon(world, tower)
+
       nets.blow(0)
       tender.ride(0)
-      scene.add(stones, gear, nets.mesh, tender.mesh, gulls.mesh)
+      beacon.burn(0, world.day.night)
+      scene.add(stones, gear, nets.mesh, tender.mesh, gulls.mesh, beacon.panes, beacon.lamp)
     },
 
     update (_state, frame) {
       nets?.blow(frame.frame * STEP)
       tender?.ride(frame.frame * STEP)
       gulls?.fly(frame.frame * STEP)
+      beacon?.burn(frame.frame * STEP, world.day.night)
     },
 
     dispose () {
@@ -110,7 +120,9 @@ export function createPierFeature (world: World): Feature {
       nets?.dispose()
       tender?.dispose()
       wood?.dispose()
+      beacon?.dispose()
 
+      beacon = null
       stones = null
       gear   = null
       wood   = null

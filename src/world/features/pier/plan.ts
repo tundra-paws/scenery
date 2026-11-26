@@ -54,12 +54,28 @@ export const CREEL = { long: 1, wide: 0.66, high: 0.46 } as const
  * sits, and how it is turned. And a few at the foot of the first net pole.
  */
 export const CREELS = [
-  { along: 11.4, across: 0.7, up: 0, turn: 0.1 },
-  { along: 11.5, across: -0.1, up: 0, turn: -0.06 },
-  { along: 12.55, across: 0.45, up: 0, turn: 1.5 },
-  { along: 11.45, across: 0.3, up: 1, turn: 0.04 },
-  { along: 9.9, across: -1.05, up: 0, turn: 0.9 },
+  { along: 9.75, across: -1.02, up: 0, turn: 0.04 },
+  { along: 10.8, across: -1.05, up: 0, turn: -0.05 },
+  { along: 10.25, across: -1, up: 1, turn: 0.08 },
+  { along: 8.6, across: -1.05, up: 0, turn: 0.9 },
+  { along: 10.45, across: 0.95, up: 0, turn: 1.45 },
 ] as const
+
+/**
+ * The light at the pier's head: a round tower of the pier's own stone, its
+ * middle this far in from the head, so many courses tall, its outer line
+ * this far from its middle at the foot and at the top. Its door looks back
+ * along the pier, this much of the round wide and this many courses high.
+ */
+export const TOWER = { back: 1.38, courses: 8, foot: 1.12, top: 0.94, door: 0.44, doorway: 4 } as const
+
+/**
+ * The lantern on the tower: a glazed room of eight sides this far from its
+ * middle to a corner and this tall, on a plinth this tall, under a roof
+ * this tall that oversails it to this far out; and the rail round the
+ * gallery, this far out and this high.
+ */
+export const LANTERN = { radius: 0.55, glazed: 0.82, plinth: 0.3, roof: 0.5, eaves: 0.74, rail: 0.18, railHigh: 0.62 } as const
 
 /** Creels left on the beach, by how far past the first pole they lie and how far down the sand from the row. */
 export const BEACHED = [

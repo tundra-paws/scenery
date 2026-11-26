@@ -58,7 +58,7 @@ export function createEnvironment (world: World): Feature {
     }
 
     fog?.color.copy(day.haze)
-    stars?.turn(time, day.hour, pixelRatio)
+    stars?.turn(time, day.hour, pixelRatio, day.night)
   }
 
   return {

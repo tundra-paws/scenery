@@ -8,6 +8,8 @@ import { PALETTE } from '../../shared/palette.ts'
 import type { Pier } from '../../shared/pier.ts'
 import { DARK, paint } from '../../shared/roof.ts'
 import { headRope } from './nets.ts'
+import { createTowerGear } from './tower.ts'
+import type { Tower } from './tower.ts'
 import { BARREL, BEACHED, BOX, COIL, COURSE, CREEL, CREELS, INSET, LADDER, NET, POLE, POST, POSTS, RACK, WALL } from './plan.ts'
 
 /** Wood as it is left, and the same tarred: the boat's two. */
@@ -256,7 +258,7 @@ function rack (pier: Pier, ground: Ground, lay: SeededRng, spare: boolean): THRE
  * `spare` is a phone's: the creels on the beach, the box and the coil are
  * left off, and every other fish.
  */
-export function createGear (pier: Pier, ground: Ground, lay: SeededRng, spare: boolean): THREE.BufferGeometry {
+export function createGear (pier: Pier, ground: Ground, tower: Tower, lay: SeededRng, spare: boolean): THREE.BufferGeometry {
   const { jetty } = pier
   const level     = ground.waterLevel
   const first     = pier.poles[0]!
@@ -270,6 +272,7 @@ export function createGear (pier: Pier, ground: Ground, lay: SeededRng, spare: b
     barrel(on(pier, BARREL.along, BARREL.across, jetty.deck + 0.02)),
     ...poles(pier, ground),
     ...rack(pier, ground, lay, spare),
+    ...createTowerGear(tower),
   ]
 
   if (!spare) {

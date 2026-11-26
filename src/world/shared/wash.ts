@@ -20,6 +20,9 @@ export interface WashUniforms {
 
   /** How far its shadow on the water lies from it, along the light. */
   uBoatShade: { value: THREE.Vector2 }
+
+  /** A lamp over the water, which the sea gives back as a road of light: where it is, and how brightly it burns (0 when it is out). */
+  uLamp: { value: THREE.Vector4 }
 }
 
 /**
@@ -43,6 +46,9 @@ export interface Wash {
 
   /** Where the boat is now: its middle, the way its bow points, and where its shadow falls. */
   ride (x: number, z: number, bow: number, shadeX: number, shadeZ: number): void
+
+  /** A lamp over the water, lit as brightly as `strength`: the light at the pier's head. */
+  shine (x: number, y: number, z: number, strength: number): void
 }
 
 export function createWash (): Wash {
@@ -53,6 +59,7 @@ export function createWash (): Wash {
     uBoat:      { value: new THREE.Vector4(1e5, 1e5, 1, 0) },
     uBoatHull:  { value: new THREE.Vector2(1, 1) },
     uBoatShade: { value: new THREE.Vector2(0, 0) },
+    uLamp:      { value: new THREE.Vector4(0, 10, 0, 0) },
   }
 
   return {
@@ -71,6 +78,10 @@ export function createWash (): Wash {
     ride (x, z, bow, shadeX, shadeZ) {
       uniforms.uBoat.value.set(x, z, Math.cos(bow), Math.sin(bow))
       uniforms.uBoatShade.value.set(shadeX, shadeZ)
+    },
+
+    shine (x, y, z, strength) {
+      uniforms.uLamp.value.set(x, y, z, strength)
     },
   }
 }
