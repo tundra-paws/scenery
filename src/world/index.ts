@@ -7,6 +7,7 @@ import { createCairn } from './features/cairn/index.ts'
 import { createClouds } from './features/clouds/index.ts'
 import { createEnvironment } from './features/environment/index.ts'
 import { createFlockFeature } from './features/flock/index.ts'
+import { createGeeseFeature } from './features/geese/index.ts'
 import { createGrass } from './features/grass/index.ts'
 import { createInfieldFeature } from './features/infield/index.ts'
 import { createMillFeature } from './features/mill/index.ts'
@@ -63,6 +64,7 @@ export function createFeatures (world: World): Feature[] {
     createPierFeature(world),
     createSkerryFeature(world),
     createStarlingsFeature(world),
+    createGeeseFeature(world),
     createWater(world),
   ]
 }

@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { elevationAt } from '../../shared/daylight.ts'
 import type { Glide, Gull, Gulls, Perch } from '../../shared/gulls.ts'
 import { commitInstances } from '../../shared/instances.ts'
+import { createLumpGeometry } from '../../shared/lump.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import type { Pier } from '../../shared/pier.ts'
 import { POST, POSTS } from './plan.ts'
@@ -20,9 +21,6 @@ const LUMPS = 4
 const BODY = [ 0.17, 0.15, 0.46 ] as const
 const HEAD = [ 0.1, 0.1, 0.18 ] as const
 const WING = { span: 1.2, chord: 0.2, thick: 0.03, root: 0.08 } as const
-
-/** Where along a lump its widest part is, from -1 at its blunt end to 1 at its point: a breast, or a wing's root. */
-const WAIST = -0.45
 
 /** How far a spread wing is held up from level, in radians, and how far a slow beat lifts and drops it. */
 const DIHEDRAL = 0.16
@@ -70,31 +68,6 @@ export function findPerches (pier: Pier): Perch[] {
   const poles = pier.poles.map(({ x, z, top }): Perch => [ x, top, z ])
 
   return [ posts.at(-1)!, poles[1]!, poles.at(-1)!, posts[0]!, poles[0]!, posts[1]!, ...poles.slice(2, -1) ]
-}
-
-/**
- * The one shape every lump of a gull is: a spindle along z, blunt at one end
- * and drawn out to a point at the other, widest near the blunt end. Stretched
- * one way it is a body with its breast forward, another a wing tapering to
- * its tip. Eight triangles.
- */
-function createLumpGeometry (): THREE.BufferGeometry {
-  const ends     = [[ 0, 0, 1 ], [ 0, 0, -1 ]] as const
-  const waist    = [[ 1, 0, WAIST ], [ 0, 1, WAIST ], [ -1, 0, WAIST ], [ 0, -1, WAIST ]] as const
-  const corners  = [] as number[]
-  const geometry = new THREE.BufferGeometry()
-
-  for (let side = 0; side < 4; side += 1) {
-    const from = waist[side]!
-    const to   = waist[(side + 1) % 4]!
-
-    corners.push(...from, ...to, ...ends[0], ...to, ...from, ...ends[1])
-  }
-
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(corners, 3))
-  geometry.computeVertexNormals()
-
-  return geometry
 }
 
 /** One lump of a gull, placed and turned in the bird's own frame (x ahead, y up, z to its right) and carried to where the bird is. */
