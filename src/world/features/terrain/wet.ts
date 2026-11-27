@@ -29,10 +29,13 @@ const GLOSS = 0.32
 const PUDDLE = 0.32
 const LEVEL  = [ 0.1, 0.3 ] as const
 const SHED   = 0.9
-const COVER  = [ 1.02, 0.52 ] as const
+const COVER  = [ 1.02, 0.58 ] as const
 
 /** How much of a wet stone's sheen the land has where it is grown over: the turf and the heather break the film up. */
 const TURF_FILM = 0.16
+
+/** And where it is the bare path: trodden earth holds more of a film than turf, and less than stone. */
+const PATH_FILM = 0.42
 
 /** The clock the wash keeps: the world's time, set each step. */
 export interface WetShore {
@@ -74,7 +77,7 @@ export function poolTheRain (material: LitMaterial, weather: Weather, day: Dayli
   const pooled = smoothstep(brim, brim.add(edge), hollow).mul(level)
     .mul(onPath)
 
-  material.wets(wet, day, pooled, mix(TURF_FILM, 1, max(bare, onPath)))
+  material.wets(wet, day, pooled, mix(mix(TURF_FILM, PATH_FILM, onPath), 1, bare))
 }
 
 // perf: cheap — two sines a fragment of land for the wash, and one noise

@@ -24,8 +24,7 @@ The curator works within these and does not rewrite this section.
 **What this place is.** A small northern island that someone walked before you. Nobody is ever
 seen on it, only what they left: stones stacked on the summit, later a path, a shelter, a light.
 A stranger should know it as "the island with the cairn", and now there is a house under it
-with the lamp lit and its door open on the fire, a boat at anchor off the landing, its sail up to
-dry, the washing out on a line under the house's low wall, and still nobody.
+with its door open on the fire, a boat at anchor, washing on a line, and still nobody.
 Beside the landing a pier of the house's stone runs out to deep water, a round tower of the
 same stone on its head with a lantern that somebody lights at sunset: a small boat in its
 lee, creels, nets drying on poles along the beach, split fish on a rack, gulls over it. A
@@ -79,9 +78,8 @@ the near black of their faces and legs (`face`), which a black sheep is all over
 starlings are too. And one dyed
 thing, a worn red (`pennant`): cloth made only to be seen
 from the water, and never more than a scrap of it. A new colour needs a job none of these does.
-The sky and its light are the exception that is not one: the same few roles (zenith, horizon,
-light, fill, ground) at five hours, day, gold, sunset, dusk and night (`HOURS`), blended by how
-high the sun stands. At night the light is the moon's cold blue-white, which the stars share.
+The sky's few roles (zenith, horizon, light, fill, ground) are blended over five hours
+(`HOURS`) by the sun's height. At night the light is the moon's cold blue-white, which the stars share.
 
 **Motifs.**
 - *Placed stone.* Cairns, markers, walls: the same boulder shape, stacked on purpose. A house
@@ -101,12 +99,14 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
 - *The high air.* Over the low clouds a thin mackerel sky, combed into streaks by a wind
   aloft that turns from the one below; it thins at night so the stars show between.
 - *Showers.* A few heavier clouds trail rain: fine streaks leaning back from the wind. One
-  is in the sound as the visit opens.
+  is in the sound as the visit opens; another has just gone over. What they leave is one
+  signal (`world.weather`): stone and turf darker and shining with the sky, puddles on the
+  path and threads in the furrows, white run-off down the steep faces, the burn in spate,
+  the sea pocked under them.
 - *The moor.* Above the worked ground the hill is heather, in patches with grass between,
   thickest on the tops: low faceted bushes on a mauve ground.
 - *The hour.* The other shared signal (`world.day`): where the sun is, and from that the sky,
-  the one light and its shadows, the fill, the haze, the sea's colours and the clouds'. Nothing
-  keeps a colour of the sky for itself. Sun and moon are one light that is out as it changes
+  the one light and its shadows, the fill, the haze, the sea's colours and the clouds'. Sun and moon are one light that is out as it changes
   hands; the lamps are the only lights that are somebody's, lit at dusk.
 - *The line between.* Shore, ridge, horizon: edges are where the detail goes.
 - *The sea gives back.* The water is a mirror, shaken by its ripples and by a low swell: the
@@ -143,11 +143,11 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
   every surface: noise in the shader, never a photograph, grain and relief and no colour.
 
 **What it is not.** Not a game: no score, no quest, no characters. Not tropical, not fantasy, no
-ruins of anything grand, no magic glow. Not busy: every added thing must leave the picture as
+ruins, no magic glow. Not busy: every added thing must leave the picture as
 quiet as it found it. Not photoreal: its textures stop at grain.
 
 **The chapters ahead.** Each is one day's major update. The journal holds the ones done;
-the last was the fire in and the geese over. Next: the other insides, and what a shower leaves.
+the last was what a shower leaves. Next: the other insides.
 
 ## Where it starts
 

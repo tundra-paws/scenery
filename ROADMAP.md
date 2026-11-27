@@ -11,8 +11,9 @@ Neither shows in `hero` at second ten by itself: pair it with something that doe
 1. **The other insides.** The mill and the light's tower are still shells: the stones, the
    hopper and a sack in the mill, its door open; a stair in the tower; and a rig that knows
    a wall from a door. `Interior` in `shared/hearth.ts` is how: unlit, its light its own.
-2. **What a shower leaves.** Wet stone and a darker land after the rain passes, a fuller
-   burn, the sea pocked under a veil; the last rig cut and a sack at the mill's door.
+2. **A bow.** A rainbow opposite a low sun wherever a shower stands there (the showers
+   are `world.weather`). Never in `hero` (the sun is in it): wants a view looking east
+   at second ten with rain in it. With it: the last rig cut, a sack at the mill's door.
 
 The night's leftovers, for a day that has room: the window's light on the grass, a meteor
 now and then, the aurora's light on the snow of the far tops.
@@ -33,14 +34,12 @@ now and then, the aurora's light on the snow of the far tops.
   crowns are lit as if half turned to the sky (`SKYWARD` in `wood/timber.ts`), a little
   bright under the moon, and throw no dappled shade.
 
-- The terrain's slope is read from `world.grid`, coarser on the smaller tiers: a rule keyed
-  to slope (the rock line) lands a little differently on each.
+- The land's slope is read from `world.grid`, coarser on the smaller tiers.
 - `bun run diff` and the gate's policy check trust the local `origin/main`: fetch it before
   believing either, and again before the last gate (two runs once built the same day).
 - The tour's flown legs keep five units over the ground but do not know what stands on it:
   a new view near a tall thing needs a look at the legs into and out of it. A leg between
   views that face opposite ways fails a test (35 degrees a second): give it time.
-- The path is colour only: benching it would change `ground.heightAt` for everything.
 - Two views do not follow the path: `landing` and `climb` are typed in at its foot and 68
   units up it. Reshape the land or move `LANDING_BEARING` (`shared/path.ts`) and move them.
 - The shelter's site (`shared/shelter.ts`) and its postcard are typed in; how it sits is read
@@ -71,7 +70,7 @@ now and then, the aurora's light on the snow of the far tops.
   boat's swing. The boat moved for it (`ASIDE`), as near the skerry as that test lets it.
   Tests hold it off the tour and every camera. Its stones are not land: a visitor walks
   through it. The sea breaks round a row of discs (`wash.stand`): no shadow, no lee.
-- The nets are opaque folds, moved on the CPU. The small boat's ropes miss their posts.
+- The nets are opaque folds, moved on the CPU.
 - The gulls go round over water only, clear of every camera (a test); the stream
   `'gulls:b'` was picked for `hero`.
 - A phone's gate, stooks, sheep's heads and small boat throw no shadow; its sea gives back
@@ -94,13 +93,11 @@ now and then, the aurora's light on the snow of the far tops.
 - **The day is typed in to fit the tour.** `DAY` in `shared/daylight.ts` is the loop's length
   (358 s). `NIGHT` and `TURNED` (the slow part's seconds, and how far the sky turns in
   them) hold the stops from `landing` to `ridge` at their hours, and `TEN` holds second ten's
-  sun; `EDGE`, `SLOW`, `NOON` and `OPENING` follow. `ridge` is half a degree after sunrise. A
-  visitor who takes the camera keeps the same clock: nothing lets them wait for the moon.
+  sun; `EDGE`, `SLOW`, `NOON` and `OPENING` follow. `ridge` is half a degree after sunrise.
 - Every postcard, and so every thumbnail, is taken at second ten: the gallery will never
   show the night. A second picture of an iteration (`seaward` at second 90) needs
   `budgets.json` and the site's scripts: a framework day.
-- At the handover (sun seven degrees down) nothing casts a shadow for a few seconds; the
-  light never comes from lower than seven degrees (`LOWEST`).
+- At the handover (sun seven degrees down) nothing casts a shadow for a few seconds.
 - The haze on the island is one colour, the horizon's. The sea and the land beyond fade into
   the glow on the sun's side (`features/beyond` does it by hand); the island's own far slopes
   still grey toward a sunset. Doing it for every lit material is `shown` in `shared/lit.ts`.
@@ -114,12 +111,10 @@ now and then, the aurora's light on the snow of the far tops.
   from under it, at half the picture's size (a third on a phone). What is many and small is
   kept out of it (`keepOutOfMirror`), and more on a phone. It draws even when little water
   is on screen.
-- Native WebGPU is one flag in `main.ts`: untried.
 - `main.ts` reaches into three's backend to keep instance matrices out of uniform arrays:
   look at it again when three is bumped.
 - The sea is still a flat plane: the swell tilts its light and the reflection, not the
-  surface, so the boats heave on water that does not. The surf is a thin line from `hero`:
-  the shelf is steep. The land beyond has no surf.
+  surface, so the boats heave on water that does not. The land beyond has no surf.
 - What stands in the sea is told to it at build (`world.wash.stand`): the boulders, the
   landing's stones, the head-dyke's foot, the pier. `water` must stay last in `index.ts` to
   hear it. The boat is three uniforms, set each step; the small boat is not told at all.
@@ -129,10 +124,8 @@ now and then, the aurora's light on the snow of the far tops.
   stands on is a rule; a test walks every sheep's round against it. Boulders are known only
   once `rocks` has built (`world.clutter`), so the test's flock does not know them. Move a
   view, and look again.
-- The flock keeps its own clock (`at` in `shared/flock.ts`): it stops when the sun is under a
-  degree and a half, so every sheep lies down where it stood, and runs again from sunrise.
-- The trods are worn only on the brae and the inbye (`terrain/wear.ts`); the sheep do not
-  walk on them.
+- The flock lies down where it stood when the sun is under 1.5 degrees (`at` in `flock.ts`).
+- The trods are worn on the brae and the inbye only; the sheep do not walk them.
 
 - **The skerry is typed in to fit `hero`** (`REEF` in `shared/skerry.ts`): bottom right, in
   the one patch of water `shelter`, `wood`, `infield`, `boat` and their legs leave free. A
@@ -164,12 +157,12 @@ now and then, the aurora's light on the snow of the far tops.
 - **The burn's course is the land's** (`shared/burn.ts`): it falls from `SPRING` (typed in to
   fit `hero`) and turns aside from the path and the landing's slip (`SHY`, `NEAR`), so below
   the dyke it runs across a slope of 0.5 to 0.9, not down it: nothing can be built there. Its
-  water lies on the land, which is not cut for it. It is not in the sun's shadow map, and no
-  rain swells it. The pool is a slow reach, not level water.
+  water lies on the land, which is not cut for it. It is not in the sun's shadow map; rain
+  only whitens it. The pool is a slow reach, not level water.
 - **The mill is typed in to fit `hero`** (`ABOVE_POOL`, `MILL_RACE` in `shared/mill.ts`):
   astride the burn on the one gentle shelf, 3.3 from the path and 2 from the fold. The burn
   lies on the land under the floor and is only called white below it (`CHURN`); the wheel
-  turns at one pace; the door is shut and nothing is inside. Tests hold its site, the way
+  turns at one pace, the burn in spate or not; the door is shut and nothing is inside. Tests hold its site, the way
   to its door, the water-gate and the tour off its walls.
 - The water-gate is found, not typed (`mill.gate`). Courses, roofs, boards and smoke are
   shared (`shared/`).
@@ -188,12 +181,20 @@ now and then, the aurora's light on the snow of the far tops.
   camera (`PATCH`). Where none grows in the patch (`sward.growsNear`) none is drawn. Where
   it grows is one picture (`sward.ts`): move a wall or the path and it follows. Blades
   cast no shadow and stand through a sheep's feet. Tufts are still planted.
+- **The wet is one number for the whole island** (`shared/weather.ts`): a shower over any
+  of it wets all of it, and it dries in some four minutes (`DRY`). `PASSED` in
+  `clouds/showers.ts` is typed in to fit `hero` (a test): it crossed the island just before
+  second ten, its rain hidden behind the wood. Nothing under a roof keeps dry. A wet face
+  gives back the dome's colours (`skyGivenBack` in `lit.ts`), never a cloud or the land.
+  Puddles are the noise's hollows on the path, not the land's low places.
+- **The run-off faces `hero`** (`TOWARD` in `shared/runoff.ts`): rills rise on steep high
+  faces looking at its camera, in the burn's material, out of the mirror, and lie on the
+  land through walls, tufts and sheep. A phone has 16, the desktop 22 (all that fit).
 - **The showers are clouds** (`clouds/showers.ts`, `rain.ts`): five, from a stream of
   their own. The first is typed to stand off the headland in `hero` at second ten, left of
   the sun (`OPENING`): a test holds it. They come round every 285 s on another line.
-  Rain is opaque streaks a pixel wide: it wets nothing and falls through roofs.
-- Triangles: desktop 76%, mobile 79.9% (the room and the geese cost a phone a hundred
-  tufts); a phone's draws 79 of 100. Its clouds are 27k, twice (the mirror): the next
+  Rain is opaque streaks a pixel wide, and falls through roofs.
+- Triangles: desktop 77%, mobile 82.6% (the rills took 8k); a phone's draws 80 of 100. Its clouds are 27k, twice (the mirror): the next
   room is there, and the next thing on a phone has to find it. What is only lit at night (the aurora, the lamps'
   panes, the stars) is not drawn by day, so `hero` at second ten never pays for it. Crowns are 36 facets on desktop (20 on a phone),
   drawn three times; walls' stones 20 on every tier. On a phone no building's stones throw
@@ -206,5 +207,5 @@ Parts for a chapter, never a day by themselves.
 - A second colour of dawn: morning and evening are the same sky, by the sun's height alone.
 - Whitecaps far out under a gust. Terns over the stacks. Weed on the reef below the tide.
 - A peat stack at the gable, a scythe on the dyke, a kailyard. Geese down on the stubble.
-- Parallax in the land's relief; wet stone beside the burn; ripples where a seal dives.
+- Parallax in the land's relief; ripples where a seal dives.
 - A wake when a boat moves. The sail lowered at dusk; its shadow on the sea.
