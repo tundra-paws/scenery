@@ -18,7 +18,7 @@ import { plantBracken } from './bracken.ts'
 import { plantHeather } from './heather.ts'
 
 
-const COUNT: Record<QualityTier, number> = { mobile: 900, desktop: 2600, highEnd: 4200 }
+const COUNT: Record<QualityTier, number> = { mobile: 800, desktop: 2600, highEnd: 4200 }
 
 /** How far from the middle of the path the grass is trodden out, from the shelter's walls, and from the way to its door. */
 const OFF_PATH    = 1.9

@@ -18,6 +18,18 @@ const SITE: Waypoint = { x: 56, z: 58 }
 export const SHELTER_LONG = 8
 export const SHELTER_DEEP = 5.6
 
+/**
+ * The room inside: how far in from the walls' outer line its own walls
+ * stand, at the long walls and at the gables (which carry the lintel's
+ * depth), and so half its width and half its length. The house's stones are
+ * laid about the outer line and reach in less far than this.
+ */
+const WALL_DEEP = 0.47
+const WALL_LONG = 0.62
+
+export const ROOM_HALF_DEEP = SHELTER_DEEP / 2 - WALL_DEEP
+export const ROOM_HALF_LONG = SHELTER_LONG / 2 - WALL_LONG
+
 /** Half the distance over which the fall of the land under the walls is measured. */
 const REACH = 4
 

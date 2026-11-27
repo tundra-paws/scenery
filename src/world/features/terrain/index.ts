@@ -1,8 +1,12 @@
 // src/world/features/terrain/index.ts
 import * as THREE from 'three'
+import { positionWorld, vec2 } from 'three/tsl'
 
 import { createLitMaterial } from '../../shared/lit.ts'
+import type { LitMaterial } from '../../shared/lit.ts'
 import { DEEP_WATER } from '../../shared/ground.ts'
+import { ROOM_HALF_DEEP, ROOM_HALF_LONG } from '../../shared/shelter.ts'
+import type { Shelter } from '../../shared/shelter.ts'
 import { traceTrods } from '../../shared/trods.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
@@ -12,6 +16,9 @@ import type { PathWear } from './wear.ts'
 import { wetTheShore } from './wet.ts'
 import type { WetShore } from './wet.ts'
 
+
+/** How far past the room's own walls the land is left out: into the thickness of the house's wall, where nothing sees its edge. */
+const CUT = 0.15
 
 /**
  * The grid's triangles, without the cells that lie wholly under deep water.
@@ -34,6 +41,20 @@ function cellsAbove (geometry: THREE.BufferGeometry, floor: number): number[] {
   }
 
   return kept
+}
+
+/**
+ * Leave the land out under the house's floor. The house is dug into the
+ * hill at its back and built up at its front, so the hill's own surface runs
+ * through the room at a slope: no fragment of it is drawn inside the room's
+ * walls, and the room's floor (`features/hearth`) is what is seen there.
+ */
+function openTheFloor (material: LitMaterial, { x, z, fall, door }: Shelter): void {
+  const off    = positionWorld.xz.sub(vec2(x, z))
+  const across = off.dot(vec2(fall[0], fall[1])).abs()
+  const along  = off.dot(vec2(door[0], door[1])).abs()
+
+  material.maskNode = across.greaterThan(ROOM_HALF_DEEP + CUT).or(along.greaterThan(ROOM_HALF_LONG + CUT))
 }
 
 /** The land: one heightfield mesh, textured a fragment (`land.ts`), shaded flat under its relief, its crags pushed out of true, the birches' leaves lying under them (`aLitter`), with the path and the ways to the shelter's door and the field gate worn into it, and its foot wet where the sea runs up it. */
@@ -83,6 +104,7 @@ export function createTerrain (world: World): Feature {
 
       wearPath(material, wear, land.grit)
       shore = wetTheShore(material, world.wind, ground.waterLevel)
+      openTheFloor(material, world.shelter)
 
       mesh               = new THREE.Mesh(geometry, material)
       mesh.name          = 'terrain'

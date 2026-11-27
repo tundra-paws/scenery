@@ -32,6 +32,9 @@ export const INSET = 0.15
 export const DOOR_HALF = 0.75
 export const DOOR_TOP  = 2.5
 
+/** How far past the doorway's own line, each side, the dark behind the stones is cut back: the stones' ends are ragged, and none of it may show in the door. */
+export const DOOR_EASE = 0.12
+
 /** The window in the downhill wall: where along the wall it runs from and to, and its sill and its head. */
 export const WINDOW = { from: -2.1, to: -1.2, sill: 1, head: 2 } as const
 

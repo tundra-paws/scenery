@@ -19,7 +19,7 @@ import { createSeededRng, smoothstep } from 'threejs-scenes/primitives'
  * side as the walk goes up at dusk, and over the cairn in the night.
  */
 const SKEINS: readonly Line[] = [
-  { over: [ 30, 48 ], bearing: 187, height: 56, after: 0, birds: { mobile: 17, desktop: 27, highEnd: 31 }, longer: -1 },
+  { over: [ 30, 48 ], bearing: 187, height: 56, after: 0, birds: { mobile: 13, desktop: 27, highEnd: 31 }, longer: -1 },
   { over: [ -46, 30 ], bearing: 171, height: 74, after: 45, birds: { mobile: 9, desktop: 15, highEnd: 19 }, longer: -1 },
   { over: [ 22, 52 ], bearing: 198, height: 61, after: 90, birds: { mobile: 9, desktop: 13, highEnd: 15 }, longer: 1 },
 ]

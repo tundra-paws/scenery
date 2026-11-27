@@ -4,32 +4,61 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import { createNoise3D } from 'threejs-scenes/primitives'
 
 import { DARK, createTurfSlope, paint } from '../../shared/roof.ts'
-import { CHIMNEY, EAVE, EAVES, HALF_DEEP, HALF_LONG, INSET, RIDGE, TURF, VERGE, underRoof } from './plan.ts'
+import { CHIMNEY, DOOR_EASE, DOOR_HALF, DOOR_TOP, EAVE, EAVES, HALF_DEEP, HALF_LONG, INSET, RIDGE, TURF, VERGE, WINDOW, underRoof } from './plan.ts'
 
 
 /** The roof, as the shared turf slope reads it. */
 const ROOF = { halfDeep: HALF_DEEP, halfLong: HALF_LONG, eave: EAVE, ridge: RIDGE, turf: TURF, eaves: EAVES, verge: VERGE } as const
 
+/** A spot on a wall's own sheet, to where it is in the house. */
+type Place = (across: number, up: number) => readonly [number, number, number]
+
+/** A wall or an opening on a wall's own sheet: its left, its foot, its right and its head. */
+type Sheet = readonly [number, number, number, number]
+
 /**
- * The inside, seen from outside: a house-shaped block just within the walls'
+ * One flat wall of the core as triangles, less a hole where the house has an
+ * opening. It faces the side from which `across` runs to the right.
+ */
+function wall (corners: number[], [ left, foot, right, head ]: Sheet, hole: Sheet | null, place: Place): void {
+  const pieces: Sheet[] = hole
+    ? [[ left, foot, hole[0], head ], [ hole[2], foot, right, head ], [ hole[0], foot, hole[2], hole[1] ], [ hole[0], hole[3], hole[2], head ]]
+    : [[ left, foot, right, head ]]
+
+  for (const [ from, low, to, high ] of pieces)
+    if (to - from > 0.01 && high - low > 0.01)
+      corners.push(...place(from, low), ...place(to, low), ...place(to, high), ...place(from, low), ...place(to, high), ...place(from, high))
+}
+
+/**
+ * The inside, seen from outside: a house-shaped shell just within the walls'
  * line, from under the ground to under the roof. It is what is dark between
- * the stones, and what keeps the hill from showing through them.
+ * the stones, and what throws the house's shadow. The doorway and the window
+ * are left out of it: through them the room itself is seen (`features/hearth`).
  */
 function createCore (foot: number): THREE.BufferGeometry {
-  const half  = HALF_DEEP - INSET
-  const eave  = underRoof(half) - 0.04
-  const shape = new THREE.Shape()
+  const half    = HALF_DEEP - INSET
+  const long    = HALF_LONG - INSET
+  const eave    = underRoof(half) - 0.04
+  const ridge   = RIDGE - 0.04
+  const corners = [] as number[]
+  const door    = [ -DOOR_HALF - DOOR_EASE, 0, DOOR_HALF + DOOR_EASE, DOOR_TOP + 0.05 ] as const
+  const light   = [ -WINDOW.to, WINDOW.sill, -WINDOW.from, WINDOW.head ] as const
 
-  shape.moveTo(-half, foot)
-  shape.lineTo(half, foot)
-  shape.lineTo(half, eave)
-  shape.lineTo(0, RIDGE - 0.04)
-  shape.lineTo(-half, eave)
-  shape.closePath()
+  wall(corners, [ -long, foot, long, eave ], null, (across, up) => [ -half, up, across ])
+  wall(corners, [ -long, foot, long, eave ], light, (across, up) => [ half, up, -across ])
+  wall(corners, [ -half, foot, half, eave ], null, (across, up) => [ -across, up, -long ])
+  wall(corners, [ -half, foot, half, eave ], door, (across, up) => [ across, up, long ])
 
-  const core = new THREE.ExtrudeGeometry(shape, { depth: (HALF_LONG - INSET) * 2, bevelEnabled: false })
+  // The gables' points, and the two slopes under the turf.
+  corners.push(half, eave, -long, -half, eave, -long, 0, ridge, -long, -half, eave, long, half, eave, long, 0, ridge, long)
+  corners.push(-half, eave, long, 0, ridge, long, 0, ridge, -long, -half, eave, long, 0, ridge, -long, -half, eave, -long)
+  corners.push(half, eave, -long, 0, ridge, -long, 0, ridge, long, half, eave, -long, 0, ridge, long, half, eave, long)
 
-  core.translate(0, 0, INSET - HALF_LONG)
+  const core = new THREE.BufferGeometry()
+
+  core.setAttribute('position', new THREE.Float32BufferAttribute(corners, 3))
+  core.computeVertexNormals()
 
   return paint(core, () => DARK)
 }

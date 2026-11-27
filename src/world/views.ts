@@ -22,6 +22,8 @@ import type { Ground } from './shared/ground.ts'
  * the cairn over it, back down to the water beside the boat at its anchor,
  * her sail up to dry, in under the field, inshore of that sail, looking up
  * its rigs to the gate, the house and the washing on its line beside it,
+ * up over the field to the house's door, which stands open, to look in at
+ * the fire on its hearth, back and
  * in over the field's dyke to the kiln on its shelf and the stacks
  * before the house's door, the path going up between them to the cairn,
  * up over the fold to the mill astride the burn, with the cairn
@@ -71,7 +73,9 @@ import type { Ground } from './shared/ground.ts'
  * between `starlings` and `hero`, which it lies between and looks the way of.
  * When the sail went up `infield` moved in under the field to keep it out of
  * the frame, and lent the leg in from `boat` four tenths of a second of its
- * own leg out, to turn in.
+ * own leg out, to turn in. `hearth` stands between `infield` and `yard` on
+ * time of its own, fifteen and a half seconds: its stop, and two slow legs,
+ * since the camera comes down to a door and turns to look in at it.
  */
 export const VIEWS: readonly View[] = [
   { name: 'hero', at: [ 84, 104 ], height: 5, look: [ 6, 34 ], lookHeight: 12, travel: 5 },
@@ -91,7 +95,8 @@ export const VIEWS: readonly View[] = [
   { name: 'wood', at: [ 74, 66 ], height: 3.2, look: [ 59, 50 ], lookHeight: 3, travel: 3 },
   { name: 'shelter', at: [ 64, 73 ], height: 7, look: [ 50, 58 ], lookHeight: 4, travel: 5 },
   { name: 'boat', at: [ 75, 92 ], height: 2.4, look: [ 48, 86.5 ], lookHeight: 6, travel: 4.4 },
-  { name: 'infield', at: [ 65.5, 81.5 ], height: 4, look: [ 54.5, 68.5 ], lookHeight: 4, travel: 3.1 },
+  { name: 'infield', at: [ 65.5, 81.5 ], height: 4, look: [ 54.5, 68.5 ], lookHeight: 4, travel: 7.6 },
+  { name: 'hearth', at: [ 54.2, 65.5 ], height: 1.6, look: [ 56.5, 56.1 ], lookHeight: 1.2, travel: 6 },
   { name: 'yard', at: [ 55, 77 ], height: 5, look: [ 46.4, 64.7 ], lookHeight: 1.6, travel: 3.5 },
   { name: 'mill', at: [ 43.5, 74.5 ], height: 7.5, look: [ 29, 68 ], lookHeight: 4.5, travel: 4.5 },
   { name: 'flock', at: [ 27, 99 ], height: 3, look: [ 17, 72 ], lookHeight: 3.5, travel: 3 },

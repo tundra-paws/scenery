@@ -9,6 +9,7 @@ import { createEnvironment } from './features/environment/index.ts'
 import { createFlockFeature } from './features/flock/index.ts'
 import { createGeeseFeature } from './features/geese/index.ts'
 import { createGrass } from './features/grass/index.ts'
+import { createHearthFeature } from './features/hearth/index.ts'
 import { createInfieldFeature } from './features/infield/index.ts'
 import { createMillFeature } from './features/mill/index.ts'
 import { createPierFeature } from './features/pier/index.ts'
@@ -57,6 +58,7 @@ export function createFeatures (world: World): Feature[] {
     createShelterFeature(world),
     createInfieldFeature(world),
     createYardFeature(world),
+    createHearthFeature(world),
     createWoodFeature(world),
     createWashingFeature(world),
     createFlockFeature(world),
