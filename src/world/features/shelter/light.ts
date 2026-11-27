@@ -35,7 +35,7 @@ const WARM = new THREE.Color(PALETTE.lamp)
  */
 export function createLightGeometry (): THREE.BufferGeometry {
   const flame = WARM.clone().multiplyScalar(FLAME)
-  const light = new THREE.OctahedronGeometry(0.2).toNonIndexed()
+  const light = new THREE.OctahedronGeometry(0.2)
   const count = light.getAttribute('position').count
   const paint = new Float32Array(count * 3)
 

@@ -24,7 +24,7 @@ The curator works within these and does not rewrite this section.
 **What this place is.** A small northern island that someone walked before you. Nobody is ever
 seen on it, only what they left: stones stacked on the summit, later a path, a shelter, a light.
 A stranger should know it as "the island with the cairn", and now there is a house under it
-with the lamp lit and the fire in, a boat at anchor off the landing with its sail up to
+with the lamp lit and its door open on the fire, a boat at anchor off the landing, its sail up to
 dry, the washing out on a line under the house's low wall, and still nobody.
 Beside the landing a pier of the house's stone runs out to deep water, a round tower of the
 same stone on its head with a lantern that somebody lights at sunset: a small boat in its
@@ -38,12 +38,10 @@ birch, bent by the wind, its leaves mostly gold and coming down; the trees neare
 are stumps, and their logs are stacked under the eave. Below the house is the ground they
 worked: a field of rigs, barley and potatoes, walled round with the stones that came out of it,
 its gate left open; a fold across the path; and the head-dyke that keeps both from the hill,
-running down into the sea. Its sheep are out on the hill: the brae under the cairn and the
-inbye above the landing are flecked with them, white, a few brown or black, some with a lamb at
-foot, each on its own heft and trods; four are penned in the fold. The starlings come and go
-of their own accord: of an evening they come in over the sea from the land beyond,
-wheel over the brae in one cloud through the gold, and pour down into the head-dyke to roost
-as the sun goes; at first light they rise out of the stones and go back over the water. Off
+running down into the sea. Its sheep are out on the hill, the brae and the inbye flecked with them, white, a few
+brown or black, some with a lamb at foot; four are penned in the fold. The starlings come in
+over the sea of an evening, wheel over the brae in one cloud, and roost in the head-dyke.
+Higher, skeins of wild geese go over, bound south, and do not stop. Off
 the east shore is a skerry the tide never covers: someone stacked a small mark on it, and seals
 haul out on its slabs, nobody's, and never nearer than that. It lies off a mountain coast: a high fell and a long range in the
 haze to the north-west, which nobody goes to, and which the sun goes down behind.
@@ -124,19 +122,22 @@ high the sun stands. At night the light is the moon's cold blue-white, which the
 - *The starlings.* One cloud, never a bird you can pick out: it folds, stretches and darkens
   where they bunch. In after noon, into the walls at sunset in a coiling stream, away at
   first light.
+- *The geese.* The year's back end, overhead: a ragged chevron behind one bird, out of
+  the north and gone over the bay. Nobody's.
 - *The seals.* The flock's opposite number on the sea: pale lumps on dark rock, breathing;
-  one looks round, one shows its head in the water and is gone. Two faceted lumps.
+  one looks round, one shows its head in the water and is gone.
 - *The fishing.* Gear left to dry, never anyone at it: a pier laid like a house wall, a
   light on its head, nets that stir, creels, fish on a rack, a boat to row out in. Gulls
-  ride the wind over the bay and stand on its posts by dark: four faceted lumps each.
+  ride the wind over the bay and stand on its posts by dark.
 - *Fresh water.* One burn, found by the land's fall: white where it is steep, a pool by
   the fold, spread over the sand at its mouth.
 - *Work left running.* The mill turns, the kiln smokes, the gate stands open, a stack is
-  half built with the sledge beside it: somebody is about, and is never seen. What they
-  built is the house's kind: stone in level courses, turf over it.
+  half built with the sledge beside it: somebody is about, and is never seen.
+- *Inside.* A room is lit by its own fire and by the day at its door, never by the sun:
+  amber at the hearth, dim and cooler by the door. What is in it is what somebody uses.
 - *The year.* The back end of it, turning with the work: harvest, the birches gold from the
   outside of the wood in, their leaves torn off by the wind and lying under them, the
-  bracken gone to rust. A stack is a beehive of straw on a ring of stones.
+  bracken gone to rust.
 - *The sward.* Grass by the blade where the visitor stands; far off, the land's grain.
 - *Facets for form, grain for surface.* Low-poly and flat-shaded, few colours; a texture on
   every surface: noise in the shader, never a photograph, grain and relief and no colour.
@@ -146,7 +147,7 @@ ruins of anything grand, no magic glow. Not busy: every added thing must leave t
 quiet as it found it. Not photoreal: its textures stop at grain.
 
 **The chapters ahead.** Each is one day's major update. The journal holds the ones done;
-the last was a light at the pier's head. Next: the insides, and what a shower leaves.
+the last was the fire in and the geese over. Next: the other insides, and what a shower leaves.
 
 ## Where it starts
 
