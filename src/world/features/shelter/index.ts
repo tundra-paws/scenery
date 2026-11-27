@@ -27,7 +27,8 @@ function free (mesh: THREE.Mesh | null): void {
 /**
  * The shelter: a low house of placed stone under a turf roof, on the shoulder
  * above the path's first hairpin, with a lamp in its doorway and a fire in
- * its hearth.
+ * its hearth. Its door stands open and its window is a hole in the wall:
+ * the room they show is `features/hearth`.
  *
  * The first built thing on the island, and still nobody is seen: only the
  * light they left burning and the smoke of their fire, which leans with the
@@ -147,6 +148,6 @@ export function createShelterFeature (world: World): Feature {
 }
 
 // perf: cheap — four draw calls and two shadow passes: the stones (17k
-// triangles), the body, the unlit openings and the smoke. One point light
+// triangles), the body, the lamp's flame and the smoke. One point light
 // without a shadow. A step moves the smoke's puffs (`smoke.ts`) and sets two
 // numbers on the lamp.

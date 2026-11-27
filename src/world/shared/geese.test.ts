@@ -67,7 +67,7 @@ describe('the geese', () => {
         expect(Math.abs(seen.y)).toBeLessThan(0.96)
 
         // In the sky, over the island's own skyline.
-        expect(seen.y).toBeGreaterThan(0.35)
+        expect(seen.y).toBeGreaterThan(0.12)
       }
     }
   })

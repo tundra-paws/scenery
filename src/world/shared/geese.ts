@@ -12,14 +12,14 @@ import { createSeededRng, smoothstep } from 'threejs-scenes/primitives'
  * how many birds are in it.
  *
  * Typed in, like the starlings' wheel, because the first was chosen by
- * looking: at second ten it is high in the right of `hero`, over the moor
- * behind the house and under the big cloud, a chevron coming on toward the
- * bay with its longer arm to the east (`geese.test.ts` holds it in that
- * frame). The other two come over later on lines of their own: down the west
- * side as the walk goes up at dusk, and over the cairn in the night.
+ * looking: at second ten it is coming on over the island straight at `hero`,
+ * south-east for the bay, so the frame has it as a chevron, point up, in the
+ * open sky between the cairn and the big cloud (`geese.test.ts` holds it in
+ * that frame). The other two come over later on lines of their own: down
+ * the west side, and over the brae.
  */
 const SKEINS: readonly Line[] = [
-  { over: [ 30, 48 ], bearing: 187, height: 56, after: 0, birds: { mobile: 13, desktop: 27, highEnd: 31 }, longer: -1 },
+  { over: [ 40, 51 ], bearing: 132, height: 52, after: 0, birds: { mobile: 15, desktop: 27, highEnd: 31 }, longer: -1 },
   { over: [ -46, 30 ], bearing: 171, height: 74, after: 45, birds: { mobile: 9, desktop: 15, highEnd: 19 }, longer: -1 },
   { over: [ 22, 52 ], bearing: 198, height: 61, after: 90, birds: { mobile: 9, desktop: 13, highEnd: 15 }, longer: 1 },
 ]
@@ -41,7 +41,7 @@ const DWINDLE    = 170
 export const SPEED = 11.5
 
 /** From one bird to the next along an arm of the chevron, and how far the arm lies back from square to the way they go, in radians. */
-const GAP   = 3.5
+const GAP   = 4.6
 const SWEEP = 0.98
 
 /** The share of a skein on its longer arm. A chevron of geese is never even. */

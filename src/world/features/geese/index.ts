@@ -14,6 +14,9 @@ import type { Feature, World } from '../../world.ts'
 /** The lumps a goose is drawn in: its body, its neck held out before it, and a wing each side. */
 const LUMPS = 4
 
+/** How much over life-size a goose is drawn: they are only ever seen from far below, and a skein has to read as birds. */
+const DRAWN = 1.3
+
 /**
  * A goose's measures, for a bird of size 1. Its body and its neck, each as
  * half its width, half its height and half its length; and a wing: half its
@@ -76,7 +79,7 @@ function fly (mesh: THREE.InstancedMesh, geese: Geese, time: number): void {
   for (const skein of geese.skeins)
     for (const goose of skein.birds) {
       geese.at(skein, goose, time, held)
-      poseGoose(mesh, index, skein.yaw, goose.size * held.shown, held)
+      poseGoose(mesh, index, skein.yaw, goose.size * held.shown * DRAWN, held)
       index += LUMPS
     }
 
@@ -138,5 +141,5 @@ export function createGeeseFeature (world: World): Feature {
 }
 
 // perf: cheap — one draw call (two with the sea's mirror, off a phone) and no
-// shadow pass: 32 triangles a bird, 1.6k for the 51 on desktop, 1k for a
+// shadow pass: 32 triangles a bird, 1.8k for the 55 on desktop, 1k for a
 // phone's 33. A step is four sines and four matrices a bird.
