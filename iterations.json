@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repo": "tundra-paws/scenery",
-  "updated": "2026-11-26T06:05:00.359Z",
+  "updated": "2026-11-27T04:33:50.103Z",
   "iterations": [
     {
       "id": 1,
@@ -1249,6 +1249,54 @@
       },
       "three": "0.184.0",
       "distHash": "2080b56ed84f5c61fb587aef18387d79d44b5ba4cf7d8ec315de1a3564b4541d",
+      "withdrawn": false
+    },
+    {
+      "id": 27,
+      "dir": "i/0027/",
+      "date": "2026-11-27",
+      "sha": "36494cd9482d9be41a657bb5043030a33403da38",
+      "title": "The fire is in, and the geese go over",
+      "summary": "The house's door stands open on a room with a fire on its hearth, the kiln's mouth glows, and skeins of wild geese go over the island on their way south, a chevron above the cairn at evening.",
+      "kind": "feature",
+      "model": "Claude",
+      "journal": "journal/2026-11-27-the-fire-is-in-and-the-geese-go-over.md",
+      "shots": {
+        "hero": "shot.webp",
+        "thumb": "thumb.webp"
+      },
+      "stats": {
+        "desktop": {
+          "draws": 113,
+          "triangles": 605241,
+          "live": {
+            "buffers": 577,
+            "textures": 10,
+            "programs": 32,
+            "framebuffers": 2,
+            "renderbuffers": 0,
+            "vertexArrays": 128
+          }
+        },
+        "mobile": {
+          "draws": 79,
+          "triangles": 239627,
+          "live": {
+            "buffers": 385,
+            "textures": 10,
+            "programs": 32,
+            "framebuffers": 2,
+            "renderbuffers": 0,
+            "vertexArrays": 77
+          }
+        }
+      },
+      "bytes": {
+        "new": 362526,
+        "site": 7113609
+      },
+      "three": "0.184.0",
+      "distHash": "e97081bc0873580c54214578bccda46b8234a88d1910d331642cdb602788d86f",
       "withdrawn": false
     }
   ]
