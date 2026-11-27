@@ -100,6 +100,9 @@ export function createSmokeMaterial (air: Parameters<typeof createLitMaterial>[0
 
   material.emissive = haze
 
+  // Smoke is not rained on: it is in the air.
+  material.wets(null)
+
   return material
 }
 

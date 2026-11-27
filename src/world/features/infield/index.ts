@@ -12,7 +12,7 @@ import { sowBarley } from './barley.ts'
 import { layDyke } from './dyke.ts'
 import type { Dyke } from './dyke.ts'
 import { hangGate } from './gate.ts'
-import { ploughRigs } from './rigs.ts'
+import { ploughRigs, wetRigs } from './rigs.ts'
 import { standStooks } from './stooks.ts'
 
 
@@ -92,6 +92,7 @@ export function createInfieldFeature (world: World): Feature {
       // where it was turned (before the crop on it bows), the gate's boards along their rails.
       stone.finish(stonework(inWorld(world.quality.tier)))
       earth.finish(tilth(inItself(world.quality.tier)))
+      wetRigs(earth, world.weather, world.day.nodes)
       wood.finish(timber(inItself(world.quality.tier)))
 
       // Hundreds of stones, each a few pixels: twenty facets apiece on every
@@ -102,6 +103,8 @@ export function createInfieldFeature (world: World): Feature {
 
       const field = ploughRigs(earth, rng.fork('infield:rigs'), ground, grid, infield, wind)
       const ears  = createLitMaterial(world, { name: 'infield-barley', flatShading: false, side: THREE.DoubleSide })
+
+      ears.sheds()
 
       rigs   = field.mesh
       barley = sowBarley(field.ears, ears, rng.fork('infield:barley'), world.quality.tier, wind)

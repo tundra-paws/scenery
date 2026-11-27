@@ -181,6 +181,8 @@ export function createLine (world: World): Line {
   // The sail's material, made as the sail's is, and so its program.
   const material = createLitMaterial(world, { name: 'washing', vertexColors: true, side: THREE.DoubleSide })
 
+  material.sheds()
+
   material.letThrough(THROUGH)
 
   const mesh = new THREE.Mesh(geometry, material)

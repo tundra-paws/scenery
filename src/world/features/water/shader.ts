@@ -1,6 +1,6 @@
 // src/world/features/water/shader.ts
 import * as THREE from 'three'
-import { Fn, If, abs, cameraPosition, clamp, distance, dot, exp, float, fract, fwidth, length, max, min, mix, normalize, positionWorld, pow, select, sin, smoothstep, texture, uniform, varying, vec2, vec3, vec4 } from 'three/tsl'
+import { Fn, If, abs, cameraPosition, clamp, distance, dot, exp, float, fract, fwidth, length, max, min, mix, mx_noise_float, normalize, positionWorld, pow, select, sin, smoothstep, texture, uniform, varying, vec2, vec3, vec4 } from 'three/tsl'
 import { NodeMaterial } from 'three/webgpu'
 import type { Node } from 'three/webgpu'
 
@@ -14,6 +14,7 @@ import { developed, hazed } from '../../shared/output.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { swellNode } from '../../shared/swell.ts'
 import type { Wash } from '../../shared/wash.ts'
+import type { Weather } from '../../shared/weather.ts'
 import type { Wind } from '../../shared/wind.ts'
 import type { Mirror } from './mirror.ts'
 import type { WashMap } from './wash.ts'
@@ -89,12 +90,23 @@ const LAMP_TILT = 90
 const LAMP_DASH = 4.6
 const LEE       = 16
 
+/**
+ * Rain on the sea: how much of a gust's roughness it gives the water
+ * under a shower, the pitch and pace of the pocks it pricks in it (rings a
+ * hand across, each a moment), and how much of the foam's white they are.
+ */
+const PELT       = 0.85
+const POCK       = 2.6
+const POCK_PACE  = 7
+const POCK_WHITE = 0.5
+
 /** What the sea is made from: the air over it, what stands in it, the land under it, and its own mirror and clock. */
 export interface SeaOptions {
-  wind:   Wind
-  clouds: CloudShadow
-  day:    Daylight
-  wash:   Wash
+  wind:    Wind
+  clouds:  CloudShadow
+  day:     Daylight
+  wash:    Wash
+  weather: Weather
 
   /** The land's height over the water, on the terrain's own grid. */
   ground: HeightMap
@@ -128,7 +140,7 @@ function fade (from: number | Node<'float'>, to: number | Node<'float'>, value: 
  * and the swell that tilt it, the world it gives back, the foam on every
  * shore and round everything that stands in it, and the haze far out.
  */
-export function createSeaMaterial ({ wind, clouds, day, wash, ground, standing, mirror, time }: SeaOptions): NodeMaterial {
+export function createSeaMaterial ({ wind, clouds, day, wash, weather, ground, standing, mirror, time }: SeaOptions): NodeMaterial {
   const [ windX, windZ ] = wind.direction
   const lee              = vec2(windX, windZ)
   const now              = heldFloat(time)
@@ -306,7 +318,8 @@ export function createSeaMaterial ({ wind, clouds, day, wash, ground, standing, 
     const slick = fade(hullSize.y, hullSize.y.mul(3), abs(local.y))
       .mul(smoothstep(hullSize.x.mul(0.5), hullSize.x.negate(), local.x))
       .mul(fade(LEE * 0.4, LEE, local.x.negate()))
-    const gust  = even.mul(slick.mul(-0.8).add(1))
+    const pelted = weather.nodes.rainOn(at)
+    const gust   = max(even.mul(slick.mul(-0.8).add(1)), pelted.mul(PELT))
 
     // How much water lies over the land here.
     const depth = texture(ground.texture, at.mul(ground.scale).add(0.5)).r.negate()
@@ -379,7 +392,13 @@ export function createSeaMaterial ({ wind, clouds, day, wash, ground, standing, 
     const veil  = max(reflectance, min(murk.mul(2), 1))
     const alpha = mix(1 - CLEAR, 1, veil).mul(smoothstep(0, pixel.mul(2).add(SHALLOWS), depth))
 
-    const foam = foamOn({ at, depth, pixel, local, gust, swell: swell.x, chop: along.add(aside) })
+    // Under a shower the sea is pocked: a ring for every drop, which near
+    // to are flecks of white and far off only the roughness they leave.
+    const pocks = smoothstep(0.62, 0.8, mx_noise_float(vec3(at.mul(POCK), now.mul(POCK_PACE))))
+      .mul(fade(0.04, 0.25, length(fwidth(at)).mul(POCK)))
+      .mul(pelted)
+      .mul(POCK_WHITE)
+    const foam  = max(foamOn({ at, depth, pixel, local, gust, swell: swell.x, chop: along.add(aside) }), pocks)
 
     // Developed like the land, then the haze by hand: the same fog as the
     // land's, but into the sky's colour in the direction looked in, so toward

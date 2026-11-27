@@ -120,8 +120,11 @@ export function createFall (world: World, rng: SeededRng): Fall {
   const count          = COUNT[world.quality.tier]
   const leaves: Leaf[] = []
   const material       = createLitMaterial(world, { name: 'leaves' })
-  const mesh           = new THREE.InstancedMesh(createLeafGeometry(), material, count)
-  const aside          = [ -wind.direction[1], wind.direction[0] ] as const
+
+  material.sheds()
+
+  const mesh  = new THREE.InstancedMesh(createLeafGeometry(), material, count)
+  const aside = [ -wind.direction[1], wind.direction[0] ] as const
 
   for (let index = 0; index < count; index += 1) {
     const tree = trees[Math.floor(rng.next() * trees.length)]!

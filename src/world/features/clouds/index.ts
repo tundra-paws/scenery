@@ -7,11 +7,12 @@ import { createCloudShadowTexture } from '../../shared/cloud-shadow.ts'
 import type { Blot } from '../../shared/cloud-shadow.ts'
 import { disposeInstances } from '../../shared/instances.ts'
 import { keepOutOfMirror } from '../../shared/mirror.ts'
+import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
 import { PUFF_FLOOR, layOutClouds } from './layout.ts'
 import { createCloudMaterial } from './material.ts'
 import { createRainGeometry, createRainMaterial } from './rain.ts'
-import { layOutShowers } from './showers.ts'
+import { layOutPassing, layOutShowers } from './showers.ts'
 
 
 /**
@@ -84,7 +85,8 @@ export function createClouds (world: World): Feature {
 
     build ({ scene, rng }) {
       const { wind } = world
-      const showers  = layOutShowers({ rng: rng.fork('clouds:showers'), count: SHOWERS, along: wind.direction, drift: wind.driftAt(POSTCARD) })
+      const drift    = wind.driftAt(POSTCARD)
+      const showers  = [ ...layOutShowers({ rng: rng.fork('clouds:showers'), count: SHOWERS, along: wind.direction, drift }), layOutPassing({ rng: rng.fork('clouds:showers'), along: wind.direction, drift }) ]
       const clouds   = [ ...layOutClouds({ rng: rng.fork('clouds:layout'), count: COUNT, along: wind.direction }), ...showers ]
       const puffs    = clouds.reduce((sum, cloud) => sum + cloud.puffs.length, 0)
 
@@ -131,6 +133,7 @@ export function createClouds (world: World): Feature {
       shadow = createCloudShadowTexture(blots, SHADOW_SIDE[world.quality.tier])
 
       world.clouds.cover(shadow)
+      world.weather.fall(showers)
 
       rain               = new THREE.Mesh(createRainGeometry(showers, rng.fork('clouds:rain')), createRainMaterial(wind.nodes, world.day.nodes, wind.direction))
       rain.name          = 'rain'
@@ -144,7 +147,12 @@ export function createClouds (world: World): Feature {
       scene.add(mesh, rain)
     },
 
+    update (_state, frame) {
+      world.weather.step(frame.frame * STEP)
+    },
+
     dispose () {
+      world.weather.fall([])
       disposeInstances(mesh)
       rain?.geometry.dispose()
 

@@ -156,6 +156,8 @@ export function createTufts (world: World): Feature {
 
       const material = createLitMaterial(world, { name: 'tuft', flatShading: false, side: THREE.DoubleSide })
 
+      material.sheds()
+
       swayInWind(material, world.wind)
 
       mesh = new THREE.InstancedMesh(geometry, material, spots.length)

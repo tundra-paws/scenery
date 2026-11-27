@@ -15,6 +15,14 @@ import type { Cloud, Puff } from './layout.ts'
  */
 export const OPENING = { x: -334, z: 82 } as const
 
+/**
+ * Where the shower that has just gone over the island is at second ten:
+ * some twenty seconds downwind of it, across its northern half, so that
+ * from `hero` its rain still trails behind the wood at the picture's right
+ * and everything it crossed is wet. Typed in, like `OPENING`.
+ */
+export const PASSED = { x: -17, z: -178 } as const
+
 /** World height of a shower's flat underside: lower and heavier than the fair-weather clouds over it. */
 export const SHOWER_BASE = 78
 
@@ -96,6 +104,21 @@ function heap (rng: SeededRng, along: readonly [number, number], length: number)
   return [ ...row, ...crown ]
 }
 
+/** A shower grown from a stream at a place: the row of puffs, and the ground its rain falls on. */
+function grow (shape: SeededRng, along: readonly [number, number], x: number, z: number): Shower {
+  const length = shape.range(LENGTH[0], LENGTH[1])
+
+  return { x, y: SHOWER_BASE + shape.range(-4, 6), z, puffs: heap(shape, along, length), row: along, reach: [ length * 0.46, length * GIRTH * 0.62 ]}
+}
+
+/**
+ * The shower that has just gone over: put where it is at second ten
+ * (`PASSED`), from a stream of its own, so the others are the ones they were.
+ */
+export function layOutPassing ({ rng, along, drift }: Omit<ShowerOptions, 'count'>): Shower {
+  return grow(rng.fork('passed'), along, wrapped(PASSED.x - drift[0]), wrapped(PASSED.z - drift[1]))
+}
+
 /**
  * Where the showers are, over the whole of the weather's square, before the
  * wind has moved them.
@@ -111,20 +134,14 @@ export function layOutShowers ({ rng, count, along, drift }: ShowerOptions): Sho
   const shape = rng.fork('shape')
   const half  = WEATHER_SPAN / 2
 
-  const grow = (x: number, z: number): Shower => {
-    const length = shape.range(LENGTH[0], LENGTH[1])
-
-    return { x, y: SHOWER_BASE + shape.range(-4, 6), z, puffs: heap(shape, along, length), row: along, reach: [ length * 0.46, length * GIRTH * 0.62 ]}
-  }
-
-  const showers = count > 0 ? [ grow(wrapped(OPENING.x - drift[0]), wrapped(OPENING.z - drift[1])) ] : []
+  const showers = count > 0 ? [ grow(shape, along, wrapped(OPENING.x - drift[0]), wrapped(OPENING.z - drift[1])) ] : []
 
   for (let tries = 0; showers.length < count && tries < count * PATIENCE; tries += 1) {
     const x = place.range(-half, half)
     const z = place.range(-half, half)
 
     if (Math.hypot(wrapped(x + drift[0]), wrapped(z + drift[1])) > OFFSHORE && showers.every(shower => apart(shower.x, shower.z, x, z) > APART))
-      showers.push(grow(x, z))
+      showers.push(grow(shape, along, x, z))
   }
 
   return showers

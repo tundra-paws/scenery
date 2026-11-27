@@ -13,7 +13,7 @@ import type { Feature, World } from '../../world.ts'
 import { describeLand, textureLand } from './land.ts'
 import { createPathWear, wearPath } from './wear.ts'
 import type { PathWear } from './wear.ts'
-import { wetTheShore } from './wet.ts'
+import { poolTheRain, wetTheShore } from './wet.ts'
 import type { WetShore } from './wet.ts'
 
 
@@ -102,7 +102,7 @@ export function createTerrain (world: World): Feature {
 
       wear = createPathWear(world.path, world.quality.tier, [ world.shelter.spur, world.infield.track, world.mill.spur, ...world.yard.ways, world.pier.way ], traceTrods(world, world.seed))
 
-      wearPath(material, wear, land.grit)
+      poolTheRain(material, world.weather, world.day.nodes, wearPath(material, wear, land.grit), land.stony)
       shore = wetTheShore(material, world.wind, ground.waterLevel)
       openTheFloor(material, world.shelter)
 

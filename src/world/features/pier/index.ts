@@ -92,7 +92,10 @@ export function createPierFeature (world: World): Feature {
 
       // The gulls are lit as the starlings are, a plain material with a
       // colour to each lump, and so are drawn with their program.
-      gulls = createFlight(createGulls(pier, findPerches(pier), world.wind.direction, world.seed, quality.tier), createLitMaterial(world, { name: 'pier-gulls' }))
+      const feathers = createLitMaterial(world, { name: 'pier-gulls' })
+
+      feathers.sheds()
+      gulls = createFlight(createGulls(pier, findPerches(pier), world.wind.direction, world.seed, quality.tier), feathers)
 
       if (phone)
         keepOutOfMirror(gulls.mesh)

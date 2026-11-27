@@ -122,6 +122,8 @@ export function createStarlingsFeature (world: World): Feature {
       const starlings                    = createStarlings({ ground, infield }, world.seed, quality.tier)
       const material                     = createLitMaterial(world, { name: 'starlings' })
 
+      material.sheds()
+
       const wings = new THREE.InstancedMesh(createWingGeometry(), material, starlings.birds.length * 2)
 
       wings.name          = 'starlings'

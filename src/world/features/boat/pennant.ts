@@ -90,6 +90,8 @@ export function createPennant (world: World): Pennant {
 
   const material = createLitMaterial(world, { name: 'pennant', color: PALETTE.pennant, side: THREE.DoubleSide })
 
+  material.sheds()
+
   const mesh = new THREE.Mesh(geometry, material)
 
   mesh.name = 'pennant'

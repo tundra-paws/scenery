@@ -183,6 +183,8 @@ export function createSail (world: World): Sail {
 
   const material = createLitMaterial(world, { name: 'sail', vertexColors: true, side: THREE.DoubleSide })
 
+  material.sheds()
+
   material.letThrough(THROUGH)
 
   const mesh = new THREE.Mesh(geometry, material)

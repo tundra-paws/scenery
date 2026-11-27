@@ -4,7 +4,7 @@ import { abs, cameraPosition, clamp, dot, fwidth, max, mix, mx_noise_float, norm
 import { NodeMaterial } from 'three/webgpu'
 import type { Node } from 'three/webgpu'
 
-import type { Burn } from '../../shared/burn.ts'
+import type { Reach } from '../../shared/burn.ts'
 import type { CloudShadow } from '../../shared/cloud-shadow.ts'
 import type { Daylight } from '../../shared/daylight.ts'
 import type { HeightGrid } from '../../shared/height-grid.ts'
@@ -43,6 +43,12 @@ interface StreamOptions {
 
   /** The world's time, set each step. */
   time: Held<number>
+
+  /** How much of the water there is at a vertex, from what it says of itself (`aBurn`): all of it, unless it is only there after rain. */
+  shown?: (said: Node<'vec4'>) => Node<'float'>
+
+  /** What rain adds to the fall it breaks white at: a stream in spate is whiter where it was clear. */
+  spate?: Node<'float'>
 }
 
 /**
@@ -56,14 +62,17 @@ interface StreamOptions {
  * far across it is, how fast the land falls there, and how far down it is.
  * `churned` is what a wheel adds to that fall, a distance down the burn:
  * water that has been thrown at one runs on as white as if it had fallen.
+ * `basin` is the width of the kerbed pool at its head: none for a rill.
  */
-export function createStreamGeometry (burn: Burn, grid: HeightGrid, churned: (along: number) => number = () => 0): THREE.BufferGeometry {
+type CreateStreamGeometryProps = { reaches: readonly Reach[] }
+
+export function createStreamGeometry ({ reaches }: CreateStreamGeometryProps, grid: HeightGrid, churned: (along: number) => number = () => 0, basin = BASIN): THREE.BufferGeometry {
   const position: number[] = []
   const said: number[]     = []
   const index: number[]    = []
 
-  burn.reaches.forEach((reach, row) => {
-    const half   = Math.max(reach.half, BASIN * (1 - reach.along / BASIN_LONG))
+  reaches.forEach((reach, row) => {
+    const half   = Math.max(reach.half, basin * (1 - reach.along / BASIN_LONG))
     const middle = grid.heightAt(reach.x, reach.z)
 
     for (const across of ACROSS) {
@@ -109,11 +118,11 @@ export function createStreamGeometry (burn: Burn, grid: HeightGrid, churned: (al
  * everything else. It thins out at its banks, and is lost in the sea at its
  * mouth.
  */
-export function createStreamMaterial ({ clouds, day, level, time }: StreamOptions): NodeMaterial {
+export function createStreamMaterial ({ clouds, day, level, time, shown: present, spate }: StreamOptions): NodeMaterial {
   const { nodes } = day
   const said      = vec4Attribute('aBurn')
   const across    = said.y
-  const fall      = said.z
+  const fall      = spate ? said.z.add(spate) : said.z
   const peat      = uniform(new THREE.Color(PALETTE.waterDeep).multiplyScalar(PEAT)) as unknown as Node<'vec3'>
   const white     = uniform(new THREE.Color(PALETTE.foam)) as unknown as Node<'vec3'>
 
@@ -154,12 +163,13 @@ export function createStreamMaterial ({ clouds, day, level, time }: StreamOption
 
   const edge  = smoothstep(0.8, 1, side).oneMinus()
   const sea   = smoothstep(level + DROWNS[0], level + DROWNS[1], positionWorld.y)
+  const there = present ? edge.mul(sea).mul(present(said)) : edge.mul(sea)
   const shown = hazed(developed(mix(water, white.mul(nodes.seaTint).mul(mix(0.6, 1, light)), foam)), nodes.horizon)
 
   const material = new NodeMaterial()
 
   material.name                = 'burn'
-  material.fragmentNode        = vec4(shown, edge.mul(sea))
+  material.fragmentNode        = vec4(shown, there)
   material.transparent         = true
   material.depthWrite          = false
   material.fog                 = false

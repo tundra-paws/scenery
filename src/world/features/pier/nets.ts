@@ -105,6 +105,9 @@ export function createNets (world: World, ground: Ground, lay: SeededRng, colour
 
   // The pennant's material in another colour, and so its program: cloth seen from both sides.
   const material = createLitMaterial(world, { name: 'nets', color: colour, side: THREE.DoubleSide })
+
+  material.sheds()
+
   const mesh     = new THREE.Mesh(geometry, material)
 
   // Like the pennant it takes no shadow from the map: that would be a program of its own.

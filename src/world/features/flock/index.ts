@@ -125,6 +125,8 @@ function poseOne ({ flock, fleece, heads, legs }: Herd, { grid }: World, sheep: 
 function herdMesh (world: World, name: string, geometry: THREE.BufferGeometry, count: number, shadow: boolean): THREE.InstancedMesh {
   const material = createLitMaterial(world, { name })
 
+  material.sheds()
+
   material.finish(wool(inItself(world.quality.tier)))
 
   const mesh = new THREE.InstancedMesh(geometry, material, count)

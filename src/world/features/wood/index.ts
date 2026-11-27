@@ -100,6 +100,8 @@ export function createWoodFeature (world: World): Feature {
 
       const material = createLitMaterial(world, { name: 'wood', vertexColors: true, flatShading: false })
 
+      material.sheds()
+
       swayInWind(material, wind)
 
       // Bark and leaves in one material: a vertex that flutters is a leaf,

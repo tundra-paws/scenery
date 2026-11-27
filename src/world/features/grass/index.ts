@@ -39,6 +39,8 @@ export function createGrass (world: World): Feature {
       const map      = createSward(world)
       const material = createLitMaterial(world, { name: 'grass', flatShading: false, side: THREE.DoubleSide })
 
+      material.sheds()
+
       growGrass(material, { sward: map, wind: world.wind, tier, centre })
 
       sward              = map.texture

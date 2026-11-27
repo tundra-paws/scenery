@@ -138,13 +138,14 @@ export function createPathWear (path: Path, tier: QualityTier, spurs: readonly (
 /**
  * Let a ground material show the path: bare earth down its middle, gritty
  * with the land's own grain (`grit`), yellowed grass beside it, and the
- * sheep's trods fainter than either.
+ * sheep's trods fainter than either. Says back how much a fragment is on
+ * the bare path, where the rain stands in puddles (`wet.ts`).
  *
  * The picture holds distance from the path, not the path, so the edge is
  * found between texels the way a distance-field font's is and stays clean
  * however coarse the terrain's own grid is on this tier.
  */
-export function wearPath (material: LitMaterial, wear: PathWear, grit: Node<'float'>): void {
+export function wearPath (material: LitMaterial, wear: PathWear, grit: Node<'float'>): Node<'float'> {
   const frame = uniform(wear.frame)
   const worn  = texture(wear.texture, positionWorld.xz.sub(frame.xy).mul(frame.zw))
   const bare  = uniform(new THREE.Color(PALETTE.path)).mul(grit.mul(GRAVEL).add(1))
@@ -155,18 +156,20 @@ export function wearPath (material: LitMaterial, wear: PathWear, grit: Node<'flo
   const pathEdge = max(fwidth(pathAway), 0.05)
   const trodAway = worn.g.oneMinus().mul(TROD_REACH)
   const trodEdge = max(fwidth(trodAway), 0.08)
+  const onPath   = smoothstep(pathEdge.oneMinus(), pathEdge.add(1), pathAway).oneMinus()
 
   material.dye(colour => {
     const verged = mix(colour, verge, smoothstep(1, VERGE, pathAway).oneMinus()
       .mul(turf)
       .mul(VERGE_TINT))
-    const walked = mix(verged, bare, smoothstep(pathEdge.oneMinus(), pathEdge.add(1), pathAway).oneMinus()
-      .mul(BARE))
+    const walked = mix(verged, bare, onPath.mul(BARE))
 
     return mix(walked, bare, smoothstep(trodEdge.oneMinus(), trodEdge.add(1), trodAway).oneMinus()
       .mul(turf)
       .mul(TROD_BARE))
   })
+
+  return onPath
 }
 
 // perf: cheap — one two-channel texture of at most 160, 256 or 384 texels a

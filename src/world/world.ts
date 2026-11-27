@@ -36,6 +36,8 @@ import { createWash } from './shared/wash.ts'
 import type { Wash } from './shared/wash.ts'
 import { createWashing } from './shared/washing.ts'
 import type { Washing } from './shared/washing.ts'
+import { createWeather } from './shared/weather.ts'
+import type { Weather } from './shared/weather.ts'
 import { createWind } from './shared/wind.ts'
 import type { Wind } from './shared/wind.ts'
 import { createWood } from './shared/wood.ts'
@@ -99,6 +101,9 @@ export interface World {
   wind:   Wind
   clouds: CloudShadow
   day:    Daylight
+
+  /** The showers, where each is now, and how wet the island is from those that have crossed it. */
+  weather: Weather
 
   /** The land on the horizon, which the sun goes down behind. */
   beyond: readonly Land[]
@@ -168,6 +173,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     grid:    createHeightGrid(ground, GRID_SEGMENTS[quality.tier]),
     wind,
     clouds:  createCloudShadow(wind),
+    weather: createWeather(wind),
     beyond,
     day:     createDaylight(createSkyline(beyond)),
     shelter,

@@ -1,6 +1,6 @@
 // src/world/features/terrain/land.ts
 import * as THREE from 'three'
-import { clamp, mix, mx_noise_float, normalLocal, positionLocal, positionWorld, smoothstep, uniform } from 'three/tsl'
+import { clamp, max, mix, mx_noise_float, normalLocal, positionLocal, positionWorld, smoothstep, uniform } from 'three/tsl'
 import type { Node } from 'three/webgpu'
 import { smoothstep as eased } from 'threejs-scenes/primitives'
 
@@ -48,6 +48,9 @@ export interface Land {
   surface:  Surface
   position: Node<'vec3'>
   grit:     Node<'float'>
+
+  /** How much of it is not grown over: rock, and the sand under the turf's line. */
+  stony: Node<'float'>
 }
 
 /** A palette colour as a node. */
@@ -168,6 +171,8 @@ export function textureLand (world: World): Land {
       .mul(land.w))),
 
     grit: fine.mul(0.6).add(finest.mul(0.4)),
+
+    stony: max(bare, turfed.oneMinus()),
   }
 }
 

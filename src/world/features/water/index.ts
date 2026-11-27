@@ -51,7 +51,7 @@ export function createWater (world: World): Feature {
       ground   = heights.texture
       wash     = washMap.texture
       mirror   = createMirror({ level: world.ground.waterLevel, scale: MIRROR_SCALE[world.quality.tier] })
-      material = createSeaMaterial({ wind: world.wind, clouds: world.clouds, day: world.day, wash: world.wash, ground: heights, standing: washMap, mirror, time })
+      material = createSeaMaterial({ wind: world.wind, clouds: world.clouds, day: world.day, wash: world.wash, weather: world.weather, ground: heights, standing: washMap, mirror, time })
 
       const geometry = new THREE.PlaneGeometry(EXTENT, EXTENT)
 

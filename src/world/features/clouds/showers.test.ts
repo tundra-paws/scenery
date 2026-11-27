@@ -13,7 +13,7 @@ import { findView, resolveView } from '../../views.ts'
 import { WORLD_SEED } from '../../world.ts'
 import { PUFF_FLOOR } from './layout.ts'
 import { STREAKS, createRainGeometry } from './rain.ts'
-import { OPENING, SHOWER_BASE, layOutShowers } from './showers.ts'
+import { OPENING, PASSED, SHOWER_BASE, layOutPassing, layOutShowers } from './showers.ts'
 
 
 /** A place brought back onto the weather's square, centred on the island. */
@@ -130,6 +130,21 @@ describe('the showers', () => {
       for (let offset = -6; offset <= 6; offset += 1)
         for (let distance = 100; distance < Math.hypot(x, z) + 30; distance += 10)
           expect(landHeight(land, bearing + offset, distance)).toBeLessThan(first.y - 40)
+  })
+
+  test('one has just gone over the island: downwind of it at second ten, over it a few seconds before', () => {
+    const passing  = layOutPassing({ rng: createSeededRng(5).fork('test'), along: wind.direction, drift })
+    const [ x, z ] = at(passing, 10)
+
+    expect(x).toBeCloseTo(PASSED.x, 6)
+    expect(z).toBeCloseTo(PASSED.z, 6)
+    expect(x * wind.direction[0] + z * wind.direction[1]).toBeGreaterThan(100 + passing.reach[0])
+    expect(Math.abs(z * wind.direction[0] - x * wind.direction[1])).toBeLessThan(100)
+
+    const [ bx, bz ] = at(passing, -15)
+
+    expect(Math.abs(bx * wind.direction[0] + bz * wind.direction[1])).toBeLessThan(100)
+    expect(passing).toEqual(layOutPassing({ rng: createSeededRng(5).fork('test'), along: wind.direction, drift }))
   })
 })
 

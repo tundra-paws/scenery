@@ -1,15 +1,17 @@
 // src/world/features/infield/rigs.ts
 import * as THREE from 'three'
-import { positionLocal, varying, vec3 } from 'three/tsl'
+import { positionLocal, smoothstep as stepNode, varying, vec3 } from 'three/tsl'
 import type { SeededRng } from 'threejs-scenes'
 import { smoothstep } from 'threejs-scenes/primitives'
 
+import type { DaylightNodes } from '../../shared/daylight.ts'
 import type { Ground } from '../../shared/ground.ts'
 import type { HeightGrid } from '../../shared/height-grid.ts'
 import type { Infield } from '../../shared/infield.ts'
 import type { LitMaterial } from '../../shared/lit.ts'
 import { floatAttribute } from '../../shared/nodes.ts'
 import { PALETTE } from '../../shared/palette.ts'
+import type { Weather } from '../../shared/weather.ts'
 import type { Wind } from '../../shared/wind.ts'
 import { cropBow, sheen } from './barley.ts'
 
@@ -26,6 +28,10 @@ const MARGIN   = 0.55
 
 /** How far from its end a rig takes to rise to its full height. */
 const ROUNDING = 0.8
+
+/** How far into a furrow's sides the standing water reaches (as `aFurrow`, 1 at its bottom), and the wet between which it dries away. */
+const RILL     = [ 0.5, 0.62 ] as const
+const RILL_DRY = [ 0.25, 0.6 ] as const
 
 /** How far the rigs lie over the land, so that the furrows' bottoms never sink into it. */
 const LIFT = 0.05
@@ -112,6 +118,9 @@ interface Plough {
   colour:   number[]
   give:     number[]
   index:    number[]
+
+  /** 1 at the bottom of a furrow, where the rain runs and stands, 0 on the bed. */
+  furrow: number[]
 
   /** Where an ear of barley stands: on the crop of a barley rig, at every vertex of it. */
   ears: number[]
@@ -232,6 +241,7 @@ function plough (out: Plough, grid: HeightGrid, rig: Rig, fall: readonly [number
       if (sown && rig.crop === 'barley' && round > 0.5)
         out.ears.push(x, y - 0.05, z)
       out.give.push(sown ? crop.give * round : 0)
+      out.furrow.push(sown ? 0 : 1)
 
       if (sown)
         tint.set(crop.colour).offsetHSL(0, -crop.dull, crop.light + lay.range(-0.05, 0.05))
@@ -290,7 +300,7 @@ function sway (material: LitMaterial, wind: Wind): void {
 export function ploughRigs (material: LitMaterial, lay: SeededRng, ground: Ground, grid: HeightGrid, infield: Infield, wind: Wind): Field {
   const fall   = fallOf(ground, infield)
   const across = [ -fall[1], fall[0] ] as const
-  const out    = { position: [], colour: [], give: [], index: [], ears: [], stooks: []}
+  const out    = { position: [], colour: [], give: [], furrow: [], index: [], ears: [], stooks: []}
 
   for (const rig of setOut(infield, fall, across, lay))
     plough(out, grid, rig, fall, across, lay)
@@ -300,6 +310,7 @@ export function ploughRigs (material: LitMaterial, lay: SeededRng, ground: Groun
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(out.position, 3))
   geometry.setAttribute('color', new THREE.Float32BufferAttribute(out.colour, 3))
   geometry.setAttribute('aCrop', new THREE.Float32BufferAttribute(out.give, 1))
+  geometry.setAttribute('aFurrow', new THREE.Float32BufferAttribute(out.furrow, 1))
   geometry.setIndex(out.index)
   geometry.computeVertexNormals()
   geometry.computeBoundingSphere()
@@ -312,6 +323,18 @@ export function ploughRigs (material: LitMaterial, lay: SeededRng, ground: Groun
   mesh.receiveShadow = true
 
   return { mesh, ears: out.ears, stooks: out.stooks }
+}
+
+/**
+ * Let the rain at the rigs: the earth darkens and shines with the island's
+ * wet, and down the bottom of every furrow, where the rain runs off the
+ * beds, a thread of water stands that gives back the sky (`shared/lit.ts`).
+ * It is the last of the field to dry.
+ */
+export function wetRigs (material: LitMaterial, weather: Weather, day: DaylightNodes): void {
+  const wet = weather.nodes.wet
+
+  material.wets(wet, day, stepNode(RILL[0], RILL[1], floatAttribute('aFurrow')).mul(stepNode(RILL_DRY[0], RILL_DRY[1], wet)))
 }
 
 // perf: cheap — one draw call, no shadow pass of its own. A dozen rigs of

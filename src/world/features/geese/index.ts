@@ -109,7 +109,12 @@ export function createGeeseFeature (world: World): Feature {
 
       const count = geese.skeins.reduce((sum, skein) => sum + skein.birds.length, 0)
 
-      mesh               = new THREE.InstancedMesh(createLumpGeometry(), createLitMaterial(world, { name: 'geese' }), count * LUMPS)
+      const feathers = createLitMaterial(world, { name: 'geese' })
+
+      // Rain runs off a feather: drawn as the starlings and the gulls are.
+      feathers.sheds()
+
+      mesh               = new THREE.InstancedMesh(createLumpGeometry(), feathers, count * LUMPS)
       mesh.name          = 'geese'
       mesh.castShadow    = false
       mesh.receiveShadow = false
