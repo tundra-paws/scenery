@@ -40,7 +40,7 @@ its gate left open; a fold across the path; and the head-dyke that keeps both fr
 running down into the sea. Its sheep are out on the hill, the brae and the inbye flecked with them, white, a few
 brown or black, some with a lamb at foot; four are penned in the fold. The starlings come in
 over the sea of an evening, wheel over the brae in one cloud, and roost in the head-dyke.
-Higher, skeins of wild geese go over, bound south, and do not stop. Off
+Higher, skeins of wild geese go over, bound south. Off
 the east shore is a skerry the tide never covers: someone stacked a small mark on it, and seals
 haul out on its slabs, nobody's, and never nearer than that. It lies off a mountain coast: a high fell and a long range in the
 haze to the north-west, which nobody goes to, and which the sun goes down behind.
@@ -62,7 +62,7 @@ white (`foam`), where the sea runs out on the land, as first snow on the far top
 only where feet have worn the grass away. Two warm notes, both reserved for light itself: the
 sun's cream, and the deeper amber of a flame someone lit (`lamp`): the shelter's lamp, the
 light at the pier's head and the boat's riding light, and the roads they lay on the water.
-One cold green that is nobody's (`aurora`), the merry dancers', a rose over it. Clouds have no colour of their own: the sun's cream where they are
+One cold green that is nobody's (`aurora`), the merry dancers', a rose over it. One olive brown that is the sea's (`wrack`): weed, only where the tide covers. Clouds have no colour of their own: the sun's cream where they are
 lit, the sky's blues where they are not. Smoke and rain are the same. Weathered wood (`timber`) for what
 came by sea and did not grow here: the boat, its oars, its mast; tarred near black where it
 keeps the water out, and a net's brown where bark has steeped it. Cloth is the flock's own
@@ -98,56 +98,55 @@ The sky's few roles (zenith, horizon, light, fill, ground) are blended over five
   trunk and a few faceted lumps of leaves, never a model of a tree.
 - *The high air.* Over the low clouds a thin mackerel sky, combed into streaks by a wind
   aloft that turns from the one below; it thins at night so the stars show between.
-- *Showers.* A few heavier clouds trail rain: fine streaks leaning back from the wind. One
-  is in the sound as the visit opens; another has just gone over. What they leave is one
-  signal (`world.weather`): stone and turf darker and shining with the sky, puddles on the
-  path and threads in the furrows, white run-off down the steep faces, the burn in spate,
-  the sea pocked under them.
+- *Showers.* A few heavier clouds trail rain. One is in the sound as the visit opens;
+  another has just gone over. What they leave is one signal (`world.weather`): stone and
+  turf dark and shining with the sky, puddles on the path, threads in the furrows, white
+  run-off down the steep faces, the burn in spate, the sea pocked under them.
 - *The moor.* Above the worked ground the hill is heather, in patches with grass between,
   thickest on the tops: low faceted bushes on a mauve ground.
-- *The hour.* The other shared signal (`world.day`): where the sun is, and from that the sky,
-  the one light and its shadows, the fill, the haze, the sea's colours and the clouds'. Sun and moon are one light that is out as it changes
-  hands; the lamps are the only lights that are somebody's, lit at dusk.
+- *The hour.* The other shared signal (`world.day`): where the sun is, and from that the
+  sky, the one light and its shadows, the haze, the sea's colours and the clouds'. Sun and
+  moon are one light; the lamps are the only lights that are somebody's, lit at dusk.
+- *The tide.* The sea's own clock (`world.tide`): it falls a fathom and comes back twice in
+  the day, and is out as the visit opens. It bares a wet strand that holds the sky, weed
+  on every stone below the mark, a line of it cast up, tangle in the shallows.
 - *The line between.* Shore, ridge, horizon: edges are where the detail goes.
 - *The sea gives back.* The water is a mirror, shaken by its ripples and by a low swell: the
   island, the cairn, the boat and the sky lie upside down in it, and the lamp at night. It
   breaks white round whatever stands in it, rides the boat on its swell, and wets the sand
   it runs back off. A gust breaks the picture up.
-- *Distance.* What is far is seen through air: fainter, bluer, and fading into the sky's own
+- *Distance.* What is far is seen through air: fainter, bluer, fading into the sky's
   colour on that side. Layers (stacks, headland, range) say how far.
-- *The flock.* Sheep, never people: grazing head down, looking round now and then, walking
-  a few strides to the next bite, round their heft; lying down as the sun goes, up at first
-  light. A sheep is a faceted woolsack, a dark head and four sticks, never a model of one.
-  Their trods are worn into the turf as the path is, fainter.
-- *The starlings.* One cloud, never a bird you can pick out: it folds, stretches and darkens
-  where they bunch. In after noon, into the walls at sunset in a coiling stream, away at
-  first light.
-- *The geese.* The year's back end, overhead: a ragged chevron behind one bird, out of
-  the north and gone over the bay. Nobody's.
-- *The seals.* The flock's opposite number on the sea: pale lumps on dark rock, breathing;
-  one looks round, one shows its head in the water and is gone.
+- *The flock.* Sheep, never people: grazing head down, looking round, walking a few
+  strides to the next bite, round their heft; lying down as the sun goes, up at first
+  light. A sheep is a faceted woolsack, a dark head and four sticks. Their trods are worn
+  into the turf, fainter than the path.
+- *The starlings.* One cloud, never a bird you can pick out: it folds, stretches and
+  darkens where they bunch. In after noon, into the walls at sunset, away at first light.
+- *The geese.* Overhead: a ragged chevron behind one bird, out of the north and gone.
+- *The seals.* The flock's opposite number on the sea: pale lumps on dark rock; one looks
+  round, one shows its head in the water and is gone.
 - *The fishing.* Gear left to dry, never anyone at it: a pier laid like a house wall, a
   light on its head, nets that stir, creels, fish on a rack, a boat to row out in. Gulls
-  ride the wind over the bay and stand on its posts by dark.
+  ride the wind over the bay.
 - *Fresh water.* One burn, found by the land's fall: white where it is steep, a pool by
   the fold, spread over the sand at its mouth.
 - *Work left running.* The mill turns, the kiln smokes, the gate stands open, a stack is
   half built with the sledge beside it: somebody is about, and is never seen.
 - *Inside.* A room is lit by its own fire and by the day at its door, never by the sun:
-  amber at the hearth, dim and cooler by the door. What is in it is what somebody uses.
-- *The year.* The back end of it, turning with the work: harvest, the birches gold from the
-  outside of the wood in, their leaves torn off by the wind and lying under them, the
-  bracken gone to rust.
+  amber at the hearth, cooler by the door. What is in it is what somebody uses.
+- *The year.* Its back end, turning with the work: harvest, the birches gold from the
+  outside in, their leaves down under them, the bracken gone to rust.
 - *The sward.* Grass by the blade where the visitor stands; far off, the land's grain.
 - *Facets for form, grain for surface.* Low-poly and flat-shaded, few colours; a texture on
   every surface: noise in the shader, never a photograph, grain and relief and no colour.
 
-**What it is not.** Not a game: no score, no quest, no characters. Not tropical, not fantasy, no
-ruins, no magic glow. Not busy: every added thing must leave the picture as
-quiet as it found it. Not photoreal: its textures stop at grain.
+**What it is not.** Not a game: no score, no quest, no characters. Not tropical, not
+fantasy, no ruins, no magic glow. Not busy: every added thing leaves the picture as quiet
+as it found it. Not photoreal: its textures stop at grain.
 
 **The chapters ahead.** Each is one day's major update. The journal holds the ones done;
-the last was what a shower leaves. Next: the other insides.
+the last was the tide. Next: the other insides.
 
 ## Where it starts
 
