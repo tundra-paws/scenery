@@ -4,7 +4,12 @@ import { Fn, abs, clamp, dFdx, dFdy, float, fwidth, length, mix, mx_noise_float,
 import type { Node } from 'three/webgpu'
 import type { QualityTier } from 'threejs-scenes'
 
+import { HIGH_WATER } from './ground.ts'
 import { PALETTE } from './palette.ts'
+import { wrack, wrackOn } from './shore.ts'
+
+/** How much of a stone's own colour the weed hides where it grows. */
+const WEEDED = 0.9
 
 /** Cycles of a pattern a pixel may span before it starts to fade, and by which it is gone. */
 const SHARP = 0.22
@@ -148,6 +153,11 @@ function toned (colour: Node<'vec3'>, pattern: Node<'float'>, amount: number): N
  * Blotched in patches a stride across, mottled within them, gritty close
  * to; paler where lichen has crusted it, and cracked, the cracks dark and
  * cut in. Its own grey comes from the material and the instance.
+ *
+ * And where it stands in the tide it is the sea's: from a little under high
+ * water down it is grown over with weed (`shore.ts`), dark and lumpy, in a
+ * ragged line the ebb shows on every stone alike, wherever in the world it
+ * was put. A stone up the hill never knows.
  */
 export function stone (seen: Seen): Surface {
   const blotch = grain(seen, 0.7)
@@ -155,16 +165,23 @@ export function stone (seen: Seen): Surface {
   const fine   = grit(seen, 8.5)
   const crack  = vein(seen, 1.15, 0.045)
   const lichen = smoothstep(0.22, 0.42, mottle.add(blotch.mul(0.5)))
+  const weed   = wrackOn(positionWorld.y.sub(HIGH_WATER), blotch.mul(0.6).add(mottle.mul(0.4)))
+  const fronds = wrack()
 
   return {
-    colour: plain => toned(plain, blotch.mul(0.5).add(mottle.mul(0.3))
-      .add(fine.mul(0.3)), 0.34)
-      .mul(lichen.mul(0.22).add(1))
-      .mul(crack.mul(-0.5).add(1)),
+    colour: plain => mix(
+      toned(plain, blotch.mul(0.5).add(mottle.mul(0.3))
+        .add(fine.mul(0.3)), 0.34)
+        .mul(lichen.mul(0.22).add(1))
+        .mul(crack.mul(-0.5).add(1)),
+      toned(fronds, mottle.mul(0.7).add(fine.mul(0.4)), 0.4),
+      weed.mul(WEEDED),
+    ),
     height: blotch.mul(0.07).add(mottle.mul(0.035))
       .add(fine.mul(0.006))
       .add(lichen.mul(0.012))
-      .sub(crack.mul(0.04)),
+      .sub(crack.mul(0.04))
+      .add(weed.mul(mottle).mul(0.05)),
   }
 }
 

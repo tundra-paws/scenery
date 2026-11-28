@@ -12,6 +12,7 @@ import { heldFloat, heldVec2, heldVec4 } from '../../shared/nodes.ts'
 import type { Held } from '../../shared/nodes.ts'
 import { developed, hazed } from '../../shared/output.ts'
 import { PALETTE } from '../../shared/palette.ts'
+import { TANGLE_SHADE, tangleOn, wrack } from '../../shared/shore.ts'
 import { swellNode } from '../../shared/swell.ts'
 import type { Wash } from '../../shared/wash.ts'
 import type { Weather } from '../../shared/weather.ts'
@@ -30,6 +31,17 @@ const DEEP = DEEP_WATER
 
 /** How much of what is under the shallows shows when looking straight down. */
 const CLEAR = 0.18
+
+/**
+ * The tangle: beds of weed on the bottom under low water (`shore.ts`),
+ * dark through the shallows when the tide has gone down to them. The depth
+ * of water over a bed by which it is lost to sight, how much of the sea's
+ * own colour it takes, and how much it closes the water over the sand.
+ */
+const TANGLE = { lost: 2.1, dark: 0.85, closes: 0.75 } as const
+
+/** And where the water over a bed is this shallow its fronds lie on the surface, and take this much of the mirror from it. */
+const AWASH = { under: 0.85, dulls: 0.88 } as const
 
 /** How much of the world the surface gives back at most, how far its ripples shake the picture in it, and how much less a gust leaves of it. */
 const MIRROR = 1
@@ -157,6 +169,7 @@ export function createSeaMaterial ({ wind, clouds, day, wash, weather, tide, gro
   const deep             = uniform(new THREE.Color(PALETTE.waterDeep)) as unknown as Node<'vec3'>
   const shallow          = uniform(new THREE.Color(PALETTE.waterShallow)) as unknown as Node<'vec3'>
   const white            = uniform(new THREE.Color(PALETTE.foam)) as unknown as Node<'vec3'>
+  const weed             = wrack().mul(TANGLE_SHADE)
   const mirrorAt         = varying(uniform(mirror.matrix).mul(vec4(positionWorld, 1)))
   const { nodes }        = day
 
@@ -366,7 +379,16 @@ export function createSeaMaterial ({ wind, clouds, day, wash, weather, tide, gro
     // drop. The hour leaves less of it as the light goes.
     const murk   = smoothstep(PALE, DEEP, depth)
     const facing = max(dot(normal, view), 0)
-    const body   = mix(mix(shallow, deep, murk), deep, gust.mul(RUFFLE)).mul(nodes.seaTint)
+
+    // The tangle under low water, where the sea is now shallow enough to
+    // show it: looked for only there.
+    const tangle = float(0).toVar()
+
+    If(depth.lessThan(TANGLE.lost), () => {
+      tangle.assign(tangleOn(at, depth.add(ebb)).mul(fade(TANGLE.lost * 0.35, TANGLE.lost, depth)))
+    })
+
+    const body = mix(mix(mix(shallow, deep, murk), deep, gust.mul(RUFFLE)), weed, tangle.mul(TANGLE.dark)).mul(nodes.seaTint)
 
     // Under a cloud, or in the boat's shadow, the water is duller: its own
     // colour is light that went into it and came back out.
@@ -385,6 +407,8 @@ export function createSeaMaterial ({ wind, clouds, day, wash, weather, tide, gro
       .add(0.06)
       .mul(MIRROR)
       .mul(gust.mul(-BREAK).add(1))
+      .mul(tangle.mul(fade(AWASH.under * 0.2, AWASH.under, depth)).mul(-AWASH.dulls)
+        .add(1))
     const halfway = normalize(nodes.lightDirection.add(view))
     const glint   = nodes.seaGlint.mul(pow(max(dot(normal, halfway), 0), 220)).mul(0.9)
       .mul(light)
@@ -400,7 +424,7 @@ export function createSeaMaterial ({ wind, clouds, day, wash, weather, tide, gro
     // deep water, where the terrain has built no floor to find. What it gives
     // back it gives back over the sand too.
     const veil  = max(reflectance, min(murk.mul(2), 1))
-    const alpha = mix(1 - CLEAR, 1, veil).mul(smoothstep(0, pixel.mul(2).add(SHALLOWS), depth))
+    const alpha = mix(1 - CLEAR, 1, veil).mul(max(smoothstep(0, pixel.mul(2).add(SHALLOWS), depth), tangle.mul(TANGLE.closes).mul(smoothstep(0, pixel.mul(2).add(0.2), depth))))
 
     // Under a shower the sea is pocked: a ring for every drop, which near
     // to are flecks of white and far off only the roughness they leave.

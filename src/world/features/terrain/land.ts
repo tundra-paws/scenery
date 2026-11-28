@@ -6,6 +6,7 @@ import { smoothstep as eased } from 'threejs-scenes/primitives'
 
 import { floatAttribute, vec4Attribute } from '../../shared/nodes.ts'
 import { PALETTE } from '../../shared/palette.ts'
+import { TANGLE_SHADE, tangleOn, wrack, wrackOn } from '../../shared/shore.ts'
 import { grain, grit, ripples, seenAt, vein } from '../../shared/surface.ts'
 import type { Surface } from '../../shared/surface.ts'
 import type { World } from '../../world.ts'
@@ -42,6 +43,19 @@ const CRAG_PITCH = 0.14
 /** The slope from which a vertex is pushed, and by which it is pushed all the way; and the distance from the burn between which that comes back. */
 const CRAGGY   = [ 0.24, 0.42 ] as const
 const BURN_BED = [ 2, 5 ] as const
+
+/**
+ * The foreshore, which the ebb bares. On rock the weed grows thick; on sand
+ * it lies in clumps, this much of it by the noise. And along the top of the
+ * tide, this high over high water and this broad, the line of weed the last
+ * flood cast up and left.
+ */
+const CLUMPS = [ 0.2, 0.36 ] as const
+const CAST   = { over: 0.42, broad: 0.16 } as const
+
+/** How much of the land's own colour the weed hides: where it grows, and where it was only cast up. */
+const GROWN       = 0.92
+const STREWN_WEED = 0.85
 
 /** What the land's material is given: the texture, the place its vertices go, and the grain the worn path wears. */
 export interface Land {
@@ -120,6 +134,18 @@ export function textureLand (world: World): Land {
     .mul(STREWN)
   const bare   = smoothstep(SCREE[0], SCREE[1], steep)
 
+  // The foreshore: weed grown on its rock, clumps of it on its sand, the
+  // line the last tide left along the top of the beach, and the tangle
+  // under low water, which the sea shows through its shallows.
+  const lumpy = mid.add(fine.mul(0.5))
+  const grown = wrackOn(land.x, mid.mul(0.6).add(fine.mul(0.4)))
+  const cast  = smoothstep(CAST.broad, 0, land.x.add(mid.mul(0.08)).sub(CAST.over)
+    .abs()).mul(smoothstep(-0.25, 0.2, macro.add(fine.mul(0.6))))
+    .mul(bare.oneMinus())
+  const tangle = tangleOn(positionWorld.xz, land.x.negate())
+  const weedy  = max(max(grown.mul(mix(smoothstep(CLUMPS[0], CLUMPS[1], lumpy), 1, bare)).mul(GROWN), cast.mul(STREWN_WEED)), tangle.mul(GROWN))
+  const weed   = wrack()
+
   // Tussocks: the turf's light and dark, a pace across, the blades in them,
   // and the terraces a grazed slope wears along its own level (the beds'
   // noise again: it runs flat, as they do).
@@ -151,7 +177,11 @@ export function textureLand (world: World): Land {
         const litter = leaf.mul(finest.mul(0.5).add(fine.mul(0.3))
           .add(1))
 
-        return mix(mix(mix(mix(mix(mix(beach, meadow, turfed), tops, dried), brake, rusted), moor, bloom), litter, strewn), crag, bare)
+        const fronds = weed.mul(lumpy.mul(0.4).add(finest.mul(0.2))
+          .add(1))
+          .mul(mix(1, TANGLE_SHADE, tangle))
+
+        return mix(mix(mix(mix(mix(mix(mix(beach, meadow, turfed), tops, dried), brake, rusted), moor, bloom), litter, strewn), crag, bare), fronds, weedy)
       },
 
       height: mix(
@@ -164,7 +194,7 @@ export function textureLand (world: World): Land {
           .add(finest.mul(0.006))
           .sub(crack.mul(0.07)),
         bare,
-      ),
+      ).add(weedy.mul(lumpy).mul(0.05)),
     },
 
     position: positionLocal.add(normalLocal.mul(mx_noise_float(positionLocal.mul(CRAG_PITCH)).mul(CRAG)

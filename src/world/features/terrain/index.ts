@@ -57,7 +57,7 @@ function openTheFloor (material: LitMaterial, { x, z, fall, door }: Shelter): vo
   material.maskNode = across.greaterThan(ROOM_HALF_DEEP + CUT).or(along.greaterThan(ROOM_HALF_LONG + CUT))
 }
 
-/** The land: one heightfield mesh, textured a fragment (`land.ts`), shaded flat under its relief, its crags pushed out of true, the birches' leaves lying under them (`aLitter`), with the path and the ways to the shelter's door and the field gate worn into it, and its foot wet where the sea runs up it. */
+/** The land: one heightfield mesh, textured a fragment (`land.ts`), shaded flat under its relief, its crags pushed out of true, the birches' leaves lying under them (`aLitter`), with the path and the ways to the shelter's door and the field gate worn into it, its foot wet where the sea runs up it, and its foreshore, bared by the ebb, wet and weedy from the last tide's mark down. */
 export function createTerrain (world: World): Feature {
   let mesh: THREE.Mesh | null = null
   let wear: PathWear | null   = null
@@ -102,8 +102,9 @@ export function createTerrain (world: World): Feature {
 
       wear = createPathWear(world.path, world.quality.tier, [ world.shelter.spur, world.infield.track, world.mill.spur, ...world.yard.ways, world.pier.way ], traceTrods(world, world.seed))
 
-      poolTheRain(material, world.weather, world.day.nodes, wearPath(material, wear, land.grit), land.stony)
-      shore = wetTheShore(material, world.wind, world.tide.nodes.level)
+      shore = wetTheShore(material, world.wind, world.tide)
+
+      poolTheRain(material, world.weather, world.day.nodes, wearPath(material, wear, land.grit), land.stony, shore.strand)
       openTheFloor(material, world.shelter)
 
       mesh               = new THREE.Mesh(geometry, material)

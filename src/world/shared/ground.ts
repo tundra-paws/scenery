@@ -1,6 +1,9 @@
 // src/world/shared/ground.ts
 import { createNoise3D, smoothstep } from 'threejs-scenes/primitives'
 
+/** World height of the sea at high water: the level everything on the island was placed against. */
+export const HIGH_WATER = 0
+
 /** How far below the water the sea floor sits at the rim. */
 const SHELF = 7
 
@@ -32,7 +35,7 @@ export interface Ground {
   /** Rough height of the tallest ground above the water. */
   readonly relief: number
 
-  /** World height of the water surface. */
+  /** World height of the water surface at high water. The tide falls from here (`shared/tide.ts`). */
   readonly waterLevel: number
   heightAt (x: number, z: number): number
 
@@ -47,7 +50,7 @@ interface GroundOptions {
   waterLevel?: number
 }
 
-export function createGround ({ seed, size = 260, relief = 40, waterLevel = 0 }: GroundOptions): Ground {
+export function createGround ({ seed, size = 260, relief = 40, waterLevel = HIGH_WATER }: GroundOptions): Ground {
   const noise = createNoise3D(seed)
   const half  = size / 2
 

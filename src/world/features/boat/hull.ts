@@ -18,7 +18,8 @@ export const LENGTH = 7.6
 const BEAM          = 2.5
 
 /** How much of it is under the water, how high its side stands over it amidships, and how high its two ends rise. */
-const DRAFT     = 0.34
+export const DRAFT = 0.34
+
 const FREEBOARD = 0.66
 const STEM      = 1.45
 
