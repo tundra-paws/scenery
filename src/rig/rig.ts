@@ -87,6 +87,7 @@ export function createRig ({ world, canvas, stick = null, interactive, onMove }:
 
       update (app, frame, ctx) {
         env.explore = app.explore
+        env.sea     = world.tide.at(frame.frame * STEP)
         stepRig(state, input, frame.frame * STEP, STEP, env)
         clearInput(input)
         place(ctx.camera)

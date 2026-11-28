@@ -88,6 +88,9 @@ export interface RigEnv {
   tour:   Tour
   ground: Ground
 
+  /** Where the sea stands now, as the tide has it: the ground's own water level until told. A visitor walks the strand the ebb has bared. */
+  sea?: number
+
   /** Whether the visitor has asked to walk or fly. */
   explore: boolean
 }
@@ -103,9 +106,9 @@ function copyPose (from: Pose, to: Pose): void {
   }
 }
 
-/** The surface a camera can stand over: the ground, or the water where the ground is under it. */
-function surfaceAt (ground: Ground, x: number, z: number): number {
-  return Math.max(ground.heightAt(x, z), ground.waterLevel)
+/** The surface a camera can stand over: the ground, or the water where the ground is under it, wherever the tide has that. */
+function surfaceAt ({ ground, sea = ground.waterLevel }: RigEnv, x: number, z: number): number {
+  return Math.max(ground.heightAt(x, z), sea)
 }
 
 export function createRigState (): RigState {
@@ -140,7 +143,7 @@ function enterOrbit (state: RigState): void {
   state.idle      = 0
 }
 
-function applyOrbit (state: RigState, input: RigInput, ground: Ground): void {
+function applyOrbit (state: RigState, input: RigInput, env: RigEnv): void {
   const { position, target } = state.pose
 
   state.theta -= input.dragX * LOOK
@@ -155,7 +158,7 @@ function applyOrbit (state: RigState, input: RigInput, ground: Ground): void {
   position[2] = z
 
   // Never under the ground or the water, however far the visitor tilts.
-  position[1] = Math.max(target[1] + Math.sin(state.phi) * state.radius, surfaceAt(ground, x, z) + CLEARANCE)
+  position[1] = Math.max(target[1] + Math.sin(state.phi) * state.radius, surfaceAt(env, x, z) + CLEARANCE)
 }
 
 /** Take the camera where it is and keep looking the way it was looking. */
@@ -172,7 +175,8 @@ function enterExplore (state: RigState): void {
   state.returning = false
 }
 
-function stepExplore (state: RigState, input: RigInput, dt: number, ground: Ground): void {
+function stepExplore (state: RigState, input: RigInput, dt: number, env: RigEnv): void {
+  const { ground }           = env
   const { position, target } = state.pose
 
   state.yaw  -= input.dragX * LOOK
@@ -196,7 +200,7 @@ function stepExplore (state: RigState, input: RigInput, dt: number, ground: Grou
 
   // Walking and flying are one motion: rising is a key, and letting go sinks
   // gently back to eye height, where the camera then follows the ground.
-  const floor = surfaceAt(ground, x, z) + EYE
+  const floor = surfaceAt(env, x, z) + EYE
   let y       = position[1] + input.lift * speed * RISE * dt
 
   if (input.lift <= 0)
@@ -235,7 +239,7 @@ export function stepRig (state: RigState, input: RigInput, t: number, dt: number
     if (state.mode !== 'explore')
       enterExplore(state)
 
-    stepExplore(state, input, dt, env.ground)
+    stepExplore(state, input, dt, env)
 
     return state
   }
@@ -247,7 +251,7 @@ export function stepRig (state: RigState, input: RigInput, t: number, dt: number
     if (state.mode !== 'orbit')
       enterOrbit(state)
 
-    applyOrbit(state, input, env.ground)
+    applyOrbit(state, input, env)
     state.idle = 0
 
     return state

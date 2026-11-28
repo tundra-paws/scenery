@@ -144,6 +144,30 @@ describe('stepRig', () => {
     expect(state.mode).toBe('explore')
   })
 
+  test('with the tide out a visitor walks down onto the strand it has bared, and no lower than the sea', () => {
+    const state = createRigState()
+    const world = { ...env(true), sea: ground.waterLevel - 1.2 }
+
+    let lowest = Infinity
+
+    for (let frame = 1; frame <= 3000; frame += 1) {
+      const input = quiet()
+
+      input.moveZ  = 1
+      input.sprint = true
+      input.dragX  = frame % 90 < 20 ? 5 : 0
+
+      stepRig(state, input, frame * STEP, STEP, world)
+
+      const [ x, y, z ] = state.pose.position
+
+      expect(y).toBeGreaterThanOrEqual(Math.max(ground.heightAt(x, z), world.sea) + EYE - 1e-9)
+      lowest = Math.min(lowest, y)
+    }
+
+    expect(lowest).toBeLessThan(ground.waterLevel + EYE - 1)
+  })
+
   test('leaving explore eases back onto the tour', () => {
     const { state } = play(900, (frame, _input, at) => {
       at.explore = frame < 300
