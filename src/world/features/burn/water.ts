@@ -38,8 +38,8 @@ interface StreamOptions {
   clouds: CloudShadow
   day:    Daylight
 
-  /** World height of the sea. */
-  level: number
+  /** World height of the sea, as the tide has it. */
+  level: Node<'float'>
 
   /** The world's time, set each step. */
   time: Held<number>
@@ -162,7 +162,7 @@ export function createStreamMaterial ({ clouds, day, level, time, shown: present
   const foam   = clamp(max(broken, lapped), 0, 1)
 
   const edge  = smoothstep(0.8, 1, side).oneMinus()
-  const sea   = smoothstep(level + DROWNS[0], level + DROWNS[1], positionWorld.y)
+  const sea   = smoothstep(DROWNS[0], DROWNS[1], positionWorld.y.sub(level))
   const there = present ? edge.mul(sea).mul(present(said)) : edge.mul(sea)
   const shown = hazed(developed(mix(water, white.mul(nodes.seaTint).mul(mix(0.6, 1, light)), foam)), nodes.horizon)
 

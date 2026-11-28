@@ -74,7 +74,9 @@ export function createPierFeature (world: World): Feature {
       gear.receiveShadow = true
 
       nets   = createNets(world, ground, rng.fork('pier:nets'), BARKED)
-      tender = createTender(pier, world.wind, ground.waterLevel, sawn)
+      tender = createTender(pier, world.wind, world.tide, sawn)
+
+      keepOutOfMirror(tender.ropes)
 
       nets.mesh.castShadow = !phone
 
@@ -105,7 +107,7 @@ export function createPierFeature (world: World): Feature {
       nets.blow(0)
       tender.ride(0)
       beacon.burn(0, world.day.night)
-      scene.add(stones, gear, nets.mesh, tender.mesh, gulls.mesh, beacon.panes, beacon.lamp)
+      scene.add(stones, gear, nets.mesh, tender.mesh, tender.ropes, gulls.mesh, beacon.panes, beacon.lamp)
     },
 
     update (_state, frame) {

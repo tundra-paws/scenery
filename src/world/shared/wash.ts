@@ -2,11 +2,12 @@
 import * as THREE from 'three'
 
 
-/** Something standing in the sea, as the water sees it: a disc at the waterline. */
+/** Something standing in the sea, as the water sees it: a disc at the waterline, at high water and at low. Nothing where it is then dry, or under. */
 export interface Footing {
   readonly x:      number
   readonly z:      number
   readonly radius: number
+  readonly ebbed:  number
 }
 
 /** The boat on the water, as the sea's shader reads it. */
@@ -30,7 +31,8 @@ export interface WashUniforms {
  *
  * Filled in by the features that put things there as they are built (the
  * boulders, the landing's stones, the head-dyke's foot) and read by the water,
- * which is built after them and breaks round each (`features/water/wash.ts`).
+ * which is built after them and breaks round each (`features/water/wash.ts`),
+ * wherever the tide has its edge: a stone the ebb leaves dry is told so.
  * The boat moves, so it is not a footing but uniforms its feature keeps
  * up to date and the sea's shader reads, like the wind's.
  */
@@ -38,8 +40,8 @@ export interface Wash {
   readonly footings: readonly Footing[]
   readonly uniforms: WashUniforms
 
-  /** Something stands in the water here, this wide at the waterline. */
-  stand (x: number, z: number, radius: number): void
+  /** Something stands in the water here, this wide at the waterline at high water, and this wide at low (the same, unless told). */
+  stand (x: number, z: number, radius: number, ebbed?: number): void
 
   /** The boat's waterline, once: half its length and half its beam. */
   hull (half: number, beam: number): void
@@ -66,9 +68,9 @@ export function createWash (): Wash {
     footings,
     uniforms,
 
-    stand (x, z, radius) {
-      if (radius > 0)
-        footings.push({ x, z, radius })
+    stand (x, z, radius, ebbed = radius) {
+      if (radius > 0 || ebbed > 0)
+        footings.push({ x, z, radius, ebbed })
     },
 
     hull (half, beam) {

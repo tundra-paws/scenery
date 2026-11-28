@@ -89,14 +89,14 @@ function stackMark (stones: THREE.InstancedMesh, from: number, { mark }: Skerry,
 }
 
 /** Every seal as it holds itself at `time`, and the one in the water. */
-function pose ({ seals }: Drawn, { skerry, ground }: World, time: number): void {
+function pose ({ seals }: Drawn, { skerry, tide }: World, time: number): void {
   const elevation = elevationAt(time)
 
   skerry.seals.forEach((seal, index) => {
     poseSeal(seals, index, seal, skerry.haul(seal, time, elevation, haul))
   })
 
-  poseSwimmer(seals, skerry.seals.length * LUMPS, skerry.swim(time, elevation, swim), ground.waterLevel)
+  poseSwimmer(seals, skerry.seals.length * LUMPS, skerry.swim(time, elevation, swim), tide.at(time))
 
   seals.instanceMatrix.needsUpdate = true
 }
@@ -129,7 +129,7 @@ export function createSkerryFeature (world: World): Feature {
         stones.setColorAt(index, tint.set(PALETTE.rock).offsetHSL(0, 0, rock.shade))
 
         // The sea breaks round every one that stands in it.
-        world.wash.stand(rock.x, rock.z, rock.footing)
+        world.wash.stand(rock.x, rock.z, rock.footing, rock.ebbed)
       })
 
       stones.count = skerry.rocks.length + stackMark(stones, skerry.rocks.length, skerry, rng.fork('skerry:mark'))

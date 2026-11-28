@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import type { WebGPURenderer } from 'three/webgpu'
 
 import { isKeptOutOfMirror } from '../../shared/mirror.ts'
+import type { Held } from '../../shared/nodes.ts'
 import { drawMirror } from '../../shared/output.ts'
 
 
@@ -42,8 +43,8 @@ export interface Mirror {
 
 interface MirrorOptions {
 
-  /** Height of the water: the plane everything is turned over. */
-  level: number
+  /** Height of the water now: the plane everything is turned over. It moves with the tide. */
+  level: Held<number>
 
   /** Size of the reflection against the drawing buffer, on each axis. The ripples blur it anyway. */
   scale: number
@@ -60,7 +61,7 @@ interface MirrorOptions {
  * space, and has to leave itself and the grass out of the picture, so the few
  * lines are here.
  */
-export function createMirror ({ level, scale }: MirrorOptions): Mirror {
+export function createMirror ({ level: tide, scale }: MirrorOptions): Mirror {
   const target                    = new THREE.RenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: true })
   const camera                    = new THREE.PerspectiveCamera()
   const matrix                    = new THREE.Matrix4()
@@ -84,7 +85,7 @@ export function createMirror ({ level, scale }: MirrorOptions): Mirror {
   }
 
   /** Turn `viewer` over the water into `camera`, and tilt its near plane onto the surface. */
-  function turnOver (viewer: THREE.PerspectiveCamera): void {
+  function turnOver (viewer: THREE.PerspectiveCamera, level: number): void {
     rotation.extractRotation(viewer.matrixWorld)
     ahead.set(0, 0, -1).applyMatrix4(rotation)
       .add(eye)
@@ -131,6 +132,8 @@ export function createMirror ({ level, scale }: MirrorOptions): Mirror {
 
       eye.setFromMatrixPosition(viewer.matrixWorld)
 
+      const level = tide.value
+
       if (eye.y <= level)
         return
 
@@ -142,7 +145,7 @@ export function createMirror ({ level, scale }: MirrorOptions): Mirror {
       if (target.width !== width || target.height !== height)
         target.setSize(width, height)
 
-      turnOver(viewer)
+      turnOver(viewer, level)
 
       sea.visible = false
       scene.traverse(hide)

@@ -4,6 +4,7 @@ import { smoothstep } from 'threejs-scenes/primitives'
 import type { Ground } from './ground.ts'
 import { distanceToSpan } from './path.ts'
 import type { Path, Waypoint } from './path.ts'
+import { RANGE } from './tide.ts'
 
 /**
  * Where the burn rises: a spring under the cairn, at the head of the one
@@ -128,7 +129,7 @@ function descend (ground: Ground, path: Path): Waypoint[] {
 
   // More strides than any course on this island needs: a hollow with no way
   // out would otherwise walk for ever.
-  for (let stride = 0; stride < 2000 && ground.heightAt(x, z) > ground.waterLevel - DROWNED; stride += 1) {
+  for (let stride = 0; stride < 2000 && ground.heightAt(x, z) > ground.waterLevel - RANGE - DROWNED; stride += 1) {
     const { down, drop } = fallAt(ground, x, z)
     const near           = ways.reduce((best, point) => Math.hypot(point.x - x, point.z - z) < Math.hypot(best.x - x, best.z - z) ? point : best)
     const off            = Math.hypot(x - near.x, z - near.z) || 1

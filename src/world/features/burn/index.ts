@@ -90,7 +90,7 @@ export function createBurnFeature (world: World): Feature {
 
       const wet = world.weather.nodes.wet
 
-      water      = new THREE.Mesh(createStreamGeometry(burn, grid, churned), createStreamMaterial({ clouds: world.clouds, day: world.day, level: ground.waterLevel, time, spate: wet.mul(SPATE) }))
+      water      = new THREE.Mesh(createStreamGeometry(burn, grid, churned), createStreamMaterial({ clouds: world.clouds, day: world.day, level: world.tide.nodes.level, time, spate: wet.mul(SPATE) }))
       water.name = 'burn'
 
       // After rain the hill runs with threads of white water that come down
@@ -99,7 +99,7 @@ export function createBurnFeature (world: World): Feature {
       const shown  = (said: Node<'vec4'>): Node<'float'> => stepNode(DRYING[0], DRYING[1], wet.add(said.w.mul(HOLDS)))
       const merged = rills.map(rill => createStreamGeometry(rill, grid, undefined, 0))
 
-      runoff      = new THREE.Mesh(mergeStreams(merged), createStreamMaterial({ clouds: world.clouds, day: world.day, level: ground.waterLevel, time, shown, spate: wet.mul(RILL_SPATE) }))
+      runoff      = new THREE.Mesh(mergeStreams(merged), createStreamMaterial({ clouds: world.clouds, day: world.day, level: world.tide.nodes.level, time, shown, spate: wet.mul(RILL_SPATE) }))
       runoff.name = 'runoff'
 
       merged.forEach(geometry => geometry.dispose())

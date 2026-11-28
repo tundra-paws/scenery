@@ -53,7 +53,8 @@ export function createBoat (world: World): Feature {
 
     berthAt(mooring, world.wind, time, berth)
 
-    hull.position.set(berth.x, berth.heave, berth.z)
+    // She rides at whatever the tide has made of the sea's level.
+    hull.position.set(berth.x, berth.heave + world.tide.at(time) - mooring.level, berth.z)
     hull.rotation.set(berth.roll, berth.yaw, berth.pitch)
 
     // The masthead, carried round by the same turn the boat was given.

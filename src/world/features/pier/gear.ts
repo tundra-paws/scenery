@@ -6,6 +6,7 @@ import { board, join } from '../../shared/boards.ts'
 import type { Ground } from '../../shared/ground.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import type { Pier } from '../../shared/pier.ts'
+import { RANGE } from '../../shared/tide.ts'
 import { DARK, paint } from '../../shared/roof.ts'
 import { headRope } from './nets.ts'
 import { createTowerGear } from './tower.ts'
@@ -49,7 +50,7 @@ function on (pier: Pier, along: number, across: number, up: number): THREE.Vecto
 
 /**
  * The dark behind the pier's stones, so no light shows between them: one
- * block from under the water to under the deck.
+ * block from under low water to under the deck.
  */
 function core (pier: Pier, level: number): THREE.BufferGeometry {
   const { jetty } = pier
@@ -260,7 +261,7 @@ function rack (pier: Pier, ground: Ground, lay: SeededRng, spare: boolean): THRE
  */
 export function createGear (pier: Pier, ground: Ground, tower: Tower, lay: SeededRng, spare: boolean): THREE.BufferGeometry {
   const { jetty } = pier
-  const level     = ground.waterLevel
+  const level     = ground.waterLevel - RANGE
   const first     = pier.poles[0]!
   const stacked   = (up: number): number => up * (CREEL.high + 0.05)
 

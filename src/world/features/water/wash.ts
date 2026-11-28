@@ -13,7 +13,7 @@ export const FAR = 4
 /** How far from what stands in the water each point of the sea is, as a shader looks it up. */
 export interface WashMap {
 
-  /** One channel, in world units from the nearest footing's edge: negative inside it, `FAR` and over where there is nothing near. */
+  /** Two channels, at high water and at low, each in world units from the nearest footing's edge: negative inside it, `FAR` and over where there is nothing near. */
   texture: THREE.DataTexture
 
   /** World position to texture coordinate: `uv = xz * scale + 0.5`. */
@@ -21,18 +21,19 @@ export interface WashMap {
 }
 
 /**
- * Lay out every footing in a distance map over the island.
+ * Lay out every footing in a distance map over the island, once for high
+ * water and once for low: the sea reads between the two as the tide stands.
  *
  * Each one touches only the texels within `FAR` of its edge, so the bake is a
  * few hundred thousand sums however many there are. Beyond the map the lookup
  * holds its border, where nothing stands.
  */
 export function createWashMap (footings: readonly Footing[], span: number): WashMap {
-  const distances = new Float32Array(SIDE * SIDE).fill(FAR)
+  const distances = new Float32Array(SIDE * SIDE * 2).fill(FAR)
   const texel     = span / SIDE
 
-  for (const { x, z, radius } of footings) {
-    const reach = radius + FAR
+  for (const { x, z, radius, ebbed } of footings) {
+    const reach = Math.max(radius, ebbed) + FAR
     const fromI = Math.max(0, Math.floor((x - reach) / texel + SIDE / 2))
     const toI   = Math.min(SIDE - 1, Math.ceil((x + reach) / texel + SIDE / 2))
     const fromJ = Math.max(0, Math.floor((z - reach) / texel + SIDE / 2))
@@ -40,11 +41,14 @@ export function createWashMap (footings: readonly Footing[], span: number): Wash
 
     for (let j = fromJ; j <= toJ; j += 1)
       for (let i = fromI; i <= toI; i += 1) {
-        const index    = j * SIDE + i
-        const distance = Math.hypot((i + 0.5 - SIDE / 2) * texel - x, (j + 0.5 - SIDE / 2) * texel - z) - radius
+        const index = (j * SIDE + i) * 2
+        const off   = Math.hypot((i + 0.5 - SIDE / 2) * texel - x, (j + 0.5 - SIDE / 2) * texel - z)
 
-        if (distance < distances[index]!)
-          distances[index] = distance
+        if (radius > 0 && off - radius < distances[index]!)
+          distances[index] = off - radius
+
+        if (ebbed > 0 && off - ebbed < distances[index + 1]!)
+          distances[index + 1] = off - ebbed
       }
   }
 
@@ -53,7 +57,7 @@ export function createWashMap (footings: readonly Footing[], span: number): Wash
   for (let index = 0; index < data.length; index += 1)
     data[index] = THREE.DataUtils.toHalfFloat(distances[index]!)
 
-  const texture = new THREE.DataTexture(data, SIDE, SIDE, THREE.RedFormat, THREE.HalfFloatType)
+  const texture = new THREE.DataTexture(data, SIDE, SIDE, THREE.RGFormat, THREE.HalfFloatType)
 
   texture.name        = 'wash-map'
   texture.magFilter   = THREE.LinearFilter
@@ -63,5 +67,5 @@ export function createWashMap (footings: readonly Footing[], span: number): Wash
   return { texture, scale: 1 / span }
 }
 
-// perf: cheap — one 256-texel half-float texture (128 KB), baked once from a
+// perf: cheap — one 256-texel half-float texture of two channels (256 KB), baked once from a
 // few dozen discs; nothing per frame.

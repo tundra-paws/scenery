@@ -19,7 +19,7 @@ const EXTENT = 3200
 const MIRROR_SCALE: Record<QualityTier, number> = { mobile: 0.35, desktop: 0.5, highEnd: 0.6 }
 
 /**
- * The sea: one plane at the water level, pale over the shelf and dark past it,
+ * The sea: one plane at the tide's level, pale over the shelf and dark past it,
  * thinning to foam where the land comes up through it. Its ripples run before
  * the wind, gusts cross it as darker patches, the foam is widest on the shore
  * the wind blows onto, and the clouds lay their shadows on it. It keeps the
@@ -50,8 +50,8 @@ export function createWater (world: World): Feature {
 
       ground   = heights.texture
       wash     = washMap.texture
-      mirror   = createMirror({ level: world.ground.waterLevel, scale: MIRROR_SCALE[world.quality.tier] })
-      material = createSeaMaterial({ wind: world.wind, clouds: world.clouds, day: world.day, wash: world.wash, weather: world.weather, ground: heights, standing: washMap, mirror, time })
+      mirror   = createMirror({ level: world.tide.level, scale: MIRROR_SCALE[world.quality.tier] })
+      material = createSeaMaterial({ wind: world.wind, clouds: world.clouds, day: world.day, wash: world.wash, weather: world.weather, tide: world.tide, ground: heights, standing: washMap, mirror, time })
 
       const geometry = new THREE.PlaneGeometry(EXTENT, EXTENT)
 
@@ -59,7 +59,7 @@ export function createWater (world: World): Feature {
 
       mesh            = new THREE.Mesh(geometry, material)
       mesh.name       = 'water'
-      mesh.position.y = world.ground.waterLevel
+      mesh.position.y = world.tide.level.value
 
       // The reflection is drawn just before the sea, for the camera that is
       // about to draw it, whichever that is.
@@ -73,6 +73,10 @@ export function createWater (world: World): Feature {
 
     update (_state, frame) {
       time.value = frame.frame * STEP
+
+      // The tide: the plane lies wherever the sea now stands.
+      if (mesh)
+        mesh.position.y = world.tide.level.value
     },
 
     dispose () {

@@ -16,6 +16,8 @@ import { swellNode } from '../../shared/swell.ts'
 import type { Wash } from '../../shared/wash.ts'
 import type { Weather } from '../../shared/weather.ts'
 import type { Wind } from '../../shared/wind.ts'
+import { RANGE } from '../../shared/tide.ts'
+import type { Tide } from '../../shared/tide.ts'
 import type { Mirror } from './mirror.ts'
 import type { WashMap } from './wash.ts'
 
@@ -108,6 +110,9 @@ export interface SeaOptions {
   wash:    Wash
   weather: Weather
 
+  /** How far the sea now stands under the level the land's heights were measured from. */
+  tide: Tide
+
   /** The land's height over the water, on the terrain's own grid. */
   ground: HeightMap
 
@@ -140,7 +145,7 @@ function fade (from: number | Node<'float'>, to: number | Node<'float'>, value: 
  * and the swell that tilt it, the world it gives back, the foam on every
  * shore and round everything that stands in it, and the haze far out.
  */
-export function createSeaMaterial ({ wind, clouds, day, wash, weather, ground, standing, mirror, time }: SeaOptions): NodeMaterial {
+export function createSeaMaterial ({ wind, clouds, day, wash, weather, tide, ground, standing, mirror, time }: SeaOptions): NodeMaterial {
   const [ windX, windZ ] = wind.direction
   const lee              = vec2(windX, windZ)
   const now              = heldFloat(time)
@@ -155,11 +160,15 @@ export function createSeaMaterial ({ wind, clouds, day, wash, weather, ground, s
   const mirrorAt         = varying(uniform(mirror.matrix).mul(vec4(positionWorld, 1)))
   const { nodes }        = day
 
-  /** How deep the water is at a place: the map is on the terrain's own grid, so zero is where the mesh breaks the surface. */
+  /** How deep the water is at a place, as the tide now stands: the map is on the terrain's own grid, so zero is where the mesh breaks the surface. */
+  const ebb     = tide.nodes.ebb
   const depthAt = (place: Node<'vec2'>): Node<'float'> => texture(ground.texture, place.mul(ground.scale).add(0.5), float(0)).r.negate()
+    .sub(ebb)
 
-  /** How far a place is from the nearest thing standing in the water (`wash.ts`). */
-  const standAt = (place: Node<'vec2'>): Node<'float'> => texture(standing.texture, place.mul(standing.scale).add(0.5), float(0)).r
+  /** How far a place is from the nearest thing standing in the water (`wash.ts`), between what the map says of high water and of low. */
+  const ebbed   = ebb.div(RANGE)
+  const between = (said: Node<'vec4'>): Node<'float'> => mix(said.r, said.g, ebbed)
+  const standAt = (place: Node<'vec2'>): Node<'float'> => between(texture(standing.texture, place.mul(standing.scale).add(0.5), float(0)))
 
   /** Distance from the boat's waterline, in world units, negative inside it, with the point in the boat's own frame (x to the bow). */
   const hullDistance = (local: Node<'vec2'>): Node<'float'> => {
@@ -229,7 +238,7 @@ export function createSeaMaterial ({ wind, clouds, day, wash, weather, ground, s
     // side the sea comes from, and rings run out from them all. The side the
     // sea comes onto is the side where a step upwind leads away from the
     // thing: the boat's own frame turns the wind with it.
-    const washed = texture(standing.texture, at.mul(standing.scale).add(0.5)).r
+    const washed = between(texture(standing.texture, at.mul(standing.scale).add(0.5)))
     const hull   = hullDistance(local)
     const stand  = min(washed, hull)
     const edge   = fwidth(stand)
@@ -323,6 +332,7 @@ export function createSeaMaterial ({ wind, clouds, day, wash, weather, ground, s
 
     // How much water lies over the land here.
     const depth = texture(ground.texture, at.mul(ground.scale).add(0.5)).r.negate()
+      .sub(ebb)
     const pixel = fwidth(depth)
 
     // Far away a ripple is smaller than a pixel and turns into a moire of the

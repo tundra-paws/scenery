@@ -75,9 +75,12 @@ export interface Rock extends Waypoint {
   /** Half its width where it is widest, for what keeps clear of it. */
   reach: number
 
-  /** Half its width where the water cuts it, for the sea to break round. Nothing when it lies under. */
+  /** Half its width where the water cuts it at high water, for the sea to break round. Nothing when it lies under. */
   footing: number
-  matrix:  THREE.Matrix4
+
+  /** The same at low water, when every one of them stands out of it. */
+  ebbed:  number
+  matrix: THREE.Matrix4
 
   /** Lighter or darker than the rock's own grey. The ones awash are wet, and darker. */
   shade: number
@@ -241,6 +244,7 @@ function setRock (stone: THREE.BufferAttribute, at: Waypoint, spread: readonly [
       top:     level + stand,
       reach,
       footing: stand > 0 ? (spread[0] + spread[2]) / 2 * (0.55 + 0.4 * Math.min(1, stand / 0.5)) : 0,
+      ebbed:   (spread[0] + spread[2]) / 2 * 0.95,
       matrix,
       shade:   0,
     },

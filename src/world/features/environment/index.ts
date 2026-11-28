@@ -20,8 +20,8 @@ const SKY_RADIUS = 1200
 const STARS: Record<QualityTier, number> = { mobile: 700, desktop: 1400, highEnd: 2000 }
 
 /**
- * Sky, sun and moon, stars, fill light, fog, and the clocks of the wind and
- * of the day.
+ * Sky, sun and moon, stars, fill light, fog, and the clocks of the wind,
+ * of the day and of the tide.
  *
  * Mounted first, because it is also where the renderer's shadow settings are
  * decided, and those have to be in place before any other feature creates a
@@ -43,6 +43,7 @@ export function createEnvironment (world: World): Feature {
     const { day } = world
 
     day.turn(time)
+    world.tide.turn(time)
     world.clouds.cast(day.light.direction, day.light.intensity)
 
     if (sun) {

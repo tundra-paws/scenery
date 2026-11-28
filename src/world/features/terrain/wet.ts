@@ -48,7 +48,7 @@ export interface WetShore {
  * comes ashore and falls back as it goes (`swell.ts`, the same swell the sea
  * draws and the boat rides). Rock at the waterline is wet the same way.
  */
-export function wetTheShore (material: LitMaterial, wind: Wind, level: number): WetShore {
+export function wetTheShore (material: LitMaterial, wind: Wind, level: Node<'float'>): WetShore {
   const time  = { value: 0 }
   const swash = swellNode(wind.direction, positionWorld.xz, heldFloat(time)).x.mul(SWASH).add(WET)
   const wet   = smoothstep(swash.sub(0.1), swash, positionWorld.y.sub(level)).oneMinus()

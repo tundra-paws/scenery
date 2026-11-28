@@ -103,7 +103,7 @@ export function createTerrain (world: World): Feature {
       wear = createPathWear(world.path, world.quality.tier, [ world.shelter.spur, world.infield.track, world.mill.spur, ...world.yard.ways, world.pier.way ], traceTrods(world, world.seed))
 
       poolTheRain(material, world.weather, world.day.nodes, wearPath(material, wear, land.grit), land.stony)
-      shore = wetTheShore(material, world.wind, ground.waterLevel)
+      shore = wetTheShore(material, world.wind, world.tide.nodes.level)
       openTheFloor(material, world.shelter)
 
       mesh               = new THREE.Mesh(geometry, material)

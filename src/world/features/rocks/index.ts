@@ -115,7 +115,7 @@ export function createRocks (world: World): Feature {
 
         // One that stands in the sea is one the sea breaks round.
         if (spot.height < ground.waterLevel + STANDING)
-          world.wash.stand(spot.x, spot.z, waterline(dummy.position.y, size * (1 + wide) / 2, size * tall * SQUAT, ground.waterLevel))
+          world.wash.stand(spot.x, spot.z, waterline(dummy.position.y, size * (1 + wide) / 2, size * tall * SQUAT, ground.waterLevel), waterline(dummy.position.y, size * (1 + wide) / 2, size * tall * SQUAT, world.tide.low))
       }
 
       mesh.count = kept

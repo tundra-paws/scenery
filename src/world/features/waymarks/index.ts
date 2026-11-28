@@ -12,6 +12,7 @@ import { SQUAT, createStoneGeometry } from '../../shared/stone.ts'
 import { inWorld, stone } from '../../shared/surface.ts'
 import { waterline } from '../../shared/wash.ts'
 import type { Wash } from '../../shared/wash.ts'
+import { RANGE } from '../../shared/tide.ts'
 import type { Feature, World } from '../../world.ts'
 
 
@@ -120,14 +121,14 @@ function layLanding (mason: Mason, path: Path, wash: Wash): void {
       const sx    = x + dx * along - dz * aside
       const sz    = z + dz * along + dx * aside
 
-      // In the water a stone sits on the bottom, but never wholly under it.
-      dummy.position.set(sx, Math.max(ground.heightAt(sx, sz), ground.waterLevel - size * 0.35) + size * 0.12, sz)
+      // In the water a stone sits on the bottom, but never wholly under it at low water: the flood covers the outermost.
+      dummy.position.set(sx, Math.max(ground.heightAt(sx, sz), ground.waterLevel - RANGE - size * 0.35) + size * 0.12, sz)
       dummy.rotation.set(lay.range(-0.25, 0.25), lay.range(0, Math.PI * 2), lay.range(-0.25, 0.25))
       dummy.scale.set(size, size * lay.range(0.7, 0.95), size * lay.range(0.85, 1.15))
       set(mason, lay.range(-0.08, 0.03))
 
       // Those out in the water break it.
-      wash.stand(sx, sz, waterline(dummy.position.y, size, dummy.scale.y * SQUAT, ground.waterLevel))
+      wash.stand(sx, sz, waterline(dummy.position.y, size, dummy.scale.y * SQUAT, ground.waterLevel), waterline(dummy.position.y, size, dummy.scale.y * SQUAT, ground.waterLevel - RANGE))
     }
 
     const hx = x - dx * (SLIP_UP + 1.4) - dz * side * SLIP

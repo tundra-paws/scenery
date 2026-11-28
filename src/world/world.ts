@@ -32,6 +32,8 @@ import { createShelter } from './shared/shelter.ts'
 import type { Shelter } from './shared/shelter.ts'
 import { createSkerry } from './shared/skerry.ts'
 import type { Skerry } from './shared/skerry.ts'
+import { createTide } from './shared/tide.ts'
+import type { Tide } from './shared/tide.ts'
 import { createWash } from './shared/wash.ts'
 import type { Wash } from './shared/wash.ts'
 import { createWashing } from './shared/washing.ts'
@@ -89,7 +91,8 @@ export type Feature = AppModule<WorldState>
  * that stands over it. And for where the harvest comes home to: the kiln
  * and the stacks. And for what the sea is worked from: the pier at the
  * landing, the nets on their poles and the fish on the rack. And for what
- * is hung out in the wind ashore: the washing line under the house.
+ * is hung out in the wind ashore: the washing line under the house. And for
+ * the sea's own clock: the tide, which everything at the water's edge keeps.
  */
 export interface World {
   seed:    number
@@ -101,6 +104,9 @@ export interface World {
   wind:   Wind
   clouds: CloudShadow
   day:    Daylight
+
+  /** The height of the sea, which falls from the ground's water level and comes back twice in the day. */
+  tide: Tide
 
   /** The showers, where each is now, and how wet the island is from those that have crossed it. */
   weather: Weather
@@ -174,6 +180,7 @@ export function createWorld ({ seed, quality }: WorldOptions): World {
     wind,
     clouds:  createCloudShadow(wind),
     weather: createWeather(wind),
+    tide:    createTide(ground.waterLevel),
     beyond,
     day:     createDaylight(createSkyline(beyond)),
     shelter,

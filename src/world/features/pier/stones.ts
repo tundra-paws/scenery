@@ -7,19 +7,23 @@ import { commitInstances } from '../../shared/instances.ts'
 import { runCourse, setStone } from '../../shared/masonry.ts'
 import type { Mason, Spot } from '../../shared/masonry.ts'
 import type { Pier } from '../../shared/pier.ts'
+import { RANGE } from '../../shared/tide.ts'
 import type { Wash } from '../../shared/wash.ts'
 import { COURSE, DECK, WALL } from './plan.ts'
 import { raiseTower } from './tower.ts'
 import type { Tower } from './tower.ts'
 
-/** Stones the mesh has room for. A third as many again as this pier and its light lay on this shore. */
-const ROOM = 520
+/** Stones the mesh has room for. A fifth as many again as this pier and its light lay on this shore. */
+const ROOM = 640
+
+/** Courses between high water and low, which the ebb shows. */
+const TIDAL = Math.ceil(RANGE / COURSE)
 
 /** How far apart along the pier the sea is told of it, and how far under the water the bed must be for it to break there. */
 const TOLD  = 1
 const AWASH = 0.05
 
-/** Where the stones are laid, what is told of them, and how many courses of the pier's faces go under the water: a phone lays one, which is all its sea shows. */
+/** Where the stones are laid, what is told of them, and how many courses of the pier's faces go under low water: a phone lays one, which is all its sea shows. */
 interface Site {
   ground: Ground
   pier:   Pier
@@ -29,7 +33,7 @@ interface Site {
 }
 
 /**
- * The pier's four faces: courses laid dry from under the water to the deck,
+ * The pier's four faces: courses laid dry from under low water to the deck,
  * each a little inside the one below, the corners turned by the sides on one
  * course and by the ends on the next. A stone the beach has buried is not laid.
  */
@@ -42,7 +46,7 @@ function raiseWalls (mason: Mason, pier: Pier, under: number): void {
     return [ x, z ]
   }
 
-  for (let course = -under; course < WALL.over; course += 1) {
+  for (let course = -under - TIDAL; course < WALL.over; course += 1) {
     const base  = jetty.deck - (WALL.over - course) * COURSE
     const half  = jetty.half + WALL.batter * (WALL.over - 1 - course) - 0.3
     const from  = 0.3 - WALL.batter * (WALL.over - 1 - course)
@@ -138,8 +142,10 @@ export function layStones (geometry: THREE.BufferGeometry, material: THREE.Mater
   for (let along = 0; along <= pier.jetty.length; along += TOLD) {
     const { x, z } = pier.place(along, 0)
 
-    if (ground.heightAt(x, z) < ground.waterLevel - AWASH)
-      wash.stand(x, z, pier.jetty.half)
+    const bed   = ground.heightAt(x, z)
+    const stood = (level: number): number => bed < level - AWASH ? pier.jetty.half : 0
+
+    wash.stand(x, z, stood(ground.waterLevel), stood(ground.waterLevel - RANGE))
   }
 
   mesh.name          = 'pier-stones'

@@ -7,6 +7,7 @@ import { keepOutOfMirror } from '../../shared/mirror.ts'
 import { PALETTE } from '../../shared/palette.ts'
 import { createStoneGeometry } from '../../shared/stone.ts'
 import { inItself, inWorld, stone as stonework, tilth, timber } from '../../shared/surface.ts'
+import { RANGE } from '../../shared/tide.ts'
 import type { Feature, World } from '../../world.ts'
 import { sowBarley } from './barley.ts'
 import { layDyke } from './dyke.ts'
@@ -48,9 +49,9 @@ function wade (world: World): void {
         const x     = from.x + (to.x - from.x) * along / span
         const z     = from.z + (to.z - from.z) * along / span
         const depth = ground.waterLevel - ground.heightAt(x, z)
+        const stood = (under: number): number => under > 0 && under < WADE.drowned ? WADE.half : 0
 
-        if (depth > 0 && depth < WADE.drowned)
-          wash.stand(x, z, WADE.half)
+        wash.stand(x, z, stood(depth), stood(depth - RANGE))
       }
     }
 }
