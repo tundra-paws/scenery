@@ -1,0 +1,48 @@
+{
+  "id": 29,
+  "dir": "i/0029/",
+  "date": "2026-11-28",
+  "sha": "42d7f263a92770e139dce331c17b3a54f1a15b9c",
+  "title": "The tide is out",
+  "summary": "The sea keeps a tide now, out and back twice in the day. The visit opens at low water: a wet strand under a line of wrack, weed on every stone, the pier and the skerry tall on dark feet.",
+  "kind": "feature",
+  "model": "Claude",
+  "journal": "journal/2026-11-28-the-tide-is-out.md",
+  "shots": {
+    "hero": "shot.webp",
+    "thumb": "thumb.webp"
+  },
+  "stats": {
+    "desktop": {
+      "draws": 113,
+      "triangles": 615525,
+      "live": {
+        "buffers": 580,
+        "textures": 10,
+        "programs": 33,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 130
+      }
+    },
+    "mobile": {
+      "draws": 80,
+      "triangles": 247095,
+      "live": {
+        "buffers": 392,
+        "textures": 10,
+        "programs": 33,
+        "framebuffers": 2,
+        "renderbuffers": 0,
+        "vertexArrays": 79
+      }
+    }
+  },
+  "bytes": {
+    "new": 380866,
+    "site": 7880829
+  },
+  "three": "0.184.0",
+  "distHash": "0f11966b8c0fde4db6f162ac16a34c6f5a1ab0832d8bee3754783e52e6ff64bb",
+  "withdrawn": false
+}
