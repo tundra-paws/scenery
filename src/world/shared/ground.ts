@@ -10,10 +10,12 @@ const SHELF = 7
 /**
  * Depth of water from which the sea shows nothing of what is under it.
  *
- * A promise two features share: the water draws itself opaque and at its
- * darkest from here down, and the terrain does not build the floor below it.
- * Less than `SHELF`, so the open sea past the land's own square is that deep
- * all the way round and the square never shows.
+ * A promise two features share: the water draws itself at its darkest from
+ * here down, and closed from a little over half of it, and the terrain
+ * builds the floor only as far as the sea, at low water, has not closed
+ * (`BUILT` in `features/terrain`). Less than `SHELF`, so the open sea past
+ * the land's own square is that deep all the way round and the square never
+ * shows.
  */
 export const DEEP_WATER = 5
 

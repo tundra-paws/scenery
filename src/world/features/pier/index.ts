@@ -66,7 +66,7 @@ export function createPierFeature (world: World): Feature {
 
       const tower = placeTower(pier)
 
-      stones = layStones(createStoneGeometry(rng.fork('pier:shape').int(1, 1_000_000), 0), stone, rng.fork('pier:lay'), { ground, pier, wash: world.wash, under: phone ? 1 : WALL.under, tower })
+      stones = layStones(createStoneGeometry(rng.fork('pier:shape').int(1, 1_000_000), 0), stone, rng.fork('pier:lay'), { ground, pier, wash: world.wash, under: phone ? 0 : WALL.under, tower })
 
       gear               = new THREE.Mesh(createGear(pier, ground, tower, rng.fork('pier:gear'), phone), sawn)
       gear.name          = 'pier-gear'

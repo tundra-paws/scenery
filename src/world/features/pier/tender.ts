@@ -102,7 +102,11 @@ export function createTender (pier: Pier, wind: Wind, tide: Tide, material: THRE
   for (let index = 0; index < colours.length; index += 3)
     ROPE.toArray(colours, index)
 
+  // Made as the boat's own geometry is (a place, a normal, a colour a
+  // vertex), so the two are drawn with one program. Its facets are flat:
+  // the normals are never read.
   cord.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  cord.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(positions.length).fill(1), 3))
   cord.setAttribute('color', new THREE.BufferAttribute(colours, 3))
   cord.setIndex(made.flatMap((_, rope) => SIDES.map(corner => corner + rope * 8)))
 
@@ -111,7 +115,8 @@ export function createTender (pier: Pier, wind: Wind, tide: Tide, material: THRE
 
   const ropes = new THREE.Mesh(cord, material)
 
-  ropes.name = 'pier-tender-ropes'
+  ropes.name          = 'pier-tender-ropes'
+  ropes.receiveShadow = true
 
   return {
     mesh,

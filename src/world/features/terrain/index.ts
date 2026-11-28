@@ -7,6 +7,7 @@ import type { LitMaterial } from '../../shared/lit.ts'
 import { DEEP_WATER } from '../../shared/ground.ts'
 import { ROOM_HALF_DEEP, ROOM_HALF_LONG } from '../../shared/shelter.ts'
 import type { Shelter } from '../../shared/shelter.ts'
+import { RANGE } from '../../shared/tide.ts'
 import { traceTrods } from '../../shared/trods.ts'
 import { STEP } from '../../world.ts'
 import type { Feature, World } from '../../world.ts'
@@ -17,14 +18,23 @@ import { poolTheRain, wetTheShore } from './wet.ts'
 import type { WetShore } from './wet.ts'
 
 
+/**
+ * How far under high water the land is built. The sea closes over the
+ * bottom at half its darkness (`water/shader.ts`), a little over half of
+ * `DEEP_WATER` down, and the tide takes the sea `RANGE` lower than that:
+ * so that far under low water, and a hand more.
+ */
+const BUILT = RANGE + DEEP_WATER * 0.53 + 0.45
+
 /** How far past the room's own walls the land is left out: into the thickness of the house's wall, where nothing sees its edge. */
 const CUT = 0.15
 
 /**
  * The grid's triangles, without the cells that lie wholly under deep water.
  *
- * The sea hides everything below `DEEP_WATER`, and two fifths of the square is
- * that deep: its corners and the foot of the shelf. A cell is two triangles,
+ * The sea hides everything below `BUILT` at every state of the tide, and
+ * more than two fifths of the square is that deep: its corners and the foot
+ * of the shelf. A cell is two triangles,
  * six indices in a row, and stays if any corner of it is above `floor`. Whole
  * cells, because the water reads its depth from the cell's four corners.
  */
@@ -89,7 +99,7 @@ export function createTerrain (world: World): Feature {
 
       geometry.setAttribute('aLand', new THREE.BufferAttribute(said, 4))
       geometry.setAttribute('aLitter', new THREE.BufferAttribute(fallen, 1))
-      geometry.setIndex(cellsAbove(geometry, ground.waterLevel - DEEP_WATER))
+      geometry.setIndex(cellsAbove(geometry, ground.waterLevel - BUILT))
       geometry.computeVertexNormals()
       geometry.computeBoundingBox()
       geometry.computeBoundingSphere()
@@ -135,8 +145,8 @@ export function createTerrain (world: World): Feature {
   }
 }
 
-// perf: medium — one draw call (two with its shadow pass). 11k triangles on the
-// mobile tier, 30k on desktop, 58k on highEnd: the grid less the two fifths of
+// perf: medium — one draw call (two with its shadow pass). 10k triangles on the
+// mobile tier, 28k on desktop, 55k on highEnd: the grid less the part of
 // it under deep water. The path is one small texture and one lookup a fragment
 // (`wear.ts`), the wet sand two sines (`wet.ts`). Built once; a step sets the
 // wash's clock.

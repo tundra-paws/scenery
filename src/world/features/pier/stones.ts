@@ -23,7 +23,7 @@ const TIDAL = Math.ceil(RANGE / COURSE)
 const TOLD  = 1
 const AWASH = 0.05
 
-/** Where the stones are laid, what is told of them, and how many courses of the pier's faces go under low water: a phone lays one, which is all its sea shows. */
+/** Where the stones are laid, what is told of them, and how many courses of the pier's faces go under low water: a phone lays none, its lowest course being awash then, which is all its sea shows. */
 interface Site {
   ground: Ground
   pier:   Pier
